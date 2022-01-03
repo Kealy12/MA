@@ -1,14 +1,17 @@
 ########################################################### Set Up ##########################################################
 
-#### Loading packages ####
+#Loading packages 
 library(data.table)
 library(tidyr)
 library(ggplot2)
 library(apaTables)
 library(ggthemes)
 
-#### Loading Questionnaire ####
-quest_raw <- fread("./00_Input/raw_data_field_2021_10_21.csv")
+# Set working directory
+setwd(dirname(rstudioapi::getSourceEditorContext()$path))
+
+# Loading Questionnaire
+quest_raw <- fread("./01_Input/raw_data_field_2021_10_21.csv")
 
 # Gender distribution 
 quest_raw[, "v_169"]
