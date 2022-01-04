@@ -1,4 +1,11 @@
 
+#Loading packages 
+library(data.table)
+library(tidyr)
+library(ggthemes)
+library(ggplot2)
+library(apaTables)
+
 # Gender distribution 
 quest_raw[, "v_169"]
 ggplot(quest_raw[, "v_169"], aes(v_169)) + 
