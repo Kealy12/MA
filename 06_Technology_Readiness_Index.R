@@ -56,7 +56,11 @@ tri_comp_mean
 
 ########################################## TRI Components for each Respondent ##########################################################
 
-
+tri_comp[, "Optimism (OPT)" := round((tri_comp$OPT2 + tri_comp$OPT4) / 2,2)]
+tri_comp[, "Innovativeness (INN)" := round((tri_comp$INN1 + tri_comp$INN2 + tri_comp$INN4) / 3,2)]
+tri_comp[, "Discomfort (DIS)" := round((tri_comp$DIS2 + tri_comp$DIS3) / 2,2)]
+tri_comp[, "Insecurity (INS)"  := round((tri_comp$INS1 + tri_comp$INS2 + tri_comp$INS4) / 3,2)]
+tri_comp
 
 
 # Clean Environment
