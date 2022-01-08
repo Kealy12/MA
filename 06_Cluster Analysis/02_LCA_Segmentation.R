@@ -21,7 +21,7 @@ setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 
 # Loading Data 
 load("./../01_Input/01_RData/00_clean_data_field.RData")
-load("./../01_Input/01_RData/01_lca_analysis.RData")
+load("./../01_Input/01_RData/01_tri_data_all.RData")
 
 ########################################## LCA Predicted Classes on scores of 10 TRI items ##########################################################
 tri_comp_raw <- tri_comp_all[, 1:10]
@@ -70,7 +70,7 @@ tri_segments_summary <- tri_segments[, .("N" = .N,
                                          "Overall TRI" = mean(`Overall TRI`)), 
                                      by = "Predicted Class"][order(`Predicted Class`)]
 
-tri_segments_summary[order(`Optimism (OPT)`)]
+round(tri_segments_summary[order(`Optimism (OPT)`)],2)
 
 ########################################## Interpretation of Results ##########################################################
 

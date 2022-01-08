@@ -38,15 +38,10 @@ sum(is.na(tri_comp_all[, 1:10])) # Total of 28 NAs
 rownames(tri_comp_all)[!complete.cases(tri_comp_all)] # Indices of rows with NAs
 tri_comp_all[rowSums(is.na(tri_comp_all)) > 0] # Overview of rows with NA
 
-########################################## Reverse Coding of Discomfort & Insecurity ##########################################################
+########################################## Reverse Coding of Discomfort ##########################################################
 # Reverse Coding of DIS2 necessary: Uncomfortable = 7, Comfortable = 1
 tri_comp_all$DIS2 <- tri_comp_all[, 8 - DIS2]
 
-# Testing
-# tri_comp_all$DIS3 <- tri_comp_all[, 8 - DIS3]
-# tri_comp_all$INS1 <- tri_comp_all[, 8 - INS1]
-# tri_comp_all$INS2 <- tri_comp_all[, 8 - INS2]
-# tri_comp_all$INS4 <- tri_comp_all[, 8 - INS4]
 
 ########################################## TRI Components for each Respondent ##########################################################
 
@@ -85,16 +80,19 @@ ggplot(tri_comp, aes(tri_comp$`Optimism.(OPT)`, tri_comp$`Insecurity.(INS)`)) +
 
 
 ########################################## Means & Overall TRI for each respondent ##########################################################
-# Overall TRI score for each respondent is the average score on the four dimensions
-tri_comp[, "Overall.TRI" := round(rowMeans(tri_comp[, c(1,2,3,4)], na.rm = T), 2)]
-tri_comp[, mean(tri_comp$`Overall.TRI`)]
+# The overall TRI score for each respondent was the average score on the four dimensions 
+# (after reverse coding the scores on discomfort and insecurity).
+tri_comp[, "Discomfort_reversed" := 8 - `Discomfort.(DIS)`]
+tri_comp[, "Insecurity_reversed" := 8 - `Insecurity.(INS)`]
+tri_comp[, "Overall TRI" := round(rowMeans(tri_comp[, c(1,2,5,6)], na.rm = T), 2)]
+tri_comp[, mean(tri_comp$`Overall TRI`)]
 
 # Means
 tri_comp_means <- tri_comp[, .("Optimism (OPT)" = mean(`Optimism.(OPT)`),
              "Innovativeness (INN)" = mean(`Innovativeness.(INN)`),
              "Discomfort (DIS)" = mean(`Discomfort.(DIS)`),
              "Insecurity (INS)" = mean(`Insecurity.(INS)`),
-             "Overall TRI" = mean(Overall.TRI))]
+             "Overall TRI" = mean(`Overall TRI`))]
 
 tri_comp_means <- melt(tri_comp_means, variable.name = "TR Components", value.name = "Mean")
 tri_comp_means$Mean <- format(tri_comp_means$Mean, digits = 3)
@@ -105,8 +103,12 @@ print(xtable(tri_comp_means, type = "latex"), file = "./../02_Output/TRI_Compone
 
 
 ########################################## Saving and Cleaning ##########################################################
+# Merging Results 
+tri_comp_all <- cbind(tri_comp_all,tri_comp)
+tri_comp_all[, c("Optimism.(OPT)", "Innovativeness.(INN)", "Discomfort.(DIS)", "Insecurity.(INS)") := NULL]
+tri_comp_all
 # Saving
-save(tri_comp_all, file = "./../01_Input/01_RData/01_lca_analysis.RData")
+save(tri_comp_all, file = "./../01_Input/01_RData/01_tri_data_all.RData")
 
 # Clean Environment
 rm(list = ls())
