@@ -30,7 +30,7 @@ quest_clean[, unique(browser)]
 ########################################################### Write to Excel ##########################################################
 
 # Save
-save(quest_clean, file = "./../01_Input/00_clean_data_field.RData")
+save(quest_clean, file = "./../01_Input/01_RData/00_clean_data_field.RData")
 
 # Write to Excel 
 sheets <- list("quest_clean" = quest_clean)
