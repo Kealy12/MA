@@ -1,6 +1,6 @@
 #######################################################################################################################################
 
-# Technology Readiness Index 2.0 
+# Technology Readiness Index 2.0 - Components
 # Cf. Parasuraman and Colby (2015)
 
 ################################################################ Set Up ###############################################################
@@ -20,7 +20,7 @@ library(poLCA)
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 
 # Loading Data 
-load("./../01_Input/00_clean_data_field.RData")
+load("./../01_Input/01_RData/00_clean_data_field.RData")
 
 ########################################## Extracting TRI 2.0 Components ##########################################################
 
@@ -37,6 +37,13 @@ tri_comp_all[tri_comp_all == 0] <- NA
 sum(is.na(tri_comp_all[, 1:10])) # Total of 28 NAs
 rownames(tri_comp_all)[!complete.cases(tri_comp_all)] # Indices of rows with NAs
 tri_comp_all[rowSums(is.na(tri_comp_all)) > 0] # Overview of rows with NA
+
+########################################## Reverse Coding of Discomfort & Insecurity ##########################################################
+# Reverse Coding of DIS3, INS1, INS2, INS4 necessary
+tri_comp_all[, 8 - c("DIS3", "INS1", "INS2", "INS4")]
+
+
+
 
 ########################################## TRI Components for each Respondent ##########################################################
 
