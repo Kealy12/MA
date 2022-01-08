@@ -70,37 +70,24 @@ tri_segments_summary <- tri_segments[, .("N" = .N,
                                          "Overall TRI" = mean(`Overall TRI`)), 
                                      by = "Predicted Class"][order(`Predicted Class`)]
 
-tri_segments_summary
+tri_segments_summary[order(`Optimism (OPT)`)]
 
 ########################################## Interpretation of Results ##########################################################
 
-# class 3: EXPLORER (14%)
-# highest TRI, highest OPT, highest INN, highest discomfort, Resistance 
-# (both strong positive and negative views about technology) -> PIONEER (13,6%)
+# class 1: EXPLORER (14%) -> PASST
+# highest TRI, highest OPT, highest INN, lowest discomfort/inhibition 
 
-# class 1: PIONEER (23%)
-# high degree of motivation and low degree of resistance (relatively low )
+# class 2: PIONEER (19%)
+# high degree of motivation and low degree of resistance 
 
-# class 2: SKEPTICS
-# largest segment, 
+# class 3: SKEPTICS (23%)
+# low motivation, but not as low as avoiders; 
 
+# class 4: HESITATORS (26%) -> PASST
+# second lowest motivation, drop in INN, above average resistance 
 
-# class 4:
-# second highest motivation, lowest resistance  -> EXPLORER (25%)?
-
-# class 5: 
-# lowest in motivation, very high resistance-> AVOIDERS (19%) 
-
-
-
-# class 2:
-# highest resistance, low INN, 
-
-Pioneers
-Explorers
-Skeptics
-Hesitators 
-
+# class 5: AVOIDERS (19%) -> PASST
+# lowest in motivation, highest in resistance 
 
 
 # Saving LCA Analysis
