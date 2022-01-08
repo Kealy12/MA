@@ -131,23 +131,39 @@ tri_comp_lca_predclass[, mean(tri_comp_lca_predclass$`Overall TRI`)]
 # SEGMENTATION
 tri_segments <- tri_comp_lca_predclass[, 11:16]
 
-tri_segments <- tri_segments[, .("Optimism (OPT)" = mean(`Optimism (OPT)`),
-             "Innovativeness (INN)" = mean(`Innovativeness (INN)`),
-             "Discomfort (DIS)" = mean(`Discomfort (DIS)`),
-             "Insecurity (INS)" = mean(`Insecurity (INS)`),
-             "Overall TRI" = mean(`Overall TRI`)), by = "Predicted Class"][order(`Predicted Class`)]
+tri_segments_summary <- tri_segments[, .("N" = .N,
+                                         "%" = .N / nrow(tri_segments),
+                                         "Optimism (OPT)" = mean(`Optimism (OPT)`),
+                                         "Innovativeness (INN)" = mean(`Innovativeness (INN)`),
+                                         "Discomfort (DIS)" = mean(`Discomfort (DIS)`),
+                                         "Insecurity (INS)" = mean(`Insecurity (INS)`),
+                                         "Overall TRI" = mean(`Overall TRI`)), 
+                                     by = "Predicted Class"][order(`Predicted Class`)]
 
-tri_segments
+tri_segments_summary[order(-`Optimism (OPT)`)]
 
 ########################################## Interpretation of Results ##########################################################
+
+# class 3:
+# highest TRI, highest INN, highest OPT, highest discomfort, Resistance 
+# (both strong positive and negative views about technology) -> PIONEER (13%)?
+
+# class 4:
+# second highest motivation, lowest resistance  -> EXPLORER (25%)?
+
+# class 5: 
+# lowest in motivation, very high resistance-> AVOIDERS (19%) 
 
 # class 1:
 
 
-# class 5: Highest Prob for score 1 in Innovativeness -> HESITATORS? 
-#   population share = 18,6%
-#   predicted class membership = 18%
-# TBD
+# class 2:
+# highest resistance, low INN, 
+
+Pioneers
+Explorers
+Skeptics
+Hesitators 
 
 
 
