@@ -70,7 +70,7 @@ tri_segments_summary <- tri_segments[, .("N" = .N,
                                          "Overall TRI" = mean(`Overall TRI`)), 
                                      by = "Predicted Class"][order(`Predicted Class`)]
 
-tri_segments_summary[order(`Discomfort (DIS)`)]
+tri_segments_summary
 
 ########################################## Interpretation of Results ##########################################################
 

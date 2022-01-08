@@ -39,11 +39,13 @@ rownames(tri_comp_all)[!complete.cases(tri_comp_all)] # Indices of rows with NAs
 tri_comp_all[rowSums(is.na(tri_comp_all)) > 0] # Overview of rows with NA
 
 ########################################## Reverse Coding of Discomfort & Insecurity ##########################################################
-# Reverse Coding of DIS3, INS1, INS2, INS4 necessary
-tri_comp_all[, 8 - c("DIS3", "INS1", "INS2", "INS4")]
-
-
-
+# Reverse Coding of DIS3, INS1, INS2, INS4 necessary (Cf. Parasuraman and Colby (2015), p. 12)
+# Comfortable = 7, not comfortable = 1; Secure = 7, Insecure = 1
+tri_comp_all$DIS2 <- tri_comp_all[, 8 - DIS2]
+# tri_comp_all$DIS3 <- tri_comp_all[, 8 - DIS3]
+# tri_comp_all$INS1 <- tri_comp_all[, 8 - INS1]
+# tri_comp_all$INS2 <- tri_comp_all[, 8 - INS2]
+# tri_comp_all$INS4 <- tri_comp_all[, 8 - INS4]
 
 ########################################## TRI Components for each Respondent ##########################################################
 
