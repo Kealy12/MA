@@ -23,8 +23,10 @@ setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 load("./../01_Input/01_RData/00_clean_data_field.RData")
 load("./../01_Input/01_RData/tri_all.RData")
 
-# Loading 5 class LCA
+# Loading LCAs
 load("./../01_Input/01_RData/lca_5class_analysis.RData")
+load("./../01_Input/01_RData/lca_4class_analysis.RData")
+
 
 ########################################## LCA Predicted Classes on scores of 10 TRI items ##########################################################
 f1 <- as.formula(cbind(OPT2, OPT4, INN1, INN2, INN4, DIS2, DIS3, INS1, INS2, INS4)~1)
@@ -82,13 +84,23 @@ tri_segments_5C_summary <- tri_segments[, .("N" = .N,
                                          "Overall TRI" = mean(`Overall TRI`)), 
                                      by = "Predicted Class (5Cs)"]
 
+tri_segments_4C_summary <- tri_segments[, .("N" = .N,
+                                            "%" = .N / nrow(tri_segments),
+                                            "Optimism (OPT)" = mean(`Optimism (OPT)`),
+                                            "Innovativeness (INN)" = mean(`Innovativeness (INN)`),
+                                            "Discomfort (DIS)" = mean(`Discomfort (DIS)`),
+                                            "Insecurity (INS)" = mean(`Insecurity (INS)`),
+                                            "Overall TRI" = mean(`Overall TRI`)), 
+                                        by = "Predicted Class (4Cs)"]
+
 round(tri_segments_4C_summary[order(-`Overall TRI`)],2)
 round(tri_segments_5C_summary[order(-`Overall TRI`)],2)
 
 
 ########################################## Interpretation of Results ##########################################################
 
-# 5 CLASSES
+# 5 CLASSES -> Problem: skeptics and pioneers not clearly distinguishable 
+
 # class 5: EXPLORER 
 # highest TRI, highest OPT, highest INN, lowest discomfort/inhibition 
 
@@ -112,10 +124,7 @@ round(tri_segments_5C_summary[order(-`Overall TRI`)],2)
 
 # class 4: HESITATORS -> PASST
 
-# class 1: SKEPTICS + PIONEERS -> 
-
-
-
+# class 1: SKEPTICS OR PIONEERS -> 
 
 
 ########################################## Saving and Cleaning ##########################################################
