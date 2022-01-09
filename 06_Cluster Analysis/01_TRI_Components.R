@@ -109,7 +109,7 @@ tri_comp_all <- cbind(tri_comp_all,tri_comp)
 tri_comp_all[, c("Optimism.(OPT)", "Innovativeness.(INN)", "Discomfort.(DIS)", "Insecurity.(INS)") := NULL]
 tri_comp_all
 # Saving
-save(tri_comp_all, file = "./../01_Input/01_RData/01_tri_data_all.RData")
+save(tri_comp_all, file = "./../01_Input/01_RData/tri_all.RData")
 
 # Clean Environment
 rm(list = ls())
