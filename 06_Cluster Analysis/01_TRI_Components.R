@@ -80,8 +80,9 @@ ggplot(tri_comp, aes(tri_comp$`Optimism.(OPT)`, tri_comp$`Insecurity.(INS)`)) +
 
 
 ########################################## Means & Overall TRI for each respondent ##########################################################
+
 # The overall TRI score for each respondent was the average score on the four dimensions 
-# (after reverse coding the scores on discomfort and insecurity).
+# (after reverse coding the scores on discomfort and insecurity). Cf. Parasuraman and Colby (2015)
 tri_comp[, "Discomfort_reversed" := 8 - `Discomfort.(DIS)`]
 tri_comp[, "Insecurity_reversed" := 8 - `Insecurity.(INS)`]
 tri_comp[, "Overall TRI" := round(rowMeans(tri_comp[, c(1,2,5,6)], na.rm = T), 2)]

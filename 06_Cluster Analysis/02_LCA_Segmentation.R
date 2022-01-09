@@ -23,43 +23,51 @@ setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 load("./../01_Input/01_RData/00_clean_data_field.RData")
 load("./../01_Input/01_RData/01_tri_data_all.RData")
 
+# Loading LCA
+load("./../01_Input/01_RData/02_lca_analysis.RData")
+
 ########################################## LCA Predicted Classes on scores of 10 TRI items ##########################################################
-tri_comp_raw <- tri_comp_all[, 1:10]
 f1 <- as.formula(cbind(OPT2, OPT4, INN1, INN2, INN4, DIS2, DIS3, INS1, INS2, INS4)~1)
 
 # LCA can only be computed on rows with no NA, so these rows need to be filtered out
-tri_comp_raw_noNA<- tri_comp_raw[complete.cases(tri_comp_raw)]
+tri_comp_all_noNA<- tri_comp_all[complete.cases(tri_comp_all)]
 
 # N of LCA = 822 due to invalid answers
 # (Parasuraman and Colby (2015): N of survey to LCA also reduced from 878 to 782)
-nrow(tri_comp_raw_noNA)
+nrow(tri_comp_all_noNA)
 
 # 5 classes, Cf. Parasuraman and Colby (2015)
 # nrep = 15 to ensure to ensure that the algorithm finds a global rather than local maximum of the log-likelihood function (greatest value)
-lca <- poLCA(f1, data = tri_comp_raw_noNA, nclass = 5, na.rm = T, nrep = 15)
+lca <- poLCA(f1, data = tri_comp_all_noNA, nclass = 5, na.rm = T, nrep = 15)
 
 # Predicted Classes
 pred_class <- as.data.table(lca$predclass)
 colnames(pred_class) <- c("Predicted Class")
 pred_class
 
-tri_comp_raw_noNA <- cbind(tri_comp_raw_noNA, pred_class)
+tri_comp_all_noNA <- cbind(tri_comp_all_noNA, pred_class)
+tri_comp_all_noNA
+
+# Saving LCA Analysis
+save(lca, file = "./../01_Input/01_RData/02_lca_analysis.RData")
 
 ########################################## TRI Components of Predicted Classes ##########################################################
-tri_comp_lca_predclass <- tri_comp_raw_noNA
-tri_comp_lca_predclass[, "Optimism (OPT)" := round(rowMeans(tri_comp_lca_predclass[, c(1,2)], na.rm = T), 2)]
-tri_comp_lca_predclass[, "Innovativeness (INN)" := round(rowMeans(tri_comp_lca_predclass[, c(3,4,5)], na.rm = T), 2)]
-tri_comp_lca_predclass[, "Discomfort (DIS)" := round(rowMeans(tri_comp_lca_predclass[, c(6,7)], na.rm = T), 2)]
-tri_comp_lca_predclass[, "Insecurity (INS)"  := round(rowMeans(tri_comp_lca_predclass[, c(8,9,10)], na.rm = T), 2)]
+#tri_comp_lca_predclass <- tri_comp_all_noNA
+#tri_comp_lca_predclass[, "Optimism (OPT) 2" := round(rowMeans(tri_comp_lca_predclass[, c(1,2)], na.rm = T), 2)]
+#tri_comp_lca_predclass[, "Innovativeness (INN)" := round(rowMeans(tri_comp_lca_predclass[, c(3,4,5)], na.rm = T), 2)]
+#tri_comp_lca_predclass[, "Discomfort (DIS)" := round(rowMeans(tri_comp_lca_predclass[, c(6,7)], na.rm = T), 2)]
+#tri_comp_lca_predclass[, "Insecurity (INS)"  := round(rowMeans(tri_comp_lca_predclass[, c(8,9,10)], na.rm = T), 2)]
 
 # Overall TRI score for each respondent is the average score on the four dimensions
-tri_comp_lca_predclass[, "Overall TRI" := round(rowMeans(tri_comp_lca_predclass[, c(12,13,14,15)], na.rm = T), 2)]
-tri_comp_lca_predclass[, mean(tri_comp_lca_predclass$`Overall TRI`)]
+# (after reverse coding the scores on discomfort and insecurity).
+# tri_comp_lca_predclass[, "Discomfort_reversed2" := 8 - `Discomfort (DIS)`]
+# tri_comp_lca_predclass[, "Insecurity_reversed" := 8 - `Insecurity (INS)`]
+# tri_comp_lca_predclass[, "Overall TRI" := round(rowMeans(tri_comp_lca_predclass[, c(12,13,16,17)], na.rm = T), 2)]
+# tri_comp_lca_predclass[, mean(tri_comp_lca_predclass$`Overall TRI`)]
 
-tri_comp_lca_predclass
 
 ########################################## Segmentation Summary ##########################################################
-tri_segments <- tri_comp_lca_predclass[, 11:16]
+tri_segments <- tri_comp_all_noNA[, c(11:14,17,18)]
 
 tri_segments_summary <- tri_segments[, .("N" = .N,
                                          "%" = .N / nrow(tri_segments),
@@ -68,27 +76,31 @@ tri_segments_summary <- tri_segments[, .("N" = .N,
                                          "Discomfort (DIS)" = mean(`Discomfort (DIS)`),
                                          "Insecurity (INS)" = mean(`Insecurity (INS)`),
                                          "Overall TRI" = mean(`Overall TRI`)), 
-                                     by = "Predicted Class"][order(`Predicted Class`)]
+                                     by = "Predicted Class"]
 
-round(tri_segments_summary[order(`Optimism (OPT)`)],2)
+round(tri_segments_summary[order(-`Overall TRI`)],2)
 
 ########################################## Interpretation of Results ##########################################################
 
-# class 1: EXPLORER (14%) -> PASST
+# class 5: EXPLORER 
 # highest TRI, highest OPT, highest INN, lowest discomfort/inhibition 
 
-# class 2: PIONEER (19%)
-# high degree of motivation and low degree of resistance 
+# class 2: SKEPTICS
+# less positive and negative views 
 
-# class 3: SKEPTICS (23%)
-# low motivation, but not as low as avoiders; 
+# class 1: PIONEERS
+# 
 
-# class 4: HESITATORS (26%) -> PASST
-# second lowest motivation, drop in INN, above average resistance 
+# class 3: HESITATORS -> PASST
+# 
 
-# class 5: AVOIDERS (19%) -> PASST
+# class 4: AVOIDERS -> PASST
 # lowest in motivation, highest in resistance 
 
+########################################## Saving and Cleaning ##########################################################
 
-# Saving LCA Analysis
-save(lca, file = "./../01_Input/01_lca_analysis.RData")
+
+
+# Clean Environment
+rm(list = ls())
+
