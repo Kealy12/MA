@@ -36,7 +36,7 @@ tri_comp_all[tri_comp_all == 0] <- NA
 # within N=847, 25 respondents have at least 1 invalid answer (Total of 28 NAs, so multiple NAs in 1 column)
 sum(is.na(tri_comp_all[, 1:10])) # Total of 28 NAs
 rownames(tri_comp_all)[!complete.cases(tri_comp_all)] # Indices of rows with NAs
-tri_comp_all[rowSums(is.na(tri_comp_all)) > 0] # Overview of rows with NA
+tri_comp_all[rowSums(is.na(tri_comp_all)) > 0] # Overview of 25 rows with NA
 
 ########################################## Reverse Coding of Discomfort ##########################################################
 # Reverse Coding of DIS2 necessary: Uncomfortable = 7, Comfortable = 1

@@ -93,8 +93,9 @@ tri_segments_4C_summary <- tri_segments[, .("N" = .N,
                                             "Overall TRI" = mean(`Overall TRI`)), 
                                         by = "Predicted Class (4Cs)"]
 
-round(tri_segments_4C_summary[order(-`Overall TRI`)],2)
 round(tri_segments_5C_summary[order(-`Overall TRI`)],2)
+round(tri_segments_4C_summary[order(-`Overall TRI`)],2)
+
 
 
 ########################################## Interpretation of Results ##########################################################
@@ -134,4 +135,3 @@ save(tri_comp_all_noNA, file = "./../01_Input/01_RData/tri_all_noNA_clusters.RDa
 
 # Clean Environment
 rm(list = ls())
-
