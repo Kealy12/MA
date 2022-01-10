@@ -58,15 +58,35 @@ quest_tri_extended <- cbind(quest_tri_extended, tri_comp_all_noNA[, "Predicted C
                                 tri_comp_all_noNA[, "Predicted Class (5Cs)"])
 
 
-################################################################ Extracting relevant applications ###############################################################
+################################################################ Extracting blockchain applications ###############################################################
 
+# need to encode clusters as factors
+quest_tri_extended$`Predicted Class (5Cs)` <- as.factor(quest_tri_extended$`Predicted Class (5Cs)`)
+quest_tri_extended$`Predicted Class (4Cs)` <- as.factor(quest_tri_extended$`Predicted Class (4Cs)`)
+
+setnames(quest_tri_extended, "Predicted Class (5Cs)", "Predicted_Class_5C")
+setnames(quest_tri_extended, "Predicted Class (4Cs)", "Predicted_Class_4C")
+
+quest_tri_extended
+
+##### 01 Tokenization of Assets
+# v_265
+
+# 5 Cluster Case
+ggplot(quest_tri_extended, aes(x = Predicted_Class_5C, v_265)) + geom_boxplot() +
+  stat_summary(fun=mean, geom="point", col="red") +
+  labs(x = "Clusters", y = "Usefulness of Asset Tokenization")
+
+# 4 Cluster Case
+ggplot(quest_tri_extended, aes(x = Predicted_Class_4C, v_265)) + geom_boxplot() +
+  stat_summary(fun=mean, geom="point", col="red") +
+  labs(x = "Clusters", y = "Usefulness of Asset Tokenization")
 
 
 
 
 
 ################################################################ Regressions ###############################################################
-
 
 
 
