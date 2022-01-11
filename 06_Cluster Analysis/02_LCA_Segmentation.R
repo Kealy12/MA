@@ -27,6 +27,9 @@ load("./../01_Input/01_RData/tri_all.RData")
 load("./../01_Input/01_RData/lca_5class_analysis.RData")
 load("./../01_Input/01_RData/lca_4class_analysis.RData")
 
+# Result of this Segmentation
+load("./../01_Input/01_RData/tri_all_noNA_clusters.RData")
+
 
 ########################################## LCA Predicted Classes on scores of 10 TRI items ##########################################################
 f1 <- as.formula(cbind(OPT2, OPT4, INN1, INN2, INN4, DIS2, DIS3, INS1, INS2, INS4)~1)
@@ -40,11 +43,11 @@ nrow(tri_comp_all_noNA)
 
 # 5 classes, Cf. Parasuraman and Colby (2015)
 # nrep = 15 to ensure to ensure that the algorithm finds a global rather than local maximum of the log-likelihood function (greatest value)
-lca_5class <- poLCA(f1, data = tri_comp_all_noNA, nclass = 5, na.rm = T, nrep = 15)
+poLCA(f1, data = tri_comp_all_noNA, nclass = 5, na.rm = T, nrep = 15)
 
 # 4 classes: hard to distinguish Pioneers and Skeptics 
 # 4 class model has lowest BIC score = best model fit
-lca_3class <- poLCA(f1, data = tri_comp_all_noNA, nclass = 3, na.rm = T, nrep = 15)
+poLCA(f1, data = tri_comp_all_noNA, nclass = 4, na.rm = T, nrep = 15)
 
 # Predicted Classes
 pred_class <- as.data.table(lca_5class$predclass)
