@@ -26,9 +26,11 @@ load("./../01_Input/01_RData/tri_all_noNA_clusters.RData")
 load("./../01_Input/01_RData/lca_5class_analysis.RData")
 load("./../01_Input/01_RData/lca_4class_analysis.RData")
 
-################################################################ Mapping TRI data back to questionnaire ###############################################################
+# Binding questionnaire to tri cluster data 
 quest_tri_extended <- cbind(quest_clean, tri_comp_all)
 quest_tri_extended
+
+################################################################ Mapping TRI data back to questionnaire ###############################################################
 
 ########## SANITY CHECKS ##########
 # 0s on TRI answers in questionnaire need to be NA (they are invalid)
@@ -59,7 +61,7 @@ quest_tri_extended <- cbind(quest_tri_extended, tri_comp_all_noNA[, "Predicted C
                                 tri_comp_all_noNA[, "Predicted Class (5Cs)"])
 
 
-################################################################ Extracting blockchain applications ###############################################################
+################################################################ Blockchain applications ###############################################################
 
 # need to encode clusters as factors
 quest_tri_extended$`Predicted Class (5Cs)` <- as.factor(quest_tri_extended$`Predicted Class (5Cs)`)
@@ -70,7 +72,7 @@ setnames(quest_tri_extended, "Predicted Class (4Cs)", "Predicted_Class_4C")
 
 quest_tri_extended
 
-##### 01 Tokenization of Assets ####
+##### A Tokenization of Assets ####
 # v_265
 
 # 5 Cluster Case
@@ -79,32 +81,80 @@ ggplot(quest_tri_extended, aes(x = Predicted_Class_5C, v_265)) + geom_boxplot() 
   labs(x = "Clusters", y = "Usefulness of Asset Tokenization")
 
 # 4 Cluster Case
-ggplot(quest_tri_extended, aes(x = Predicted_Class_4C, v_265)) + geom_violin() +
+ggplot(quest_tri_extended, aes(x = Predicted_Class_4C, v_265)) + geom_boxplot() +
   stat_summary(fun=mean, geom="point", col="red") +
   labs(x = "Clusters", y = "Usefulness of Asset Tokenization")
 
-##### 02 Fractional ownership
-# 
-ggplot(quest_tri_extended, aes(x = Predicted_Class_5C, v_265)) + geom_boxplot() +
+##### B Fractional ownership ####
+# v_266
+
+# 5 Cluster Case
+ggplot(quest_tri_extended, aes(x = Predicted_Class_5C, v_266)) + geom_boxplot() +
   stat_summary(fun=mean, geom="point", col="red") +
-  labs(x = "Clusters", y = "Usefulness of Asset Tokenization")
+  labs(x = "Clusters", y = "Usefulness of Fractional ownership")
+
+# 4 Cluster Case
+ggplot(quest_tri_extended, aes(x = Predicted_Class_4C, v_266)) + geom_boxplot() +
+  stat_summary(fun=mean, geom="point", col="red") +
+  labs(x = "Clusters", y = "Usefulness of Fractional ownership")
 
 
-##### 03 Self-Sovereign Identity ####
-# 
+##### C Self-Sovereign Identity ####
+# v_267
 
-##### 04 Smart Contracts ####
-#
+# 5 Cluster Case
+ggplot(quest_tri_extended, aes(x = Predicted_Class_5C, v_267)) + geom_boxplot() +
+  stat_summary(fun=mean, geom="point", col="red") +
+  labs(x = "Clusters", y = "Usefulness of Self-Sovereign Identity")
 
-##### 05 Micropayments
-#
-
-##### 06 Anonymous Transaction
-#
-
+# 4 Cluster Case
+ggplot(quest_tri_extended, aes(x = Predicted_Class_4C, v_267)) + geom_boxplot() +
+  stat_summary(fun=mean, geom="point", col="red") +
+  labs(x = "Clusters", y = "Usefulness of Self-Sovereign Identity")
 
 
+##### D Smart Contracts ####
+# v_268
 
+# 5 Cluster Case
+ggplot(quest_tri_extended, aes(x = Predicted_Class_5C, v_268)) + geom_boxplot() +
+  stat_summary(fun=mean, geom="point", col="red") +
+  labs(x = "Clusters", y = "Usefulness of Smart Contracts")
+
+# 4 Cluster Case
+ggplot(quest_tri_extended, aes(x = Predicted_Class_4C, v_268)) + geom_boxplot() +
+  stat_summary(fun=mean, geom="point", col="red") +
+  labs(x = "Clusters", y = "Usefulness of Smart Contracts")
+
+##### E Micropayments ####
+# v_269
+
+# 5 Cluster Case
+ggplot(quest_tri_extended, aes(x = Predicted_Class_5C, v_269)) + geom_boxplot() +
+  stat_summary(fun=mean, geom="point", col="red") +
+  labs(x = "Clusters", y = "Usefulness of Micropayments")
+
+# 4 Cluster Case
+ggplot(quest_tri_extended, aes(x = Predicted_Class_4C, v_269)) + geom_boxplot() +
+  stat_summary(fun=mean, geom="point", col="red") +
+  labs(x = "Clusters", y = "Usefulness of Micropayments")
+
+##### F Anonymous Transaction ####
+# v_270
+
+# 5 Cluster Case
+ggplot(quest_tri_extended, aes(x = Predicted_Class_5C, v_270)) + geom_boxplot() +
+  stat_summary(fun=mean, geom="point", col="red") +
+  labs(x = "Clusters", y = "Usefulness of Anonymous Transactions")
+
+# 4 Cluster Case
+ggplot(quest_tri_extended, aes(x = Predicted_Class_4C, v_270)) + geom_boxplot() +
+  stat_summary(fun=mean, geom="point", col="red") +
+  labs(x = "Clusters", y = "Usefulness of Anonymous Transactions")
+
+
+
+################################################################ Logisitic Regression ###############################################################
 
 
 # Ordinal Logistic Regression: TBD
@@ -130,10 +180,7 @@ cbind(coeffs_4C, "p value" = round(p,3))
 
 
 
-
-################################################################ Regressions ###############################################################
-
-
+################################################################ Saving and Cleaning ###############################################################
 
 
 # Clean Environment
