@@ -52,6 +52,8 @@ tri_comp_all[, "Insecurity (INS)"  := round(rowMeans(tri_comp_all[, c(8,9,10)], 
 
 tri_comp_all
 
+ggplot(tri_comp_all, aes(INS4)) + geom_histogram()
+
 ########################################## TRI Correlations ##########################################################
 
 # Using Spearman, because we cannot assume Gaussian distribution

@@ -70,7 +70,7 @@ setnames(quest_tri_extended, "Predicted Class (4Cs)", "Predicted_Class_4C")
 
 quest_tri_extended
 
-##### 01 Tokenization of Assets
+##### 01 Tokenization of Assets ####
 # v_265
 
 # 5 Cluster Case
@@ -79,15 +79,40 @@ ggplot(quest_tri_extended, aes(x = Predicted_Class_5C, v_265)) + geom_boxplot() 
   labs(x = "Clusters", y = "Usefulness of Asset Tokenization")
 
 # 4 Cluster Case
-ggplot(quest_tri_extended, aes(x = Predicted_Class_4C, v_265)) + geom_boxplot() +
+ggplot(quest_tri_extended, aes(x = Predicted_Class_4C, v_265)) + geom_violin() +
   stat_summary(fun=mean, geom="point", col="red") +
   labs(x = "Clusters", y = "Usefulness of Asset Tokenization")
+
+##### 02 Fractional ownership
+# 
+ggplot(quest_tri_extended, aes(x = Predicted_Class_5C, v_265)) + geom_boxplot() +
+  stat_summary(fun=mean, geom="point", col="red") +
+  labs(x = "Clusters", y = "Usefulness of Asset Tokenization")
+
+
+##### 03 Self-Sovereign Identity ####
+# 
+
+##### 04 Smart Contracts ####
+#
+
+##### 05 Micropayments
+#
+
+##### 06 Anonymous Transaction
+#
+
+
+
+
+
 
 # Ordinal Logistic Regression: TBD
 # Dependent variable (Y) = Likert Scale -> Ordinal
 # Independent vairable (X) = Categorical 
 quest_tri_extended$v_265 <- as.factor(quest_tri_extended$v_265)
 
+# 5 Classes OLR
 olr_5C <- polr(v_265 ~ Predicted_Class_5C, data = quest_tri_extended, Hess = T)
 summary(olr_5C)
 olr_5C$coefficients
@@ -101,6 +126,7 @@ olr_4C$coefficients
 coeffs_4C <- coef(summary(olr_4C))
 p <- pnorm(abs(coeffs_4C[, "t value"]), lower.tail = FALSE) * 2
 cbind(coeffs_4C, "p value" = round(p,3))
+
 
 
 

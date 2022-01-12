@@ -99,6 +99,8 @@ tri_segments_4C_summary <- tri_segments[, .("N" = .N,
 round(tri_segments_5C_summary[order(-`Overall TRI`)],2)
 round(tri_segments_4C_summary[order(-`Overall TRI`)],2)
 
+# Show key information of lca models in table for paper
+
 
 
 ########################################## Interpretation of Results ##########################################################
