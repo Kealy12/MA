@@ -102,7 +102,6 @@ round(tri_segments_4C_summary[order(-`Overall TRI`)],2)
 # Show key information of lca models in table for paper
 
 
-
 ########################################## Interpretation of Results ##########################################################
 
 # 5 CLASSES -> Problem: skeptics and pioneers not clearly distinguishable 
@@ -131,6 +130,10 @@ round(tri_segments_4C_summary[order(-`Overall TRI`)],2)
 # class 4: HESITATORS -> PASST
 
 # class 1: SKEPTICS OR PIONEERS -> 
+
+########################################## Validation of Clusters ##########################################################
+
+
 
 
 ########################################## Saving and Cleaning ##########################################################

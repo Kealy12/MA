@@ -1,6 +1,6 @@
 #######################################################################################################################################
 
-# Regressing LCA-based clusters on blockchain applications
+# Descriptive Stats on blockchain applications and clusters
 
 ################################################################ Set Up ###############################################################
 
@@ -15,6 +15,7 @@ library(ggplot2)
 library(GGally)
 library(poLCA)
 library(MASS)
+library(likert)
 
 # Set working directory
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
@@ -37,6 +38,10 @@ quest_tri_extended <- quest_tri_extended[complete.cases(quest_tri_extended)]
 quest_tri_extended <- cbind(quest_tri_extended, tri_comp_all_noNA[, "Predicted Class (4Cs)"], 
                             tri_comp_all_noNA[, "Predicted Class (5Cs)"])
 
+# Renaming for further usage
+setnames(quest_tri_extended, "Predicted Class (5Cs)", "Predicted_Class_5C")
+setnames(quest_tri_extended, "Predicted Class (4Cs)", "Predicted_Class_4C")
+
 ########## SANITY CHECKS ##########
 # 0s on TRI answers in questionnaire need to be NA (they are invalid)
 quest_tri_extended[v_108 == 0, v_108 := NA]
@@ -57,21 +62,23 @@ rownames(quest_tri_extended)[!complete.cases(quest_tri_extended)] # Indices of r
 quest_tri_extended[rowSums(is.na(quest_tri_extended)) > 0] # Overview of rows with NA
 
 
-
-
 ################################################################ Scores of Blockchain applications ###############################################################
 
-# Need to encode clusters as factors
-quest_tri_extended$`Predicted Class (5Cs)` <- as.factor(quest_tri_extended$`Predicted Class (5Cs)`)
-quest_tri_extended$`Predicted Class (4Cs)` <- as.factor(quest_tri_extended$`Predicted Class (4Cs)`)
-setnames(quest_tri_extended, "Predicted Class (5Cs)", "Predicted_Class_5C")
-setnames(quest_tri_extended, "Predicted Class (4Cs)", "Predicted_Class_4C")
-
-# Extract Applications of survey in separate data table
+# Extract Application colums
 apps <- quest_tri_extended[, .(v_265, v_266, v_267, v_268, v_269, v_270, Predicted_Class_5C, Predicted_Class_4C)]
 
 apps <- melt(apps, id.vars = c("Predicted_Class_5C", "Predicted_Class_4C"), 
-     variable.name = "Applications", value.name = "Score")
+     variable.name = "Applications", value.name = "Score_Factor")
+
+# Need Score as Factor (String) and as Integer for Calculations
+apps$Score_Factor <- as.factor(apps$Score_Factor)
+apps[, Score_Int := as.numeric(Score_Factor)]
+
+apps
+
+# Need to encode clusters as factors
+apps$Predicted_Class_5C <- as.factor(apps$Predicted_Class_5C)
+apps$Predicted_Class_4C <- as.factor(apps$Predicted_Class_4C)
 
 # Renaming
 apps[Applications == "v_265", Applications := "Tokenization of Assets"]
@@ -81,16 +88,54 @@ apps[Applications == "v_268", Applications := "Smart Contracts"]
 apps[Applications == "v_269", Applications := "Micropayments"]
 apps[Applications == "v_270", Applications := "Anonymous Transactions"]
 
+# 7-point Likert Scale: Adding Scores as Strings
+apps[Score_Factor == 1, Score_String :="Not usefull at all"]
+apps[Score_Factor == 2, Score_String :="Not usefull"]
+apps[Score_Factor == 3, Score_String :="Somewhat not usefull"]
+apps[Score_Factor == 4, Score_String :="Neutral"]
+apps[Score_Factor == 5, Score_String :="Somewhat usefull"]
+apps[Score_Factor == 6, Score_String :="Usefull"]
+apps[Score_Factor == 7, Score_String :="Very usefull"]
+
+# % distribution of answers
+apps[Score_Factor == 1 , value := .N / nrow(quest_tri_extended), by = "Applications"]
+apps[Score_Factor == 2 , value := .N / nrow(quest_tri_extended), by = "Applications"]
+apps[Score_Factor == 3 , value := .N / nrow(quest_tri_extended), by = "Applications"]
+apps[Score_Factor == 4 , value := .N / nrow(quest_tri_extended), by = "Applications"]
+apps[Score_Factor == 5 , value := .N / nrow(quest_tri_extended), by = "Applications"]
+apps[Score_Factor == 6 , value := .N / nrow(quest_tri_extended), by = "Applications"]
+apps[Score_Factor == 7 , value := .N / nrow(quest_tri_extended), by = "Applications"]
+
+levels(apps$Score_String)
+apps$Score_String <- as.factor(apps$Score_String , levels = c("Not usefull at all", "Not usefull", "Somewhat not usefull", "Neutral", 
+                                                           "Somewhat usefull", "Usefull", "Very usefull"))
+apps[is.na(Score_Factor)]
+
+apps_summary <- unique(apps[ ,c("Applications", "Score_String", "value")])
+summary(apps_summary)
+
+# Visualization of answers (%) on applications 
+ggplot(apps_summary, aes(x = reorder(Applications, value), y = value, 
+                         fill = Score_String)) +
+  geom_bar(position = "stack", stat = "identity") +
+  coord_flip() +
+  scale_fill_brewer(palette = "PuOr") + 
+  theme_apa()
+
+
 #### Scores Overall ####
 # Mean Likert Scores of Applications
-apps_means <- as.data.table(aggregate(Score ~  Applications, apps, mean))
-apps_means$Score <- round(apps_means$Score, 2)
-apps_means[order(-Score)]
+apps_means <- as.data.table(aggregate(Score_Int ~  Applications, apps, mean))
+apps_means$Score_Int <- round(apps_means$Score_Int, 2)
+apps_means[order(-Score_Int)]
+
+apps
 
 # Visualization of Scores of each Application
-ggplot(apps, aes(Applications, Score)) + geom_boxplot() +
+ggplot(apps, aes(Applications, Score_Int)) + geom_boxplot() +
   stat_summary(fun=mean, geom="point", col="red") +
-  geom_text(data = apps_means, aes(label = Score, y = Score + 0.3), size = 3)
+  geom_text(data = apps_means, aes(label = Score_Int, y = Score_Int + 0.3), size = 3)
+  
 
 #### Scores per Cluster ####
 # Cluster Means
