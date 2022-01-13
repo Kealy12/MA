@@ -66,7 +66,7 @@ rownames(quest_tri_extended)[!complete.cases(quest_tri_extended)] # Indices of r
 quest_tri_extended[rowSums(is.na(quest_tri_extended)) > 0] # Overview of rows with NA
 
 
-################################################################ Scores of Blockchain applications ###############################################################
+################################################################ Scores on Blockchain applications ###############################################################
 
 # Extract Application colums
 apps <- quest_tri_extended[, .(v_265, v_266, v_267, v_268, v_269, v_270, Predicted_Class_5C, Predicted_Class_4C)]
@@ -112,13 +112,7 @@ apps[is.na(Score_Factor)]
 
 apps_summary <- unique(apps[ ,c("Applications", "Score_String", "value")])
 
-# Visualization of answers (%) on applications 
-ggplot(apps_summary, aes(x = reorder(Applications, value), y = value, 
-                         fill = Score_String)) +
-  geom_bar(position = "stack", stat = "identity") +
-  coord_flip() +
-  scale_fill_brewer(palette = "PuOr")
-
+apps_summary
 
 #### Scores Overall ####
 # Mean Likert Scores of Applications
@@ -126,12 +120,21 @@ apps_means <- as.data.table(aggregate(Score_Int ~  Applications, apps, mean))
 apps_means$Score_Int <- round(apps_means$Score_Int, 2)
 apps_means[order(-Score_Int)]
 
-
-
 # Visualization of Scores of each Application
 ggplot(apps, aes(Applications, Score_Int)) + geom_boxplot() +
   stat_summary(fun=mean, geom="point", col="red") +
   geom_text(data = apps_means, aes(label = Score_Int, y = Score_Int + 0.3), size = 3)
+
+# Visualization of answers (%) on applications 
+apps_summary <- merge(apps_summary, apps_means, by = "Applications")
+ggplot(apps_summary, aes(x = reorder(Applications, Score_Int), y = value, 
+                         fill = Score_String)) +
+  geom_bar(position = "stack", stat = "identity") +
+  coord_flip() +
+  scale_fill_brewer(palette = "PuOr")
+
+
+
   
 
 #### Scores per Cluster ####
