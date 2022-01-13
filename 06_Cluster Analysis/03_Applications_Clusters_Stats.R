@@ -42,6 +42,10 @@ quest_tri_extended <- cbind(quest_tri_extended, tri_comp_all_noNA[, "Predicted C
 setnames(quest_tri_extended, "Predicted Class (5Cs)", "Predicted_Class_5C")
 setnames(quest_tri_extended, "Predicted Class (4Cs)", "Predicted_Class_4C")
 
+# Need to encode clusters as factors
+quest_tri_extended$Predicted_Class_5C <- as.factor(quest_tri_extended$Predicted_Class_5C)
+quest_tri_extended$Predicted_Class_4C <- as.factor(quest_tri_extended$Predicted_Class_4C)
+
 ########## SANITY CHECKS ##########
 # 0s on TRI answers in questionnaire need to be NA (they are invalid)
 quest_tri_extended[v_108 == 0, v_108 := NA]
@@ -76,10 +80,6 @@ apps[, Score_Int := as.numeric(Score_Factor)]
 
 apps
 
-# Need to encode clusters as factors
-apps$Predicted_Class_5C <- as.factor(apps$Predicted_Class_5C)
-apps$Predicted_Class_4C <- as.factor(apps$Predicted_Class_4C)
-
 # Renaming
 apps[Applications == "v_265", Applications := "Tokenization of Assets"]
 apps[Applications == "v_266", Applications := "Fractional ownership"]
@@ -106,21 +106,18 @@ apps[Score_Factor == 5 , value := .N / nrow(quest_tri_extended), by = "Applicati
 apps[Score_Factor == 6 , value := .N / nrow(quest_tri_extended), by = "Applications"]
 apps[Score_Factor == 7 , value := .N / nrow(quest_tri_extended), by = "Applications"]
 
-levels(apps$Score_String)
-apps$Score_String <- as.factor(apps$Score_String , levels = c("Not usefull at all", "Not usefull", "Somewhat not usefull", "Neutral", 
+apps$Score_String <- factor(apps$Score_String , levels = c("Not usefull at all", "Not usefull", "Somewhat not usefull", "Neutral", 
                                                            "Somewhat usefull", "Usefull", "Very usefull"))
 apps[is.na(Score_Factor)]
 
 apps_summary <- unique(apps[ ,c("Applications", "Score_String", "value")])
-summary(apps_summary)
 
 # Visualization of answers (%) on applications 
 ggplot(apps_summary, aes(x = reorder(Applications, value), y = value, 
                          fill = Score_String)) +
   geom_bar(position = "stack", stat = "identity") +
   coord_flip() +
-  scale_fill_brewer(palette = "PuOr") + 
-  theme_apa()
+  scale_fill_brewer(palette = "PuOr")
 
 
 #### Scores Overall ####
@@ -129,7 +126,7 @@ apps_means <- as.data.table(aggregate(Score_Int ~  Applications, apps, mean))
 apps_means$Score_Int <- round(apps_means$Score_Int, 2)
 apps_means[order(-Score_Int)]
 
-apps
+
 
 # Visualization of Scores of each Application
 ggplot(apps, aes(Applications, Score_Int)) + geom_boxplot() +
@@ -139,18 +136,18 @@ ggplot(apps, aes(Applications, Score_Int)) + geom_boxplot() +
 
 #### Scores per Cluster ####
 # Cluster Means
-apps_cluster4C_means <- as.data.table(aggregate(Score ~  Predicted_Class_4C, apps, mean))
-apps_cluster4C_means$Score <- round(apps_cluster4C_means$Score, 2)
-apps_cluster4C_means[order(-Score)]
+apps_cluster4C_means <- as.data.table(aggregate(Score_Int ~  Predicted_Class_4C, apps, mean))
+apps_cluster4C_means$Score_Int <- round(apps_cluster4C_means$Score_Int, 2)
+apps_cluster4C_means[order(-Score_Int)]
 
-ggplot(apps, aes(Predicted_Class_4C, Score)) + geom_boxplot() +
+ggplot(apps, aes(Predicted_Class_4C, Score_Int)) + geom_boxplot() +
   stat_summary(fun=mean, geom="point", col="red")
 
 
 ################################################################ Application Scores by Cluster ###############################################################
 
 # Overview
-ggplot(apps, aes(Predicted_Class_4C, Score)) + geom_boxplot() + 
+ggplot(apps, aes(Predicted_Class_4C, Score_Int)) + geom_boxplot() + 
   facet_grid(~ Applications) +
   stat_summary(fun=mean, geom="point", col="red")
 
