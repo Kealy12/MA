@@ -30,7 +30,12 @@ load("./../01_Input/01_RData/lca_4class_analysis.RData")
 quest_tri_extended <- cbind(quest_clean, tri_comp_all)
 quest_tri_extended
 
-################################################################ Mapping TRI data back to questionnaire ###############################################################
+# Filter out respondents who had invalid answers on TRI questions, LCA only worked on non-NA answers
+quest_tri_extended <- quest_tri_extended[complete.cases(quest_tri_extended)]
+
+# Map clusters to remaining data
+quest_tri_extended <- cbind(quest_tri_extended, tri_comp_all_noNA[, "Predicted Class (4Cs)"], 
+                            tri_comp_all_noNA[, "Predicted Class (5Cs)"])
 
 ########## SANITY CHECKS ##########
 # 0s on TRI answers in questionnaire need to be NA (they are invalid)
@@ -51,26 +56,59 @@ sum(is.na(quest_tri_extended)) # Total of 28 NAs
 rownames(quest_tri_extended)[!complete.cases(quest_tri_extended)] # Indices of rows with NAs
 quest_tri_extended[rowSums(is.na(quest_tri_extended)) > 0] # Overview of rows with NA
 
-########### LCA Mapping #############
-# Filter out respondents who had invalid answers on TRI questions
-# LCA only worked on non-NA answers
-quest_tri_extended <- quest_tri_extended[complete.cases(quest_tri_extended)]
-
-# Map clusters to remaining data
-quest_tri_extended <- cbind(quest_tri_extended, tri_comp_all_noNA[, "Predicted Class (4Cs)"], 
-                                tri_comp_all_noNA[, "Predicted Class (5Cs)"])
 
 
-################################################################ Blockchain applications ###############################################################
 
-# need to encode clusters as factors
+################################################################ Scores of Blockchain applications ###############################################################
+
+# Need to encode clusters as factors
 quest_tri_extended$`Predicted Class (5Cs)` <- as.factor(quest_tri_extended$`Predicted Class (5Cs)`)
 quest_tri_extended$`Predicted Class (4Cs)` <- as.factor(quest_tri_extended$`Predicted Class (4Cs)`)
-
 setnames(quest_tri_extended, "Predicted Class (5Cs)", "Predicted_Class_5C")
 setnames(quest_tri_extended, "Predicted Class (4Cs)", "Predicted_Class_4C")
 
-quest_tri_extended
+# Extract Applications of survey in separate data table
+apps <- quest_tri_extended[, .(v_265, v_266, v_267, v_268, v_269, v_270, Predicted_Class_5C, Predicted_Class_4C)]
+
+apps <- melt(apps, id.vars = c("Predicted_Class_5C", "Predicted_Class_4C"), 
+     variable.name = "Applications", value.name = "Score")
+
+# Renaming
+apps[Applications == "v_265", Applications := "Tokenization of Assets"]
+apps[Applications == "v_266", Applications := "Fractional ownership"]
+apps[Applications == "v_267", Applications := "Self-Sovereign Identity"]
+apps[Applications == "v_268", Applications := "Smart Contracts"]
+apps[Applications == "v_269", Applications := "Micropayments"]
+apps[Applications == "v_270", Applications := "Anonymous Transactions"]
+
+#### Scores Overall ####
+# Mean Likert Scores of Applications
+apps_means <- as.data.table(aggregate(Score ~  Applications, apps, mean))
+apps_means$Score <- round(apps_means$Score, 2)
+apps_means[order(-Score)]
+
+# Visualization of Scores of each Application
+ggplot(apps, aes(Applications, Score)) + geom_boxplot() +
+  stat_summary(fun=mean, geom="point", col="red") +
+  geom_text(data = apps_means, aes(label = Score, y = Score + 0.3), size = 3)
+
+#### Scores per Cluster ####
+# Cluster Means
+apps_cluster4C_means <- as.data.table(aggregate(Score ~  Predicted_Class_4C, apps, mean))
+apps_cluster4C_means$Score <- round(apps_cluster4C_means$Score, 2)
+apps_cluster4C_means[order(-Score)]
+
+ggplot(apps, aes(Predicted_Class_4C, Score)) + geom_boxplot() +
+  stat_summary(fun=mean, geom="point", col="red")
+
+
+################################################################ Application Scores by Cluster ###############################################################
+
+# Overview
+ggplot(apps, aes(Predicted_Class_4C, Score)) + geom_boxplot() + 
+  facet_grid(~ Applications) +
+  stat_summary(fun=mean, geom="point", col="red")
+
 
 ##### A Tokenization of Assets ####
 # v_265
@@ -139,7 +177,7 @@ ggplot(quest_tri_extended, aes(x = Predicted_Class_4C, v_269)) + geom_boxplot() 
   stat_summary(fun=mean, geom="point", col="red") +
   labs(x = "Clusters", y = "Usefulness of Micropayments")
 
-##### F Anonymous Transaction ####
+##### F Anonymous Transactions ####
 # v_270
 
 # 5 Cluster Case
@@ -151,6 +189,8 @@ ggplot(quest_tri_extended, aes(x = Predicted_Class_5C, v_270)) + geom_boxplot() 
 ggplot(quest_tri_extended, aes(x = Predicted_Class_4C, v_270)) + geom_boxplot() +
   stat_summary(fun=mean, geom="point", col="red") +
   labs(x = "Clusters", y = "Usefulness of Anonymous Transactions")
+
+
 
 
 
