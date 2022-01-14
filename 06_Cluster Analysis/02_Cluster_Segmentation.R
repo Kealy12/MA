@@ -24,8 +24,10 @@ load("./../01_Input/01_RData/00_clean_data_field.RData")
 load("./../01_Input/01_RData/tri_all.RData")
 
 # Loading LCAs
+load("./../01_Input/01_RData/lca_6class_analysis.RData")
 load("./../01_Input/01_RData/lca_5class_analysis.RData")
 load("./../01_Input/01_RData/lca_4class_analysis.RData")
+load("./../01_Input/01_RData/lca_3class_analysis.RData")
 
 # Result of this Segmentation
 load("./../01_Input/01_RData/tri_all_noNA_clusters.RData")
@@ -49,43 +51,25 @@ poLCA(f1, data = tri_comp_all_noNA, nclass = 5, na.rm = T, nrep = 15)
 # 4 class model has lowest BIC score = best model fit
 poLCA(f1, data = tri_comp_all_noNA, nclass = 4, na.rm = T, nrep = 15)
 
-# Predicted Classes
-pred_class <- as.data.table(lca_5class$predclass)
-colnames(pred_class) <- c("Predicted Class (5Cs)")
-pred_class
+# For Comparison Purpose: 6 & 3 class model
+lca_6class <- poLCA(f1, data = tri_comp_all_noNA, nclass = 6, na.rm = T, nrep = 15)
+lca_3class <- poLCA(f1, data = tri_comp_all_noNA, nclass = 3, na.rm = T, nrep = 15)
 
+# Predicted Classes
+pred_class <- as.data.table(lca_3class$predclass)
+colnames(pred_class) <- c("Predicted Class (3Cs)")
+unique(pred_class)
+
+# Binding Results together
 tri_comp_all_noNA <- cbind(tri_comp_all_noNA, pred_class)
 tri_comp_all_noNA
 
 # Saving LCA Analysis
-save(lca_4class, file = "./../01_Input/01_RData/lca_4class_analysis.RData")
-
-########################################## TRI Components of Predicted Classes ##########################################################
-#tri_comp_lca_predclass <- tri_comp_all_noNA
-#tri_comp_lca_predclass[, "Optimism (OPT) 2" := round(rowMeans(tri_comp_lca_predclass[, c(1,2)], na.rm = T), 2)]
-#tri_comp_lca_predclass[, "Innovativeness (INN)" := round(rowMeans(tri_comp_lca_predclass[, c(3,4,5)], na.rm = T), 2)]
-#tri_comp_lca_predclass[, "Discomfort (DIS)" := round(rowMeans(tri_comp_lca_predclass[, c(6,7)], na.rm = T), 2)]
-#tri_comp_lca_predclass[, "Insecurity (INS)"  := round(rowMeans(tri_comp_lca_predclass[, c(8,9,10)], na.rm = T), 2)]
-
-# Overall TRI score for each respondent is the average score on the four dimensions
-# (after reverse coding the scores on discomfort and insecurity).
-# tri_comp_lca_predclass[, "Discomfort_reversed2" := 8 - `Discomfort (DIS)`]
-# tri_comp_lca_predclass[, "Insecurity_reversed" := 8 - `Insecurity (INS)`]
-# tri_comp_lca_predclass[, "Overall TRI" := round(rowMeans(tri_comp_lca_predclass[, c(12,13,16,17)], na.rm = T), 2)]
-# tri_comp_lca_predclass[, mean(tri_comp_lca_predclass$`Overall TRI`)]
+save(lca_6class, file = "./../01_Input/01_RData/lca_6class_analysis.RData")
 
 
-########################################## Segmentation Summary ##########################################################
-tri_segments <- tri_comp_all_noNA[, c(11:14,17,18,19)]
-
-tri_segments_5C_summary <- tri_segments[, .("N" = .N,
-                                         "%" = .N / nrow(tri_segments),
-                                         "Optimism (OPT)" = mean(`Optimism (OPT)`),
-                                         "Innovativeness (INN)" = mean(`Innovativeness (INN)`),
-                                         "Discomfort (DIS)" = mean(`Discomfort (DIS)`),
-                                         "Insecurity (INS)" = mean(`Insecurity (INS)`),
-                                         "Overall TRI" = mean(`Overall TRI`)), 
-                                     by = "Predicted Class (5Cs)"]
+########################################## Model Summaries ##########################################################
+tri_segments <- tri_comp_all_noNA[, c(11:14,17,18,19,20,21)]
 
 tri_segments_4C_summary <- tri_segments[, .("N" = .N,
                                             "%" = .N / nrow(tri_segments),
@@ -96,13 +80,86 @@ tri_segments_4C_summary <- tri_segments[, .("N" = .N,
                                             "Overall TRI" = mean(`Overall TRI`)), 
                                         by = "Predicted Class (4Cs)"]
 
+tri_segments_4C_summary<- round(tri_segments_4C_summary[order(-`Overall TRI`)],2)
+
+#### Other Models for Comparison ####
+tri_segments_6C_summary <- tri_segments[, .("N" = .N,
+                                            "%" = .N / nrow(tri_segments),
+                                            "Optimism (OPT)" = mean(`Optimism (OPT)`),
+                                            "Innovativeness (INN)" = mean(`Innovativeness (INN)`),
+                                            "Discomfort (DIS)" = mean(`Discomfort (DIS)`),
+                                            "Insecurity (INS)" = mean(`Insecurity (INS)`),
+                                            "Overall TRI" = mean(`Overall TRI`)), 
+                                        by = "Predicted Class (6Cs)"]
+
+tri_segments_5C_summary <- tri_segments[, .("N" = .N,
+                                         "%" = .N / nrow(tri_segments),
+                                         "Optimism (OPT)" = mean(`Optimism (OPT)`),
+                                         "Innovativeness (INN)" = mean(`Innovativeness (INN)`),
+                                         "Discomfort (DIS)" = mean(`Discomfort (DIS)`),
+                                         "Insecurity (INS)" = mean(`Insecurity (INS)`),
+                                         "Overall TRI" = mean(`Overall TRI`)), 
+                                     by = "Predicted Class (5Cs)"]
+
+
+
+tri_segments_3C_summary <- tri_segments[, .("N" = .N,
+                                            "%" = .N / nrow(tri_segments),
+                                            "Optimism (OPT)" = mean(`Optimism (OPT)`),
+                                            "Innovativeness (INN)" = mean(`Innovativeness (INN)`),
+                                            "Discomfort (DIS)" = mean(`Discomfort (DIS)`),
+                                            "Insecurity (INS)" = mean(`Insecurity (INS)`),
+                                            "Overall TRI" = mean(`Overall TRI`)), 
+                                        by = "Predicted Class (3Cs)"]
+
+#### Summaries of other models ####
+
+round(tri_segments_6C_summary[order(-`Overall TRI`)],2)
 round(tri_segments_5C_summary[order(-`Overall TRI`)],2)
-round(tri_segments_4C_summary[order(-`Overall TRI`)],2)
+round(tri_segments_3C_summary[order(-`Overall TRI`)],2)
 
 # Show key information of lca models in table for paper
 
+########################################## Statistical Comparison of Latent Class Analysis Models ##########################################################
 
-########################################## Interpretation of Results ##########################################################
+model_3 <- data.table("Number of Clusters" = "3", "Log-Likelihood" = lca_3class$llik, "BIC" = lca_3class$bic, "AIC" = lca_3class$aic)
+model_4 <- data.table("Number of Clusters" = "4", "Log-Likelihood" = lca_4class$llik, "BIC" = lca_4class$bic, "AIC" = lca_4class$aic)
+model_5 <- data.table("Number of Clusters" = "5", "Log-Likelihood" = lca_5class$llik, "BIC" = lca_5class$bic, "AIC" = lca_5class$aic)
+model_6 <- data.table("Number of Clusters" = "6", "Log-Likelihood" = lca_6class$llik, "BIC" = lca_6class$bic, "AIC" = lca_6class$aic)
+
+model_summary <- rbind(model_3, model_4, model_5, model_6)
+model_summary
+
+# Following Parasuraman and Colby (2015): We concluded 4 Clusters, due to:
+# Best model fit (lowest BIC) statistically and more clearly distinguishable cluster TRI characteristics for our purposes
+
+#### Writing to Excel and Printing Table ####
+print(xtable(model_summary, type = "latex"), file = "./../02_Output/lca_model_summary.tex",include.rownames = F, only.contents = T, include.colnames = T, hline.after = c(nrow(model_summary)))
+sheets <- list("model_summary" = model_summary)
+write_xlsx(sheets, "./../02_Output/lca_model_summary.xlsx")
+
+########################################## Going Forward: 4 Cluster Segmentation ##########################################################
+
+# Preparing Table
+colnames(tri_segments_4C_summary)[1] <- "Cluster"
+tri_segments_4C_summary$Cluster <- as.character(tri_segments_4C_summary$Cluster)
+tri_segments_4C_summary[ Cluster == "3", Cluster := "Explorers"]
+tri_segments_4C_summary[ Cluster == "4", Cluster := "Hesitators"]
+tri_segments_4C_summary[ Cluster == "2", Cluster := "Avoiders"]
+tri_segments_4C_summary[ Cluster == "1", Cluster := "Pioneers"]
+
+tri_segments_4C_summary
+
+# Writing to Excel and Printing Table
+print(xtable(model_summary, type = "latex"), file = "./../02_Output/tri_segments_4C_summary.tex",include.rownames = F, only.contents = T, include.colnames = T, hline.after = c(nrow(tri_segments_4C_summary)))
+sheets <- list("tri_segments_4C_summary" = tri_segments_4C_summary)
+write_xlsx(sheets, "./../02_Output/tri_segments_4C_summary.xlsx")
+
+# Saving
+save(tri_segments_4C_summary, file = "./../01_Input/01_RData/tri_segments_4C_summary.RData")
+
+########################################## Interpretation ##########################################################
+
 
 # 5 CLASSES -> Problem: skeptics and pioneers not clearly distinguishable 
 
@@ -123,17 +180,13 @@ round(tri_segments_4C_summary[order(-`Overall TRI`)],2)
 
 ####### 4 CLASSES ########
 
-# class 3: EXPLORER -> PASST
+# class 3: EXPLORER
 
-# class 2: AVOIDERS -> PASST
+# class 2: AVOIDERS
 
-# class 4: HESITATORS -> PASST
+# class 4: HESITATORS
 
-# class 1: SKEPTICS OR PIONEERS -> 
-
-########################################## Validation of Clusters ##########################################################
-
-
+# class 1: PIONEERS
 
 
 ########################################## Saving and Cleaning ##########################################################
