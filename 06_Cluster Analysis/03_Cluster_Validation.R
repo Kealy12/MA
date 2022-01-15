@@ -76,10 +76,10 @@ quest_tri_extended[ v_285 == 16, .N]
 mean(quest_tri_extended$v_285)
 
 # % of people > 50
-age50plus <- quest_tri_extended[v_285 > 50, .("Aged 50+ (N)" = .N ), by = "Cluster"]
+age50plus <- quest_tri_extended[v_285 >= 50, .("Age 50+ (N)" = .N ), by = "Cluster"]
 n_c <- quest_tri_extended[, .(N = .N), by = "Cluster"]
 age_dt <- merge(age50plus, n_c, by = "Cluster")
-age_dt[, "Aged 50+ (%)" := round(`Aged 50+ (N)` / `N`,2)][, `Aged 50+ (N)` := NULL]
+age_dt[, "Age 50+ (%)" := round(`Age 50+ (N)` / `N`,2)][, `Age 50+ (N)` := NULL]
 age_dt[, N := NULL]
 
 demo_dt <- merge(demo_dt, age_dt, by = "Cluster", all.x = T)
@@ -87,12 +87,18 @@ demo_dt
 
 # Minimum Bachelors Degree
 # v_186
-quest_tri_extended[v_285 > 50, .("Aged 50+ (N)" = .N ), by = "Cluster"]
+# If bachelor, master or phd - else 0
+quest_tri_extended[, bach := ifelse(v_186 == 4 | v_186 == 5 | v_186 == 6, 1, 0)]
+bach_degree <- quest_tri_extended[bach == 1, .("Minimum Bachelor's Degree (N)" = .N), by = Cluster]
 n_c <- quest_tri_extended[, .(N = .N), by = "Cluster"]
-age_dt <- merge(age50plus, n_c, by = "Cluster")
-age_dt[, "Aged 50+ (%)" := round(`Aged 50+ (N)` / `N`,2)][, `Aged 50+ (N)` := NULL]
-age_dt[, N := NULL]
+bach_dt <- merge(bach_degree, n_c, by = "Cluster")
+bach_dt[, "Minimum Bachelor's Degree (%)" := round(`Minimum Bachelor's Degree (N)` / `N`,2)][, `Minimum Bachelor's Degree (N)` := NULL]
+bach_dt[, N := NULL]
 
+demo_dt <- merge(demo_dt, bach_dt, by = "Cluster", all.x = T)
+demo_dt
+
+# More TBD
 
 ###### Blockchain Tech Characteristics ######
 
