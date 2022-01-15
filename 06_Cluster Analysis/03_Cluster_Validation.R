@@ -47,27 +47,57 @@ quest_tri_extended[ Cluster == "1", Cluster := "Pioneers"]
 # Setting Cluster as Factor and Levels corresponding Overall TRI
 quest_tri_extended$Cluster <- as.factor(quest_tri_extended$Cluster)
 quest_tri_extended$Cluster <- factor(quest_tri_extended$Cluster , 
-                                     levels = c("Avoiders", "Hesitators", "Pioneers", "Explorers"))
+                                     levels = c("Explorers", "Pioneers", "Hesitators", "Avoiders"))
 
 summary(quest_tri_extended$Cluster)
 ########################################## Validation of Clusters ##########################################################
 quest_tri_extended
 tri_segments_4C_summary
 
+table(quest_tri_extended$Cluster)
 table(quest_tri_extended$v_169)
 
-#### Demographic Data ####
-# Gender, Age, Mean Household Income per Month, Level of Education
-# Gender: v_169 -> Male = 1, Female = 2
+###### Demographic Data ######
+
+# Gender
+# v_169 -> Male = 1, Female = 2
 f_c <- quest_tri_extended[v_169 == 2, .("Female (N)" = .N ), by = "Cluster"]
 n_c <- quest_tri_extended[, .(N = .N), by = "Cluster"]
+demo_dt <- merge(f_c, n_c, by = "Cluster")
+demo_dt[, "Female (%)" := round(`Female (N)` / `N`,2)][, `Female (N)` := NULL]
+demo_dt
 
-demo <- cbind(f_c, n_c)
-demo[, 3 := NULL]
-demo[, "Female (%)" := round(`Female (N)` / `N`,2)][, `Female (N)` := NULL]
-demo
+# Age
+# v_285 -> Need to recode data: +14 on score to show age (nobody < 15 and > 85)
+quest_tri_extended[, v_285 := v_285 + 14]
+quest_tri_extended[ v_285 == 16, .N]
 
-# Age: v_285
+# Mean Age of respondents 
+mean(quest_tri_extended$v_285)
+
+# % of people > 50
+age50plus <- quest_tri_extended[v_285 > 50, .("Aged 50+ (N)" = .N ), by = "Cluster"]
+n_c <- quest_tri_extended[, .(N = .N), by = "Cluster"]
+age_dt <- merge(age50plus, n_c, by = "Cluster")
+age_dt[, "Aged 50+ (%)" := round(`Aged 50+ (N)` / `N`,2)][, `Aged 50+ (N)` := NULL]
+age_dt[, N := NULL]
+
+demo_dt <- merge(demo_dt, age_dt, by = "Cluster", all.x = T)
+demo_dt
+
+# Minimum Bachelors Degree
+# v_186
+quest_tri_extended[v_285 > 50, .("Aged 50+ (N)" = .N ), by = "Cluster"]
+n_c <- quest_tri_extended[, .(N = .N), by = "Cluster"]
+age_dt <- merge(age50plus, n_c, by = "Cluster")
+age_dt[, "Aged 50+ (%)" := round(`Aged 50+ (N)` / `N`,2)][, `Aged 50+ (N)` := NULL]
+age_dt[, N := NULL]
+
+
+###### Blockchain Tech Characteristics ######
+
+
+# Mean Household Income per Month, Level of Education
 
 # Clean Environment
 rm(list = ls())
