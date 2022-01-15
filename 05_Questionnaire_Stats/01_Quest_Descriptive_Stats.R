@@ -28,7 +28,7 @@ quest_raw[v_282 == 2, "v_282"][, .N]
 
 
 
-
+# Overall Blockchain knowledge (before and after the survey)
 
 
 

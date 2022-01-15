@@ -68,7 +68,7 @@ quest_tri_extended[rowSums(is.na(quest_tri_extended)) > 0] # Overview of rows wi
 
 ################################################################ Scores on Blockchain applications ###############################################################
 
-# Extract Application colums
+# Extract Application columns
 apps <- quest_tri_extended[, .(v_265, v_266, v_267, v_268, v_269, v_270, Predicted_Class_5C, Predicted_Class_4C)]
 
 apps <- melt(apps, id.vars = c("Predicted_Class_5C", "Predicted_Class_4C"), 
@@ -127,6 +127,7 @@ ggplot(apps, aes(Applications, Score_Int)) + geom_boxplot() +
 
 # Visualization of answers (%) on applications 
 apps_summary <- merge(apps_summary, apps_means, by = "Applications")
+
 ggplot(apps_summary, aes(x = reorder(Applications, Score_Int), y = value, 
                          fill = Score_String)) +
   geom_bar(position = "stack", stat = "identity") +
