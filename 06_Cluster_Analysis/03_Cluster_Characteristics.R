@@ -129,8 +129,6 @@ internet <- quest_tri_extended[, .("Ability to Explain the Internet (1-10)" = ro
 cluster_bc_dt <- merge(cluster_bc_dt, internet, by = "Cluster", all.x = T)
 cluster_bc_dt
 
-# Only need one of those
-
 #### Possession of any cryptocurrency ####
 # v_54 (1 = Yes, 2 = No)
 
@@ -159,6 +157,7 @@ quest_tri_extended[, .N, by =v_331]
 
 
 
+########################################## Saving and Cleaning ##########################################################
 
 # Clean Environment
 rm(list = ls())

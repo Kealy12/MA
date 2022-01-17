@@ -1,15 +1,50 @@
+#######################################################################################################################################
 
-#Loading packages 
+# General Questionnaire Stats 
+
+################################################################ Set Up ###############################################################
+
+# Packages
 library(data.table)
+library(dplyr)
 library(tidyr)
-library(ggthemes)
-library(ggplot2)
+library(writexl)
+library(xtable)
 library(apaTables)
+library(ggplot2)
+library(GGally)
+library(poLCA)
+
+# Set working directory
+setwd(dirname(rstudioapi::getSourceEditorContext()$path))
+
+# Loading Data 
+load("./../01_Input/01_RData/00_clean_data_field.RData")
+
+################################################################ General Stats of questionnaire ###############################################################
+
+# N
+quest_clean[, .N]
+
+# Gender distribution
+
+
+
+# Age distribution
+
+
+
+# Have you heard of following terms?
+# v_321
+
+
+
+
 
 # Gender distribution 
-quest_raw[, "v_169"]
-ggplot(quest_raw[, "v_169"], aes(v_169)) + 
-  geom_bar() + theme_apa()
+quest_clean[, "v_169"]
+ggplot(quest_clean[, "v_169"], aes(v_169)) + 
+  geom_bar()
 
 # Age distribution 
 quest_raw[, "v_285"]
@@ -32,6 +67,11 @@ quest_raw[v_282 == 2, "v_282"][, .N]
 
 
 
+
+
+
+# Clean Environment
+rm(list = ls())
 
 
 #### GGplot ####
