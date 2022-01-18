@@ -15,7 +15,6 @@ library(ggplot2)
 library(GGally)
 library(poLCA)
 library(MASS)
-library(likert)
 
 # Set working directory
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
@@ -125,7 +124,9 @@ ggplot(apps_summary, aes(x = reorder(Applications, Score_Int), y = dis_by_app,
                          fill = Score_Factor)) +
   geom_bar(position = "stack", stat = "identity") +
   coord_flip() +
-  scale_fill_brewer(palette = "PuOr")
+  scale_fill_brewer(palette = "PuOr") +
+  guides(fill = guide_legend(reverse=TRUE)) +
+  labs( x = "Blockchain Applications", y = "Percentage")
 
 
 
@@ -200,13 +201,18 @@ a
 
 a <- melt(a, id.vars = "Cluster")
 
-ggplot(a, aes(x = Cluster, y = value, 
+# Final Likert visualization
+ggplot(a, aes(x = factor(Cluster, levels = rev(levels(Cluster))), y = value, 
                          fill = variable)) +
   geom_bar(position = "stack", stat = "identity") +
   coord_flip() +
-  scale_fill_brewer(palette = "PuOr")
+  scale_fill_brewer(palette = "PuOr") +
+  guides(fill = guide_legend(reverse=TRUE)) + 
+  labs(x = "Clusters", y = "Percentage", title = "Usefulness of Asset Tokenizations")
 
-class(a$Cluster)
+n_clus
+  
+
 
 ##### B Fractional ownership ####
 # v_266
@@ -249,7 +255,7 @@ ggplot(quest_tri_extended, aes(x = Predicted_Class_4C, v_270)) + geom_boxplot() 
 
 
 
-################################################################ Logisitic Regression ###############################################################
+################################################################ Logistic Regression ###############################################################
 
 
 # Ordinal Logistic Regression: TBD
@@ -277,6 +283,8 @@ cbind(coeffs_4C, "p value" = round(p,3))
 
 ################################################################ Saving and Cleaning ###############################################################
 
+# Saving updated questionnaire with clusters
+save(quest_tri_extended, file = "./../01_Input/01_RData/01_quest_cluster_extended.RData")
 
 # Clean Environment
 rm(list = ls())

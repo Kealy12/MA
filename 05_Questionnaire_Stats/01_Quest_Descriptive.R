@@ -14,21 +14,53 @@ library(apaTables)
 library(ggplot2)
 library(GGally)
 library(poLCA)
+library(RColorBrewer)
 
 # Set working directory
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 
 # Loading Data 
 load("./../01_Input/01_RData/00_clean_data_field.RData")
+load("./../01_Input/01_RData/tri_all_noNA_clusters.RData")
+load("./../01_Input/01_RData/01_quest_cluster_extended.RData")
+
+
 
 ################################################################ General Stats of questionnaire ###############################################################
 
-# N
+#### N ####
 quest_clean[, .N]
 
-# Gender distribution
+#### Have you heard of the following terms ####
+# v_321 - v_325
+# 1 = yes, 2 = no
+heard <- quest_clean[, .(v_321, v_322, v_323, v_324, v_325)]
+colnames(heard) <- c("Blockchain Technology", "Bitcoin", "NFT", "Cryptocurrency", "Ethereum")
+heard <- melt(heard)
+heard$value <- as.character(heard$value)
+heard[value == "1", value := "Yes"]
+heard[value == "2", value := "No"]
 
+ggplot(heard, aes(variable, fill = value)) + geom_bar(position = "fill") +
+  labs( y = "%", x = "Terms") + coord_flip() + scale_fill_brewer( palette = "Paired")
 
+table(heard)
+
+##### Gender ####
+# v_169 -> Male = 1, Female = 2
+quest_clean[v_169 == 1, v_169 := "Male"]
+quest_clean[v_169 == 2, v_169 := "Female"]
+quest_clean$v_169 <- as.factor(quest_clean$v_169)
+
+# Gender - Posession of Crypto
+# v_54 (1 = Yes, 2 = No)
+ggplot(quest_clean, aes(v_169, fill = v_54 == 1 )) + 
+  geom_bar(position = "fill") + scale_fill_brewer( palette = "Paired")
+
+# Gender - Posession of NFT
+# v_331 (1 = Yes, 2 = No, -77 = missing value (conditional question, if person heard of NFT))
+ggplot(quest_clean, aes(v_169, fill = v_331 == 1 )) + 
+  geom_bar(position = "fill")+ scale_fill_brewer( palette = "Paired")
 
 # Age distribution
 
