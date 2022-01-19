@@ -172,8 +172,6 @@ quest_clean[ v_285 == 79, .N]
 mean(quest_clean$v_285)
 
 # Age - Heard of Blockchain Technology
-
-
 # x = Age: Continuous, Y = Heard of Blockchain Tech: Categorical
 # Logistic Model
 # age_HeardOfBC <- quest_clean[, .(v_321, v_285)]
@@ -181,6 +179,18 @@ mean(quest_clean$v_285)
 # glm <- glm(age_HeardOfBC$v_321 ~ age_HeardOfBC$v_285, age_HeardOfBC, family = "binomial")
 # 
 # coef(gl)
+
+
+#### Difference between Bitcoin and Blockchain #### 
+# v_282
+# 1 = Yes, 2 = No
+diff <- quest_clean[, "v_282"]
+diff <- melt(diff)
+diff[, value := as.numeric(ifelse(value == "1", "1", "0"))]
+round(diff[, sum(value) / nrow(diff)],2)
+# only 25 % know the difference
+
+
 
 
 #### GGplot ####
