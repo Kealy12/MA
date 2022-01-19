@@ -14,7 +14,7 @@
 #'   Defaults to \code{FALSE}.
 #'
 #' @param legend.font.size Integer indicating the font size of the labels in the
-#'   legend. Default and APA-recommended is 12, but if there are many labels it
+#'   legend. Default and APA-recommended is 12, but if the re are many labels it
 #'   may be necessary to choose a smaller size.
 #'
 #' @param x.font.size Font size of x-axis label.
