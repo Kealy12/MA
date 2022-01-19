@@ -193,6 +193,71 @@ round(diff[, sum(value) / nrow(diff)],2)
 
 
 
+#### 
+
+#### Contact with Blockchain technology ####
+# v_10: in professional life
+# v_11: in personal life
+contact<- quest_clean[, c("v_10", "v_11")]
+colnames(contact) <- c("Contact in professional life", "Contact in personal life")
+contact <- melt(contact)
+# can be no 0s
+contact[value == 0, value := NA]
+table(contact)
+
+# 7-point Likert Scale: Adding Scores as Strings
+contact[value == 1, likert :="Very low"]
+contact[value == 2, likert :="Low"]
+contact[value == 3, likert :="Below average"]
+contact[value == 4, likert :="Average"]
+contact[value == 5, likert :="Above average"]
+contact[value == 6, likert :="High"]
+contact[value == 7, likert :="Very high"]
+
+contact$likert <- factor(contact$likert  , levels = c("Very low", "Low", "Below average", "Average", 
+                                                           "Above average", "High", "Very high"))
+
+contact[value == 1, dis := .N / nrow(quest_clean), by = variable]
+contact[value == 2, dis := .N / nrow(quest_clean), by = variable]
+contact[value == 3, dis := .N / nrow(quest_clean), by = variable]
+contact[value == 4, dis := .N / nrow(quest_clean), by = variable]
+contact[value == 5, dis := .N / nrow(quest_clean), by = variable]
+contact[value == 6, dis := .N / nrow(quest_clean), by = variable]
+contact[value == 7, dis := .N / nrow(quest_clean), by = variable]
+
+contact_summary <- unique(contact)
+
+ggplot(contact_summary, aes(x = variable, y = dis, 
+                         fill = likert)) +
+  geom_bar(position = "stack", stat = "identity", width = 0.6) +
+  coord_flip() +
+  scale_fill_brewer(palette = "PuOr") +
+  guides(fill = guide_legend(reverse=TRUE)) +
+  labs( title = "Current contact with Blockchain Technology", y = "%", x = "") +
+  theme_apa() + scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25)) + 
+  theme_apa(remove.x.gridlines = F) +
+  theme(text=element_text(family="Times New Roman", size=12)) + 
+  guides(fill = guide_legend(reverse=TRUE))
+
+
+# Higher Contact in Personal Life
+contact[, mean(value), by = variable]
+
+
+
+#### Knowledge of Blockchain technology ####
+# v_286 (1-10 scale)
+# Mean
+quest_clean[, .("Knowledge of Blockchain Technology (1-10)" = round(mean(v_286, na.rm = T),2))]
+
+ggplot(quest_clean, aes(v_286)) + geom_boxplot() + coord_flip()
+
+
+
+
+
+
+
 #### GGplot ####
 ggplot(dt, aes(x, y, fill = ..., color = ...)) +
   # USE HISTOGRAMS TO LOOK AT DIFFERENT DISTRIBUTIONS!
