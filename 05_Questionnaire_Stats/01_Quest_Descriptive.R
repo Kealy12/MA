@@ -21,6 +21,7 @@ library(extrafont)
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 
 # Loading Data 
+quest_raw <- fread("./../01_Input/raw_data_field_2021_10_21.csv")
 load("./../01_Input/01_RData/00_clean_data_field.RData")
 load("./../01_Input/01_RData/tri_all_noNA_clusters.RData")
 load("./../01_Input/01_RData/01_quest_cluster_extended.RData")
@@ -33,6 +34,7 @@ source("./../04_Data_Prep/99_APA_Theme.R")
 #### N ####
 quest_clean[, .N]
 
+
 #### Have you heard of the following terms ####
 # v_321 - v_325
 # 1 = yes, 2 = no
@@ -42,19 +44,52 @@ heard <- melt(heard)
 heard$value <- as.character(heard$value)
 heard[value == "1", value := "Yes"]
 heard[value == "2", value := "No"]
+heard$value <- as.factor(heard$value)
 
+# Trick for ordering the axis
+heard[, N := .N, by = c("variable", "value")]
+heard[value == "No", N:= 0]
+heard
 
-ggplot(heard, aes(variable, fill = factor(value))) + geom_bar(position = "fill") +
+plot_heard <- ggplot(heard, aes(reorder(variable, N), fill = factor(value))) + geom_bar(position = "fill") +
   coord_flip() + scale_fill_brewer( palette = "Paired") +
   scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25)) + 
   theme_apa(remove.x.gridlines = F) +
   theme(text=element_text(family="Times New Roman", size=12)) + 
-  labs(y = "%", x = "", title = "Distribution on respondents knowing the following terms") +
+  labs(y = "%", x = "", title = "Distribution of respondents knowing the following terms") +
   guides(fill = guide_legend(reverse=TRUE))
 
-table(heard)
 
-##### Gender ####
+#### Can you explain these to a friend ####
+# v_326 - v_330
+# 1 = yes, 2 = no
+explain <- quest_clean[, .(v_326, v_327, v_328, v_329, v_330)]
+colnames(explain) <- c("Blockchain Technology", "Bitcoin", "NFT", "Cryptocurrency", "Ethereum")
+explain <- melt(explain)
+explain$value <- as.character(explain$value)
+explain[value == "1", value := "Yes"]
+explain[value == "2", value := "No"]
+explain$value <- as.factor(explain$value)
+
+# Trick for ordering the axis
+explain[, N := .N, by = c("variable", "value")]
+explain[value == "No", N:= 0]
+explain
+
+plot_explain <- ggplot(explain, aes(reorder(variable, N), fill = factor(value))) + geom_bar(position = "fill") +
+  coord_flip() + scale_fill_brewer( palette = "Paired") +
+  scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25)) + 
+  theme_apa(remove.x.gridlines = F) +
+  theme(text=element_text(family="Times New Roman", size=12)) + 
+  labs(y = "%", x = "", title = "Distribution of respondents being able to explain these terms to a friend") +
+  guides(fill = guide_legend(reverse=TRUE))
+
+plot_heard
+plot_explain
+
+
+
+#### Gender - Possession of Crypto / NFT ####
 # v_169 -> Male = 1, Female = 2
 quest_clean$v_169 <- as.character(quest_clean$v_169)
 quest_clean[v_169 == 1, v_169 := "Male"]
@@ -75,7 +110,13 @@ ggplot(quest_clean, aes(v_169, fill = v_54 == 1 )) +
 # Gender - Possession of NFT
 # v_331 (1 = Yes, 2 = No, -77 = missing value (conditional question, if person heard of NFT))
 ggplot(quest_clean, aes(v_169, fill = v_331 == 1 )) + 
-  geom_bar(position = "fill")+ scale_fill_brewer( palette = "Paired")
+  geom_bar(position = "fill")+ scale_fill_brewer( palette = "Paired") +
+  coord_flip() +
+  scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25)) + 
+  theme_apa(remove.x.gridlines = F) +
+  theme(text=element_text(family="Times New Roman", size=12)) + 
+  labs(y = "%", x = "", title = "Possession of NFT") +
+  guides(fill = guide_legend(reverse=TRUE))
 
 # Age distribution
 
@@ -121,6 +162,27 @@ quest_raw[v_282 == 2, "v_282"][, .N]
 rm(list = ls())
 
 
+
+#### Age ####
+# v_285 -> Need to recode data: +14 on score to show age (nobody < 15 and > 85)
+quest_clean[, v_285 := v_285 + 14]
+quest_clean[ v_285 == 79, .N]
+
+# Mean Age of respondents 
+mean(quest_clean$v_285)
+
+# Age - Heard of Blockchain Technology
+
+
+# x = Age: Continuous, Y = Heard of Blockchain Tech: Categorical
+# Logistic Model
+# age_HeardOfBC <- quest_clean[, .(v_321, v_285)]
+# age_HeardOfBC[, v_321 := as.numeric(ifelse(v_321 == "1", "1", "0"))]
+# glm <- glm(age_HeardOfBC$v_321 ~ age_HeardOfBC$v_285, age_HeardOfBC, family = "binomial")
+# 
+# coef(gl)
+
+
 #### GGplot ####
 ggplot(dt, aes(x, y, fill = ..., color = ...)) +
   # USE HISTOGRAMS TO LOOK AT DIFFERENT DISTRIBUTIONS!
@@ -134,4 +196,6 @@ scale_x_log10() + scale_y_log10() +
   labs(x = "...", y = "...", title = "...") +
   guides(fill/color = guide_legend(title = "..."))
 
+# Clean Environment
+rm(list = ls())
 
