@@ -90,6 +90,7 @@ plot_explain
 
 
 #### Gender - Possession of Crypto / NFT ####
+
 # v_169 -> Male = 1, Female = 2
 quest_clean$v_169 <- as.character(quest_clean$v_169)
 quest_clean[v_169 == 1, v_169 := "Male"]
@@ -164,6 +165,7 @@ rm(list = ls())
 
 
 #### Age ####
+
 # v_285 -> Need to recode data: +14 on score to show age (nobody < 15 and > 85)
 quest_clean[, v_285 := v_285 + 14]
 quest_clean[ v_285 == 79, .N]
@@ -182,6 +184,7 @@ mean(quest_clean$v_285)
 
 
 #### Difference between Bitcoin and Blockchain #### 
+
 # v_282
 # 1 = Yes, 2 = No
 diff <- quest_clean[, "v_282"]
@@ -191,11 +194,8 @@ round(diff[, sum(value) / nrow(diff)],2)
 # only 25 % know the difference
 
 
-
-
-#### 
-
 #### Contact with Blockchain technology ####
+
 # v_10: in professional life
 # v_11: in personal life
 contact<- quest_clean[, c("v_10", "v_11")]
@@ -204,6 +204,8 @@ contact <- melt(contact)
 # can be no 0s
 contact[value == 0, value := NA]
 table(contact)
+contact <- contact[complete.cases(contact)]
+
 
 # 7-point Likert Scale: Adding Scores as Strings
 contact[value == 1, likert :="Very low"]
@@ -231,7 +233,7 @@ ggplot(contact_summary, aes(x = variable, y = dis,
                          fill = likert)) +
   geom_bar(position = "stack", stat = "identity", width = 0.6) +
   coord_flip() +
-  scale_fill_brewer(palette = "PuOr") +
+  scale_fill_brewer(palette = "BrBG") +
   guides(fill = guide_legend(reverse=TRUE)) +
   labs( title = "Current contact with Blockchain Technology", y = "%", x = "") +
   theme_apa() + scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25)) + 
@@ -246,12 +248,68 @@ contact[, mean(value), by = variable]
 
 
 #### Knowledge of Blockchain technology ####
-# v_286 (1-10 scale)
+
+# Beginning of Questionnaire: v_286 (1-10 scale)
+# End of Questionnaire: v_333
 # Mean
-quest_clean[, .("Knowledge of Blockchain Technology (1-10)" = round(mean(v_286, na.rm = T),2))]
+quest_clean[, .("Pre-Knowledge of Blockchain Technology (1-10)" = round(mean(v_286, na.rm = T),2))]
+quest_clean[, .("Post-Knowledge of Blockchain Technology (1-10)" = round(mean(v_333, na.rm = T),2))]
 
-ggplot(quest_clean, aes(v_286)) + geom_boxplot() + coord_flip()
+#### Tech Usage ####
 
+# v_19 - v_30
+# 1 = Yes, 2 = No, 3 = Don't know enough 
+tech_usage <- quest_clean[, c("v_19", "v_20", "v_21", "v_22", "v_23", "v_24", 
+                              "v_25", "v_26", "v_27", "v_28", "v_29", "v_30")]
+colnames(tech_usage) <- c("Cloud computing", "Big data", "Internet of things", "Smart Home products",
+                          "3D printing", "Artificial intelligence", "Machine learning", "Neural networks",
+                          "Deepfake technology", "Blockchain technology", "5G", "Contactless payments")
+
+tech_usage <- melt(tech_usage)
+
+# can be no 0s
+tech_usage[value == 0, value := NA]
+table(tech_usage)
+tech_usage <- tech_usage[complete.cases(tech_usage)]
+
+# Calculating distribution of answers
+tech_usage[value == "1", likert :="Yes"]
+tech_usage[value == "2", likert :="No"]
+tech_usage[value == "3", likert :="Don't know enough about it"]
+tech_usage$likert <- factor(tech_usage$likert, levels = c("No","Don't know enough about it", "Yes"))
+
+# N per variable after excluding NAs
+tech_usage[, N:= .N, by = variable]
+
+tech_usage[value == 1, dis := .N / N, by = variable]
+tech_usage[value == 2, dis := .N / N, by = variable]
+tech_usage[value == 3, dis := .N / N, by = variable]
+
+# Trick for ordering the axis
+tech_usage[, N:= .N, by = c("variable", "value")]
+tech_usage[value == "2", N:= 0]
+tech_usage[value == "3", N:= 0]
+tech_usage
+
+tech_usage_summary <- unique(tech_usage)
+tech_usage_summary
+
+# Plot
+plot_usageIntention <- ggplot(tech_usage_summary, aes(x = reorder(variable, N), y = dis, 
+                            fill = likert)) +
+  geom_bar(position = "stack", stat = "identity", width = 0.6) +
+  geom_text(aes(label = scales::percent(dis,accuracy = 1, trim = FALSE)), 
+                position = position_stack(vjust = 0.5), size = 2.1, family = "Times New Roman") +
+  coord_flip() +
+  scale_fill_brewer(palette = "BrBG") +
+  guides(fill = guide_legend(reverse=TRUE)) +
+  labs( title = "Tech Usage Intention", y = "%", x = "") +
+  theme_apa() + scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25)) + 
+  theme_apa(remove.x.gridlines = F) +
+  theme(text=element_text(family="Times New Roman", size=12)) + 
+  guides(fill = guide_legend(reverse=TRUE)) 
+
+plot_usageIntention
 
 
 
