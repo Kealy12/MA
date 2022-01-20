@@ -17,6 +17,7 @@ library(poLCA)
 library(RColorBrewer)
 library(extrafont)
 
+
 # Set working directory
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 
@@ -58,6 +59,34 @@ plot_heard <- ggplot(heard, aes(reorder(variable, N), fill = factor(value))) + g
   theme(text=element_text(family="Times New Roman", size=12)) + 
   labs(y = "%", x = "", title = "Distribution of respondents knowing the following terms") +
   guides(fill = guide_legend(reverse=TRUE))
+
+
+#### In which sector have you heard about blockchain technology ####
+
+# Conditional Question
+# v_31 - v_35, v_292, v_293
+# 1 = quoted, 0 = not quoted
+sector <- quest_clean[, .(v_31, v_32, v_33, v_34, v_35, v_292, v_293)]
+colnames(sector) <- c("I have not heard of any Blockchain Technology applications", 
+                       "Finance and banking", "Transport and logistics", "Energy and utilities", 
+                      "Healthcare and pharmaceuticals", "Art and collectibles", "Other")
+sector <- melt(sector)
+
+# only look at distribution of selected answers
+quoted <- sector[value == 1]
+quoted <- quoted[, value := sum(value), by = variable]
+quoted[, dis := value / nrow(quoted) , by = variable]
+quoted[, show := 1]
+
+quoted_summary <- unique(quoted)
+quoted_summary
+
+ggplot(quoted, aes(x = show, fill = variable)) + geom_bar(position = "fill") +
+  theme(text=element_text(family="Times New Roman", size=12)) +
+  scale_fill_brewer(palette = "Paired")
+  geom_text(aes(label = scales::percent(dis,accuracy = 1, trim = FALSE)), 
+            position = position_stack(vjust = 0.5), size = 2.1, family = "Times New Roman")
+
 
 
 #### Can you explain these to a friend ####
@@ -303,14 +332,11 @@ plot_usageIntention <- ggplot(tech_usage_summary, aes(x = reorder(variable, N), 
   coord_flip() +
   scale_fill_brewer(palette = "BrBG") +
   guides(fill = guide_legend(reverse=TRUE)) +
-  labs( title = "Tech Usage Intention", y = "%", x = "") +
+  labs( title = "Usage intention of technologies", y = "%", x = "") +
   theme_apa() + scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25)) + 
   theme_apa(remove.x.gridlines = F) +
   theme(text=element_text(family="Times New Roman", size=12)) + 
   guides(fill = guide_legend(reverse=TRUE)) 
-
-plot_usageIntention
-
 
 
 
