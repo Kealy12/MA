@@ -327,8 +327,8 @@ tech_usage_summary <- unique(tech_usage)
 tech_usage_summary
 
 # Plot
-plot_usageIntention <- ggplot(tech_usage_summary, aes(x = reorder(variable, N), y = dis, 
-                            fill = likert)) +
+plot_usageIntention <- 
+  ggplot(tech_usage_summary, aes(x = reorder(variable, N), y = dis, fill = likert)) +
   geom_bar(position = "stack", stat = "identity", width = 0.6) +
   geom_text(aes(label = scales::percent(dis,accuracy = 1, trim = FALSE)), 
                 position = position_stack(vjust = 0.5), size = 2.1, family = "Times New Roman") +
@@ -340,8 +340,7 @@ plot_usageIntention <- ggplot(tech_usage_summary, aes(x = reorder(variable, N), 
   theme_apa(remove.x.gridlines = F) +
   theme(text=element_text(family="Times New Roman", size=12))
 
-
-
+plot_usageIntention
 
 
 #### Ability to explain the internet and blockchain ####
@@ -403,13 +402,66 @@ plot_abilityExplain <- ggplot(ability_summary, aes(x = variable, y = dis,
   scale_fill_brewer(palette = "BrBG") +
   guides(fill = guide_legend(reverse=TRUE)) +
   labs( title = "Self-rated ability to explain the following technologies", y = "%", x = "") +
-  theme_apa(remove.x.gridlines = F) + scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25)) + 
+  theme_apa(remove.x.gridlines = F) + 
+  scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25)) + 
   theme(text=element_text(family="Times New Roman", size=12))
 
 plot_abilityExplain
 
 
-#### Posession of Crypto / NFT ####
+#### Possession of Crypto / NFT ####
+# Crypto
+# v_54 (1 = Yes, 2 = No)
+crypto <- quest_clean[, "v_54"]
+round(crypto[ v_54 == 1, .("Possession of Crypto (%)" = .N / nrow(crypto))],2) 
+
+# Possession of a NFT #
+# v_331 (1 = Yes, 2 = No, -77 = missing value (conditional question, if person heard of NFT))
+nft <- quest_clean[, "v_331"]
+round(nft[ v_331 == 1, .("Possession of Crypto (%)" = .N / nrow(crypto))],2)
+
+
+
+#### Conditional: When first became crypto owner ####
+
+# v_297
+when <- quest_clean[, "v_297"]
+when[v_297 == -77, v_297 := NA]
+
+# Missing values (-77) to NAs
+when <- when[complete.cases(when)]
+table(when)
+
+# scale it to years
+when[, "Year" := v_297 + 2005]
+
+when[, value := .N, by = v_297]
+when <- when[, .(max(value)), by = Year][order(Year)]
+when[, dis := V1 / when[, sum(V1)], by = Year]
+when
+
+ggplot(when, aes(Year, dis)) + 
+  geom_line() + 
+ # geom_text_repel(aes(label = scales::percent(dis,accuracy = 1, trim = F)), 
+  #           size = 3, family = "Times New Roman", direction = "y") +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1L)) +
+  scale_fill_brewer(palette = "BrBG") +
+  guides(fill = guide_legend(reverse=TRUE)) +
+  labs( title = "Share of respondents who possess/possessed cryptocurrency \nfirst becoming a cryptocurrency owner", y = "%", x = "Years") +
+  theme_apa(remove.y.gridlines = F) +
+  theme(text=element_text(family="Times New Roman", size=12))
+
+
+
+
+#### Conditional: Difficulty buying crypto ####
+# v_298 (Scale: 1 (Very easy) - 7 (Very hard))
+
+diff <- quest_clean[, .(v_298)]
+diff[v_298 == -77 | v_298 == 0, v_298 := NA]
+diff[, mean(v_298, na.rm = T)] # relatively easy
+
+
 
 
 
