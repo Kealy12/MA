@@ -92,7 +92,47 @@ ggplot(sector, aes(x= value, fill = reorder(variable, -N))) + geom_bar(position 
 
 
 
-####  Conditional: Knowingly used blockchain applications
+####  Conditional: Knowingly used blockchain applications ####
+# v_55
+# 1 = Yes, 2 = No
+
+# Out of all respondents: 3%
+used <- quest_clean[, .(v_55)]
+used <- melt(used)
+used[, value := as.numeric(ifelse(value == "1", "1", 0))]
+round(used[, sum(value) / nrow(used)],2)
+
+# Out of share who heard about blockchain technology: 7% 
+used_share <- quest_clean[, .(v_55)]
+used_share <- melt(used_share)
+used_share[value == -77, value := NA]
+used_share <- used_share[complete.cases(used_share)]
+used_share[, value := as.numeric(ifelse(value == "1", "1", 0))]
+round(used_share[, sum(value) / nrow(used_share)],2)
+
+####  Conditional: Use Crypto as means of payment ####
+
+# v_56
+# 1 = Yes, 2 = No
+
+# Out of all respondents: 27%
+use_crypto <- quest_clean[, .(v_56)]
+use_crypto <- melt(use_crypto)
+table(use_crypto)
+use_crypto[, value := as.numeric(ifelse(value == "1", "1", 0))]
+round(use_crypto[, sum(value) / nrow(use_crypto)],2)
+
+# Out of share who heard about Cryptocurrencyy: 28% 
+use_crypto_share <- quest_clean[, .(v_56)]
+use_crypto_share <- melt(use_crypto_share)
+use_crypto_share[value == -77, value := NA]
+use_crypto_share <- use_crypto_share[complete.cases(use_crypto_share)]
+use_crypto_share[, value := as.numeric(ifelse(value == "1", "1", 0))]
+round(use_crypto_share[, sum(value) / nrow(use_crypto_share)],2)
+
+
+
+
 
 #### Can you explain these to a friend ####
 # v_326 - v_330
@@ -288,6 +328,12 @@ contact[, mean(value), by = variable]
 # Mean
 quest_clean[, .("Pre-Knowledge of Blockchain Technology (1-10)" = round(mean(v_286, na.rm = T),2))]
 quest_clean[, .("Post-Knowledge of Blockchain Technology (1-10)" = round(mean(v_333, na.rm = T),2))]
+
+#### Friends knowledge of blockchain technology ####
+
+
+
+
 
 #### Tech Usage ####
 
@@ -497,6 +543,11 @@ ggplot(manage_crypto, aes(x= value, fill = reorder(variable, -N))) + geom_bar(po
 
 
 
+
+
+
+
+#### 
 
 
 
