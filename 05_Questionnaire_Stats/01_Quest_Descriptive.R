@@ -16,6 +16,7 @@ library(GGally)
 library(poLCA)
 library(RColorBrewer)
 library(extrafont)
+library(ggrepel)
 
 # Set working directory
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
@@ -335,10 +336,80 @@ plot_usageIntention <- ggplot(tech_usage_summary, aes(x = reorder(variable, N), 
   scale_fill_brewer(palette = "BrBG") +
   guides(fill = guide_legend(reverse=TRUE)) +
   labs( title = "Usage intention of technologies", y = "%", x = "") +
-  theme_apa() + scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25)) + 
+  scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25)) + 
   theme_apa(remove.x.gridlines = F) +
-  theme(text=element_text(family="Times New Roman", size=12)) + 
-  guides(fill = guide_legend(reverse=TRUE)) 
+  theme(text=element_text(family="Times New Roman", size=12))
+
+
+
+
+
+#### Ability to explain the internet and blockchain ####
+
+## Mean: Explain the Internet
+# v_49 (1-10 scale)
+internet <- quest_clean[, .("Ability to Explain the Internet (1-10)" = round(mean(v_49, na.rm = T),2))]
+internet
+## Mean: Explain Blockchain
+# v_50 (1-10 scale)
+blockchain <- quest_clean[, .("Ability to Explain Blockchain Technology (1-10)" = round(mean(v_50, na.rm = T),2))]
+blockchain
+
+## Likert visualization
+ability <- quest_clean[, c("v_50", "v_49")]
+colnames(ability) <- c("Blockchain technology", "The internet")
+ability <- melt(ability)
+
+# can be no 0s
+ability[value == 0, value := NA]
+table(ability)
+ability <- ability[complete.cases(ability)]
+table(ability$variable)
+
+# N per variable after excluding NAs
+ability[, N:= .N, by = variable]
+
+# 7-point Likert Scale: Adding Scores as Strings
+ability[value == 1, likert :="I don't know exactly how it works"]
+ability[value == 2, likert :="I don't know how it works"]
+ability[value == 3, likert :="I somewhat don't know how it works"]
+ability[value == 4, likert :="Neutral"]
+ability[value == 5, likert :="I somewhat can explain how it works"]
+ability[value == 6, likert :="I can explain how it works"]
+ability[value == 7, likert :="I can fully explain how it works"]
+
+ability$likert <- factor(ability$likert  , levels = c("I don't know exactly how it works", "I don't know how it works",
+                                                      "I somewhat don't know how it works", "Neutral", 
+                                                      "I somewhat can explain how it works", "I can explain how it works",
+                                                      "I can fully explain how it works"))
+
+ability[value == 1, dis := .N / N, by = variable]
+ability[value == 2, dis := .N / N, by = variable]
+ability[value == 3, dis := .N / N, by = variable]
+ability[value == 4, dis := .N / N, by = variable]
+ability[value == 5, dis := .N / N, by = variable]
+ability[value == 6, dis := .N / N, by = variable]
+ability[value == 7, dis := .N / N, by = variable]
+
+ability_summary <- unique(ability)
+
+plot_abilityExplain <- ggplot(ability_summary, aes(x = variable, y = dis, 
+                            fill = likert)) +
+  geom_bar(position = "stack", stat = "identity", width = 0.6) +
+  geom_text(aes(label = scales::percent(dis,accuracy = 1, trim = FALSE)), 
+            position = position_stack(vjust = 0.5), size = 2.5, family = "Times New Roman",
+            check_overlap = T) +
+  coord_flip() +
+  scale_fill_brewer(palette = "BrBG") +
+  guides(fill = guide_legend(reverse=TRUE)) +
+  labs( title = "Self-rated ability to explain the following technologies", y = "%", x = "") +
+  theme_apa(remove.x.gridlines = F) + scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25)) + 
+  theme(text=element_text(family="Times New Roman", size=12))
+
+plot_abilityExplain
+
+
+#### Posession of Crypto / NFT ####
 
 
 
