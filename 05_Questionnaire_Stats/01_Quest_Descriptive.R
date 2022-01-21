@@ -61,7 +61,7 @@ plot_heard <- ggplot(heard, aes(reorder(variable, N), fill = factor(value))) + g
   guides(fill = guide_legend(reverse=TRUE))
 
 
-#### In which sector have you heard about blockchain technology ####
+####  Conditional: Sector you heard about blockchain technology ####
 
 # Conditional Question
 # v_31 - v_35, v_292, v_293
@@ -91,6 +91,8 @@ ggplot(sector, aes(x= value, fill = reorder(variable, -N))) + geom_bar(position 
   scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25))
 
 
+
+####  Conditional: Knowingly used blockchain applications
 
 #### Can you explain these to a friend ####
 # v_326 - v_330
@@ -422,7 +424,7 @@ round(nft[ v_331 == 1, .("Possession of Crypto (%)" = .N / nrow(crypto))],2)
 
 
 
-#### Conditional: When first became crypto owner ####
+####  Conditional: When first became crypto owner ####
 
 # v_297
 when <- quest_clean[, "v_297"]
@@ -447,19 +449,51 @@ ggplot(when, aes(Year, dis)) +
   scale_y_continuous(labels = scales::percent_format(accuracy = 1L)) +
   scale_fill_brewer(palette = "BrBG") +
   guides(fill = guide_legend(reverse=TRUE)) +
-  labs( title = "Share of respondents who possess/possessed cryptocurrency \nfirst becoming a cryptocurrency owner", y = "%", x = "Years") +
+  labs( title = "Point of time when share of respondents who possess/possessed \ncryptocurrency first became a cryptocurrency owner", y = "%", x = "Years") +
   theme_apa(remove.y.gridlines = F) +
   theme(text=element_text(family="Times New Roman", size=12))
 
 
 
 
-#### Conditional: Difficulty buying crypto ####
+####  Conditional: Difficulty buying crypto ####
 # v_298 (Scale: 1 (Very easy) - 7 (Very hard))
 
 diff <- quest_clean[, .(v_298)]
 diff[v_298 == -77 | v_298 == 0, v_298 := NA]
 diff[, mean(v_298, na.rm = T)] # relatively easy
+
+
+
+#### Conditional: How manage crypto
+
+manage_crypto <- quest_clean[, .(v_316, v_317, v_318, v_319)]
+colnames(manage_crypto) <- c("On Coinbase, Binance or other exchange", 
+                      "On MetaMask or other digital (browser) wallet", 
+                      "On a piece of paper, USB-Storage or other offline wallet", 
+                      "I do not know or do not want to tell")
+manage_crypto <- melt(manage_crypto)
+
+# only look at distribution of selected answers
+manage_crypto <- manage_crypto[value == 1]
+manage_crypto <- manage_crypto[, N := sum(value), by = variable]
+manage_crypto[, dis := N / nrow(manage_crypto) , by = variable]
+
+manage_crypto_summary <- unique(manage_crypto)
+manage_crypto_summary
+
+ggplot(manage_crypto, aes(x= value, fill = reorder(variable, -N))) + geom_bar(position = "fill") +
+  theme(text=element_text(family="Times New Roman", size=12))+
+  scale_fill_brewer(palette = "Paired") +
+  geom_text(data = manage_crypto_summary, aes(label = scales::percent(dis,accuracy = 1, trim = FALSE), y = dis), 
+            position = position_stack(vjust = 0.5), size = 2.5, family = "Times New Roman") +
+  theme(axis.title.x = element_blank(), legend.title = element_blank(), axis.text.x = element_blank(), 
+        axis.ticks.x = element_blank(), panel.background = element_blank()) +
+  labs( y = "%", title = "Share of respondents who possess/possessed cryptocurrency \non how they manage their cryptocurrencies") +
+  scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25))
+
+
+
 
 
 
