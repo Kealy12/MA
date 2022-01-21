@@ -17,7 +17,6 @@ library(poLCA)
 library(RColorBrewer)
 library(extrafont)
 
-
 # Set working directory
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 
@@ -73,19 +72,22 @@ colnames(sector) <- c("I have not heard of any Blockchain Technology application
 sector <- melt(sector)
 
 # only look at distribution of selected answers
-quoted <- sector[value == 1]
-quoted <- quoted[, value := sum(value), by = variable]
-quoted[, dis := value / nrow(quoted) , by = variable]
-quoted[, show := 1]
+sector <- sector[value == 1]
+sector <- sector[, N := sum(value), by = variable]
+sector[, dis := N / nrow(sector) , by = variable]
 
-quoted_summary <- unique(quoted)
-quoted_summary
+sector_summary <- unique(sector)
+sector_summary
 
-ggplot(quoted, aes(x = show, fill = variable)) + geom_bar(position = "fill") +
-  theme(text=element_text(family="Times New Roman", size=12)) +
-  scale_fill_brewer(palette = "Paired")
-  geom_text(aes(label = scales::percent(dis,accuracy = 1, trim = FALSE)), 
-            position = position_stack(vjust = 0.5), size = 2.1, family = "Times New Roman")
+ggplot(sector, aes(x= value, fill = reorder(variable, -N))) + geom_bar(position = "fill") +
+  theme(text=element_text(family="Times New Roman", size=12))+
+  scale_fill_brewer(palette = "Paired") +
+  geom_text(data = sector_summary, aes(label = scales::percent(dis,accuracy = 1, trim = FALSE), y = dis), 
+            position = position_stack(vjust = 0.5), size = 2.5, family = "Times New Roman") +
+  theme(axis.title.x = element_blank(), legend.title = element_blank(), axis.text.x = element_blank(), 
+        axis.ticks.x = element_blank(), panel.background = element_blank()) +
+  labs( y = "%", title = "Sectors respondents heard about blockchain technology") +
+  scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25))
 
 
 
