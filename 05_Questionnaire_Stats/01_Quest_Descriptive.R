@@ -195,81 +195,6 @@ plot_explain
 
 
 
-#### Gender - Possession of Crypto / NFT ####
-
-# v_169 -> Male = 1, Female = 2
-quest_clean$v_169 <- as.character(quest_clean$v_169)
-quest_clean[v_169 == 1, v_169 := "Male"]
-quest_clean[v_169 == 2, v_169 := "Female"]
-quest_clean$v_169 <- as.factor(quest_clean$v_169)
-
-# Gender - Possession of Crypto
-# v_54 (1 = Yes, 2 = No)
-ggplot(quest_clean, aes(v_169, fill = v_54 == 1 )) + 
-  geom_bar(position = "fill") + scale_fill_brewer( palette = "Paired") + 
-  coord_flip() +
-  scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25)) + 
-  theme_apa(remove.x.gridlines = F) +
-  theme(text=element_text(family="Times New Roman", size=12)) + 
-  labs(y = "%", x = "", title = "Possession of Crypto") +
-  guides(fill = guide_legend(reverse=TRUE))
-
-# Gender - Possession of NFT
-# v_331 (1 = Yes, 2 = No, -77 = missing value (conditional question, if person heard of NFT))
-ggplot(quest_clean, aes(v_169, fill = v_331 == 1 )) + 
-  geom_bar(position = "fill")+ scale_fill_brewer( palette = "Paired") +
-  coord_flip() +
-  scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25)) + 
-  theme_apa(remove.x.gridlines = F) +
-  theme(text=element_text(family="Times New Roman", size=12)) + 
-  labs(y = "%", x = "", title = "Possession of NFT") +
-  guides(fill = guide_legend(reverse=TRUE))
-
-# Age distribution
-
-
-
-# Have you heard of following terms?
-# v_321
-
-
-
-
-
-# Gender distribution 
-quest_clean[, "v_169"]
-ggplot(quest_clean[, "v_169"], aes(v_169)) + 
-  geom_bar()
-
-# Age distribution 
-quest_raw[, "v_285"]
-ggplot(quest_raw[, "v_285"], aes(v_285)) + 
-  geom_histogram() + theme_apa()
-
-# Difference beteen Bitcoin and Blockchain? 
-difference <- quest_raw[, "v_282"]
-difference <- difference[, v_282 := gsub(1, "yes", v_282)]
-difference <- difference[, v_282 := gsub(2, "no", v_282)]
-
-ggplot(difference, aes(v_282)) + 
-  geom_bar()
-
-quest_raw[v_282 == 2, "v_282"][, .N]
-
-
-
-# Overall Blockchain knowledge (before and after the survey)
-
-
-
-
-
-
-# Clean Environment
-rm(list = ls())
-
-
-
 #### Age ####
 
 # v_285 -> Need to recode data: +14 on score to show age (nobody < 15 and > 85)
@@ -278,6 +203,12 @@ quest_clean[ v_285 == 79, .N]
 
 # Mean Age of respondents 
 mean(quest_clean$v_285)
+
+# Age distribution 
+quest_raw[, "v_285"]
+ggplot(quest_raw[, "v_285"], aes(v_285)) + 
+  geom_histogram() + theme_apa()
+
 
 # Age - Heard of Blockchain Technology
 # x = Age: Continuous, Y = Heard of Blockchain Tech: Categorical
