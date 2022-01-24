@@ -26,6 +26,8 @@ quest_raw <- fread("./../01_Input/raw_data_field_2021_10_21.csv")
 load("./../01_Input/01_RData/00_clean_data_field.RData")
 load("./../01_Input/01_RData/tri_all_noNA_clusters.RData")
 load("./../01_Input/01_RData/01_quest_cluster_extended.RData")
+load("./../01_Input/01_RData/tri_all.RData")
+
 
 # Loading Theme
 source("./../04_Data_Prep/99_APA_Theme.R")
@@ -786,13 +788,73 @@ pers_inn_score[, .("Personal innovativeness overall" = round(mean(PIIT, na.rm = 
 
 #### TRI ####
 
-quest_tri_extended
+tri <- quest_clean[, .(v_108, v_109, v_207, v_208, v_209, 
+                       v_228, v_229, v_230, v_231, v_232)]
+colnames(tri) <- c("Optimism:\nNew technology gives me more freedom of\nmobility",
+                   "Optimism:\nNew technology makes me more productive",
+                   "Innovativeness:\nOther people come to me for advice on new\ntechnologies",
+                   "Innovativeness:\nIn general, I am among the first in my circle of\nfriends to acquire new technology when it\nappears",
+                   "Innovativeness:\nI keep up with the latest technological\ndevelopments in my areas of interest",
+                   "Discomfort:\nI can usually figure out new high-tech products\nand services without help from others",
+                   "Discomfort:\nSometimes, I think that technology systems are\nnot designed for use by ordinary people",
+                   "Insecurity:\nPeople are too dependent on technology to do\nthings for them",
+                   "Insecurity:\nToo much technology distracts people to a point\nthat is harmful",
+                   "Insecurity:\nI don’t feel comfortable doing business if the\nother party is only available online")
 
-# Extracting relevant questions for TRI subcomponents
-tri_comp_all <- quest_clean[, .(OPT2 = v_108, OPT4 = v_109, INN1 = v_207, INN2 = v_208, INN4 = v_209, 
-                                DIS2 = v_228, DIS3 = v_229, INS1 = v_230, INS2 = v_231, INS4 = v_232)]
+tri <- tri[, c(10,9,8,7,6,5,4,3,2,1)]
+
+tri <- melt(tri)
+tri[tri == 0] <- NA
+tri <- tri[complete.cases(tri)]
+table(tri)
+
+# N per variable after excluding NAs
+tri[, N:= .N, by = variable]
+
+# 7-point Likert Scale: Adding Scores as Strings
+tri[value == 1, likert :="Strongly disagree"]
+tri[value == 2, likert :="Disagree"]
+tri[value == 3, likert :="Somewhat disagree"]
+tri[value == 4, likert :="Neither agree or disagree"]
+tri[value == 5, likert :="Somewhat agree"]
+tri[value == 6, likert :="Agree"]
+tri[value == 7, likert :="Strongly agree"]
+
+tri$likert <- factor(tri$likert , levels = c("Strongly disagree", "Disagree", "Somewhat disagree", "Neither agree or disagree", 
+                                                       "Somewhat agree", "Agree", "Strongly agree"))
+
+# % distribution of answers
+tri[value == 1 , dis := .N / N, by = variable]
+tri[value == 2 , dis := .N / N, by = variable]
+tri[value == 3 , dis := .N / N, by = variable]
+tri[value == 4 , dis := .N / N, by = variable]
+tri[value == 5 , dis := .N / N, by = variable]
+tri[value == 6 , dis := .N / N, by = variable]
+tri[value == 7 , dis := .N / N, by = variable]
+
+tri_summary <- unique(tri)
+
+ggplot(tri_summary, aes(x = variable, y = dis, fill = likert)) +
+  geom_bar(position = "stack", stat = "identity", width = 0.6) +
+  geom_text(aes(label = scales::percent(dis,accuracy = 1, trim = FALSE)), 
+            position = position_stack(vjust = 0.5), size = 2.5, family = "Times New Roman",
+            check_overlap = T) +
+  coord_flip() +
+  scale_fill_brewer(palette = "BrBG") +
+  guides(fill = guide_legend(reverse=TRUE)) +
+  labs( title = "Distribution of answers on TRI statements", y = "%", x = "") +
+  theme_apa(remove.x.gridlines = F) + 
+  scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25)) + 
+  theme(text=element_text(family="Times New Roman", size=12))
 
 tri_comp_all
+
+
+
+
+
+
+
 
 
 
