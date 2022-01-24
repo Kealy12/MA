@@ -104,7 +104,7 @@ rownames(quest_tri_extended)[!complete.cases(quest_tri_extended)] # Indices of r
 quest_tri_extended[rowSums(is.na(quest_tri_extended)) > 0] # Overview of rows with NA
 
 
-################################################################ Scores on Applications ###############################################################
+########################################################### Scores on Applications ###############################################################
 
 #### Scores Overall ####
 # Mean Likert (1-7) Scores of Applications
@@ -130,7 +130,7 @@ ggplot(apps_summary, aes(x = reorder(Applications, Score_Int), y = dis_by_app,
 
 
 
-################################################################  Scores by Cluster ###############################################################
+########################################################### Scores by Cluster ###############################################################
 
 #### Scores per Cluster ####
 # Cluster Means on Applications

@@ -2,7 +2,7 @@
 
 # General Questionnaire Stats 
 
-################################################################ Set Up ###############################################################
+############################################# Set Up ###############################################################
 
 # Packages
 library(data.table)
@@ -538,6 +538,7 @@ ggplot(manage_crypto, aes(x= value, fill = reorder(variable, -N))) + geom_bar(po
 
 
 
+
 ################################## Trust, Personal Innovativeness & TRI   ###################################
 
 #### Trust overall ####
@@ -779,6 +780,14 @@ ggplot(tri_summary, aes(x = variable, y = dis, fill = likert)) +
   theme(text=element_text(family="Times New Roman", size=12))
 
 tri_comp_all
+
+
+
+
+
+
+
+
 
 
 

@@ -28,13 +28,12 @@ load("./../01_Input/01_RData/tri_all_noNA_clusters.RData")
 load("./../01_Input/01_RData/01_quest_cluster_extended.RData")
 load("./../01_Input/01_RData/tri_all.RData")
 
-
 # Loading Theme
 source("./../04_Data_Prep/99_APA_Theme.R")
 
-################################## Associations ####################################
+################################## Associations ############################################
 
-#### Gender - Possession of Crypto / NFT ####
+#### Gender vs. Possession of Crypto / NFT ####
 
 # v_169 -> Male = 1, Female = 2
 quest_clean$v_169 <- as.character(quest_clean$v_169)
@@ -51,7 +50,8 @@ ggplot(quest_clean, aes(v_169, fill = v_54 == 1 )) +
   theme_apa(remove.x.gridlines = F) +
   theme(text=element_text(family="Times New Roman", size=12)) + 
   labs(y = "%", x = "", title = "Possession of Crypto") +
-  guides(fill = guide_legend(reverse=TRUE)) +
+  guides(fill = guide_legend(reverse=TRUE))
+
   geom_text(aes(label = scales::percent(dis,accuracy = 1, trim = FALSE)), 
             position = position_stack(vjust = 0.5), size = 2.5, family = "Times New Roman",
             check_overlap = T)
@@ -66,6 +66,52 @@ ggplot(quest_clean, aes(v_169, fill = v_331 == 1 )) +
   theme(text=element_text(family="Times New Roman", size=12)) + 
   labs(y = "%", x = "", title = "Possession of NFT") +
   guides(fill = guide_legend(reverse=TRUE))
+
+
+#### Have you heard of Blockchain vs. Application Scores #####
+
+# Blockchain: v_321
+# 1 = yes, 2 = no
+heard_app <- quest_clean[, .(v_321, v_265, v_266, v_267, v_268, v_269, v_270)]
+colnames(heard_app) <- c("Blockchain_Technology", 
+                         "Tokenization of Assets",
+                         "Fractional ownership",
+                         "Self-Sovereign Identity",
+                         "Smart Contracts",
+                         "Micropayments",
+                         "Anonymous Transactions")
+
+heard_app <- melt(heard_app, id.vars = c("Blockchain_Technology"), 
+             variable.name = "Applications", value.name = "Score_Factor")
+
+# Need Score as Factor (String) and as Integer for Calculations
+heard_app$Score_Factor <- as.factor(heard_app$Score_Factor)
+heard_app[, Score_Int := as.numeric(Score_Factor)]
+
+# Scores on applications by whether people heard of blockchain or not
+heard_app_means <- as.data.table(aggregate(Score_Int ~  Blockchain_Technology, heard_app, mean))
+heard_app_means[Blockchain_Technology == 1, heard_it := "Yes"]
+heard_app_means[Blockchain_Technology == 2, heard_it := "No"]
+heard_app_means$Score_Int <- round(heard_app_means$Score_Int, 2)
+heard_app_means[order(-Score_Int)]
+
+
+
+
+
+
+
+
+
+
+
+
+#### Clean Environment ####
+rm(list = ls())
+
+
+
+
 
 
 
