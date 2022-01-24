@@ -602,6 +602,9 @@ ggplot(manage_crypto, aes(x= value, fill = reorder(variable, -N))) + geom_bar(po
 
 
 
+
+
+
 ################################## Trust, Personal Innovativeness & TRI   ###################################
 
 #### Trust overall ####
@@ -639,50 +642,50 @@ plot_trust <- ggplot(trust, aes(x= variable, fill = reorder(String, -N))) + geom
   scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25))
 
 
-#### Trust in detail ####
+#### Privacy ####
 
 # v_104, v_105, v_106 (reverse coded), v_107, v_205, v_206
-trust_likert <- quest_clean[, .(v_104, v_105, v_106, v_107)]
-colnames(trust_likert) <- c("Compared to others, I am more sensitive about\nthe way other people or organizations handle my\npersonal information",
-                            "Compared to others, I see more importance in\nkeeping personal information private",
-                            "Compared to others, I am less concerned about\npotential threats to my personal privacy",
-                            "I am not bothered by data collection, because my\npersonal information is publicly available anyway")
+privacy <- quest_clean[, .(v_106, v_107, v_104, v_105)]
+colnames(privacy) <- c("Compared to others, I am less concerned about\npotential threats to my personal privacy",
+                       "I am not bothered by data collection, because my\npersonal information is publicly available anyway", 
+                       "Compared to others, I am more sensitive about\nthe way other people or organizations handle my\npersonal information",
+                       "Compared to others, I see more importance in\nkeeping personal information private")
 
-trust_likert <- melt(trust_likert)
+privacy <- melt(privacy)
 
 # can be no 0s
-trust_likert[value == 0, value := NA]
-table(trust_likert)
-trust_likert <- trust_likert[complete.cases(trust_likert)]
-table(trust_likert$variable)
+privacy[value == 0, value := NA]
+table(privacy)
+privacy <- privacy[complete.cases(privacy)]
+table(privacy$variable)
 
 # N per variable after excluding NAs
-trust_likert[, N:= .N, by = variable]
+privacy[, N:= .N, by = variable]
 
 # 7-point Likert Scale: Adding Scores as Strings
-trust_likert[value == 1, likert :="Strongly disagree"]
-trust_likert[value == 2, likert :="Disagree"]
-trust_likert[value == 3, likert :="Somewhat disagree"]
-trust_likert[value == 4, likert :="Neither agree or disagree"]
-trust_likert[value == 5, likert :="Somewhat agree"]
-trust_likert[value == 6, likert :="Agree"]
-trust_likert[value == 7, likert :="Strongly agree"]
+privacy[value == 1, likert :="Strongly disagree"]
+privacy[value == 2, likert :="Disagree"]
+privacy[value == 3, likert :="Somewhat disagree"]
+privacy[value == 4, likert :="Neither agree or disagree"]
+privacy[value == 5, likert :="Somewhat agree"]
+privacy[value == 6, likert :="Agree"]
+privacy[value == 7, likert :="Strongly agree"]
 
-trust_likert$likert <- factor(trust_likert$likert , levels = c("Strongly disagree", "Disagree", "Somewhat disagree", "Neither agree or disagree", 
+privacy$likert <- factor(privacy$likert , levels = c("Strongly disagree", "Disagree", "Somewhat disagree", "Neither agree or disagree", 
                                                            "Somewhat agree", "Agree", "Strongly agree"))
 
 # % distribution of answers
-trust_likert[value == 1 , dis := .N / N, by = variable]
-trust_likert[value == 2 , dis := .N / N, by = variable]
-trust_likert[value == 3 , dis := .N / N, by = variable]
-trust_likert[value == 4 , dis := .N / N, by = variable]
-trust_likert[value == 5 , dis := .N / N, by = variable]
-trust_likert[value == 6 , dis := .N / N, by = variable]
-trust_likert[value == 7 , dis := .N / N, by = variable]
+privacy[value == 1 , dis := .N / N, by = variable]
+privacy[value == 2 , dis := .N / N, by = variable]
+privacy[value == 3 , dis := .N / N, by = variable]
+privacy[value == 4 , dis := .N / N, by = variable]
+privacy[value == 5 , dis := .N / N, by = variable]
+privacy[value == 6 , dis := .N / N, by = variable]
+privacy[value == 7 , dis := .N / N, by = variable]
 
-trust_likert_summary <- unique(trust_likert)
+privacy_summary <- unique(privacy)
 
-ggplot(trust_likert_summary, aes(x = variable, y = dis, fill = likert)) +
+ggplot(privacy_summary, aes(x = variable, y = dis, fill = likert)) +
   geom_bar(position = "stack", stat = "identity", width = 0.6) +
   geom_text(aes(label = scales::percent(dis,accuracy = 1, trim = FALSE)), 
             position = position_stack(vjust = 0.5), size = 2.5, family = "Times New Roman",
@@ -690,34 +693,40 @@ ggplot(trust_likert_summary, aes(x = variable, y = dis, fill = likert)) +
   coord_flip() +
   scale_fill_brewer(palette = "BrBG") +
   guides(fill = guide_legend(reverse=TRUE)) +
-  labs( title = "Distribution of answers related to trust", y = "%", x = "") +
+  labs( title = "Distribution of answers related to privacy", y = "%", x = "") +
   theme_apa(remove.x.gridlines = F) + 
   scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25)) + 
   theme(text=element_text(family="Times New Roman", size=12))
 
-plot_trust
 
-# Mean of answers
+# Scores
+# Average out of all statements -> Own index 
+privacy_scores <- quest_clean[, .(v_104, v_105, v_106, v_107)]
+privacy_scores[privacy_scores == 0] <- NA
+
+# Reverse code v_106
+privacy_scores[, Reverse_v_106 := 8 - v_106]
+privacy_scores[, Privacy := round(rowMeans(privacy_scores[, .(v_104, v_105, v_107, Reverse_v_106)], na.rm = T), 2)]
+
+# Score overall
+privacy_scores[, .("Privacy score overall" = round(mean(Privacy, na.rm = T),2))]
 
 
 
-#### Personal Innovativeness
-#### Personal Innovativeness ####
 
+
+
+
+#### Personal innovativeness ####
+# cf. Agarwal & Prasad, 1998 
 # v_205, v_206
 
-# Score
-
-
-# Likert
+## Likert
 pers_inn <- quest_clean[, .(v_205, v_206)]
 colnames(pers_inn) <- c("In general, I am hesitant to try out new\ninformation technologies",
-                            "I like to experiment with new\ninformation technologies")
+                        "I like to experiment with new\ninformation technologies")
 pers_inn <- melt(pers_inn)
-
-# can be no 0s
-pers_inn[value == 0, value := NA]
-table(pers_inn)
+pers_inn[pers_inn == 0] <- NA
 pers_inn <- pers_inn[complete.cases(pers_inn)]
 
 # N per variable after excluding NAs
@@ -760,7 +769,16 @@ ggplot(pers_inn_summary, aes(x = variable, y = dis, fill = likert)) +
   theme(text=element_text(family="Times New Roman", size=12))
 
 
+## Score: Average out of statements
+pers_inn_score <- quest_clean[, .(v_205, v_206)]
+pers_inn_score[pers_inn_score == 0] <- NA
 
+# Reverse code v_205
+pers_inn_score[, Reverse_v_205 := 8 - v_205]
+pers_inn_score[, PIIT := round(rowMeans(pers_inn_score[, .(v_206, Reverse_v_205)], na.rm = T), 2)]
+
+# Score overall
+pers_inn_score[, .("Personal innovativeness overall" = round(mean(PIIT, na.rm = T),2))]
 
 
 
