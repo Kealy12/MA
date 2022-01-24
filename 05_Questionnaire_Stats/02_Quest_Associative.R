@@ -98,10 +98,27 @@ heard_app_means[order(-Score_Int)]
 
 
 
+#### Blockchain usage intention pre-& post-survey ####
 
+# H0: Blockchain usage intention pre-survey is independent from usage intention post-survey
+block_usage <- quest_clean[,c("v_28", "v_334")]
+colnames(block_usage) <- c("Blockchain technology usage intention pre-survey ", "Blockchain technology usage intention post-survey ")
 
+# Filter out 3s (=Don't knows) and 0s
+block_usage[block_usage == 3] <- NA
+block_usage[block_usage == 0] <- NA
+block_usage <- block_usage[complete.cases(block_usage)]
 
+# 1 = Yes, 0 = No
+block_usage[block_usage == 2] <- 0
+f <- table(block_usage)
+f
 
+fisher.test(f, alternative = "greater")
+
+# p-value 1.06e-41 -> Reject H0 at alpha = 1% level
+# Usage intention pre-survey not independent from usage intention post-survey
+# --> the difference in ratios did not arrive by pure chance
 
 
 
