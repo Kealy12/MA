@@ -324,14 +324,17 @@ contact[, mean(value), by = variable]
 #### Knowledge of Blockchain technology ####
 
 # Beginning of Questionnaire: v_286 (1-10 scale)
-# End of Questionnaire: v_333
-# Mean
 quest_clean[, .("Pre-Knowledge of Blockchain Technology (1-10)" = round(mean(v_286, na.rm = T),2))]
+
+# End of Questionnaire: v_333
 quest_clean[, .("Post-Knowledge of Blockchain Technology (1-10)" = round(mean(v_333, na.rm = T),2))]
+
 
 #### Friends knowledge of blockchain technology ####
 
-
+# v_287
+# Scale 1 (they never heard of it) - 10 (they are experts)
+friends_know <- quest_clean[, .(v_287)]
 
 
 
