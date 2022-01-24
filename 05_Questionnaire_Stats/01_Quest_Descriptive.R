@@ -30,7 +30,7 @@ load("./../01_Input/01_RData/01_quest_cluster_extended.RData")
 # Loading Theme
 source("./../04_Data_Prep/99_APA_Theme.R")
 
-################################################################ General Stats of questionnaire ###############################################################
+################################ Descriptive Blockchain Stats ######################
 
 #### N ####
 quest_clean[, .N]
@@ -132,6 +132,36 @@ round(use_crypto_share[, sum(value) / nrow(use_crypto_share)],2)
 
 
 
+
+
+####  Conditional: Why exclude possibility to use crypto  ####
+
+# v_306, v_307, v_313
+exclude <- quest_clean[, .(v_306, v_307, v_313)]
+colnames(exclude) <- c("I find it difficult to find something where I can learn about cryptocurrencies", 
+                             "I am not interested in cryptocurrencies", 
+                             "Other reason")
+exclude <- melt(exclude)
+
+# only look at distribution of selected answers
+exclude <- exclude[value == 1]
+exclude <- exclude[, N := sum(value), by = variable]
+exclude[, dis := N / nrow(exclude) , by = variable]
+
+exclude_summary <- unique(exclude)
+exclude_summary
+
+plot_exclude <- ggplot(exclude, aes(x= value, fill = reorder(variable, -N))) + geom_bar(position = "fill") +
+  theme(text=element_text(family="Times New Roman", size=12))+
+  scale_fill_brewer(palette = "Paired") +
+  geom_text(data = exclude_summary, aes(label = scales::percent(dis,accuracy = 1, trim = FALSE), y = dis), 
+            position = position_stack(vjust = 0.5), size = 2.5, family = "Times New Roman") +
+  theme(axis.title.x = element_blank(), legend.title = element_blank(), axis.text.x = element_blank(), 
+        axis.ticks.x = element_blank(), panel.background = element_blank()) +
+  labs( y = "%", title = "Share of respondents who would not use cryptocurrency \non on the reason why") +
+  scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25))
+
+plot_exclude
 
 
 #### Can you explain these to a friend ####
@@ -330,11 +360,22 @@ quest_clean[, .("Pre-Knowledge of Blockchain Technology (1-10)" = round(mean(v_2
 quest_clean[, .("Post-Knowledge of Blockchain Technology (1-10)" = round(mean(v_333, na.rm = T),2))]
 
 
-#### Friends knowledge of blockchain technology ####
+#### Friend's knowledge of blockchain technology ####
 
 # v_287
 # Scale 1 (they never heard of it) - 10 (they are experts)
 friends_know <- quest_clean[, .(v_287)]
+friends_know[, .("Friend's knowledge of blockchain technology (1-10)" = round(mean(v_287, na.rm = T),2))]
+# they have low knowledge about blockchain
+
+#### Social influence on blockchain usage ####
+
+# v_296
+# Scale 1 (they never heard of it) - 10 (they are experts)
+social <- quest_clean[, .(v_296)]
+social[, .("Social influence on my blockchain usage (1-10)" = round(mean(v_296, na.rm = T),2))]
+# They would rather discourage me
+
 
 
 
@@ -514,7 +555,7 @@ diff[, mean(v_298, na.rm = T)] # relatively easy
 
 
 
-#### Conditional: How manage crypto
+####  Conditional: How manage crypto ####
 
 manage_crypto <- quest_clean[, .(v_316, v_317, v_318, v_319)]
 colnames(manage_crypto) <- c("On Coinbase, Binance or other exchange", 
@@ -551,6 +592,190 @@ ggplot(manage_crypto, aes(x= value, fill = reorder(variable, -N))) + geom_bar(po
 
 
 #### 
+
+
+
+
+
+
+
+
+
+
+################################## Trust, Personal Innovativeness & TRI   ###################################
+
+#### Trust overall ####
+
+# Disposition to trust other people
+# v_314
+trust <- quest_clean[, .(v_314)]
+trust <- melt(trust)
+
+# can be no 0s
+trust[value == 0, value := NA]
+trust <- trust[complete.cases(trust)]
+
+# Preparing Plot
+trust[value == 1, String := "Most people can be trusted"]
+trust[value == 2, String := "You cannot be careful enough"]
+
+trust <- trust[, N := .N, by = String]
+trust[, dis := N / nrow(trust) , by = String]
+
+trust_summary <- unique(trust)
+
+# Score
+trust_summary
+
+# Likert
+plot_trust <- ggplot(trust, aes(x= variable, fill = reorder(String, -N))) + geom_bar(position = "fill") +
+  theme(text=element_text(family="Times New Roman", size=12))+
+  scale_fill_brewer(palette = "Paired") +
+  geom_text(data = trust_summary, aes(label = scales::percent(dis,accuracy = 1, trim = FALSE), y = dis), 
+            position = position_stack(vjust = 0.5), size = 2.5, family = "Times New Roman") +
+  theme(axis.title.x = element_blank(), legend.title = element_blank(), axis.text.x = element_blank(), 
+        axis.ticks.x = element_blank(), panel.background = element_blank()) +
+  labs( y = "%", title = "Disposition to trust other people") +
+  scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25))
+
+
+#### Trust in detail ####
+
+# v_104, v_105, v_106 (reverse coded), v_107, v_205, v_206
+trust_likert <- quest_clean[, .(v_104, v_105, v_106, v_107)]
+colnames(trust_likert) <- c("Compared to others, I am more sensitive about\nthe way other people or organizations handle my\npersonal information",
+                            "Compared to others, I see more importance in\nkeeping personal information private",
+                            "Compared to others, I am less concerned about\npotential threats to my personal privacy",
+                            "I am not bothered by data collection, because my\npersonal information is publicly available anyway")
+
+trust_likert <- melt(trust_likert)
+
+# can be no 0s
+trust_likert[value == 0, value := NA]
+table(trust_likert)
+trust_likert <- trust_likert[complete.cases(trust_likert)]
+table(trust_likert$variable)
+
+# N per variable after excluding NAs
+trust_likert[, N:= .N, by = variable]
+
+# 7-point Likert Scale: Adding Scores as Strings
+trust_likert[value == 1, likert :="Strongly disagree"]
+trust_likert[value == 2, likert :="Disagree"]
+trust_likert[value == 3, likert :="Somewhat disagree"]
+trust_likert[value == 4, likert :="Neither agree or disagree"]
+trust_likert[value == 5, likert :="Somewhat agree"]
+trust_likert[value == 6, likert :="Agree"]
+trust_likert[value == 7, likert :="Strongly agree"]
+
+trust_likert$likert <- factor(trust_likert$likert , levels = c("Strongly disagree", "Disagree", "Somewhat disagree", "Neither agree or disagree", 
+                                                           "Somewhat agree", "Agree", "Strongly agree"))
+
+# % distribution of answers
+trust_likert[value == 1 , dis := .N / N, by = variable]
+trust_likert[value == 2 , dis := .N / N, by = variable]
+trust_likert[value == 3 , dis := .N / N, by = variable]
+trust_likert[value == 4 , dis := .N / N, by = variable]
+trust_likert[value == 5 , dis := .N / N, by = variable]
+trust_likert[value == 6 , dis := .N / N, by = variable]
+trust_likert[value == 7 , dis := .N / N, by = variable]
+
+trust_likert_summary <- unique(trust_likert)
+
+ggplot(trust_likert_summary, aes(x = variable, y = dis, fill = likert)) +
+  geom_bar(position = "stack", stat = "identity", width = 0.6) +
+  geom_text(aes(label = scales::percent(dis,accuracy = 1, trim = FALSE)), 
+            position = position_stack(vjust = 0.5), size = 2.5, family = "Times New Roman",
+            check_overlap = T) +
+  coord_flip() +
+  scale_fill_brewer(palette = "BrBG") +
+  guides(fill = guide_legend(reverse=TRUE)) +
+  labs( title = "Distribution of answers related to trust", y = "%", x = "") +
+  theme_apa(remove.x.gridlines = F) + 
+  scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25)) + 
+  theme(text=element_text(family="Times New Roman", size=12))
+
+plot_trust
+
+# Mean of answers
+
+
+
+#### Personal Innovativeness
+#### Personal Innovativeness ####
+
+# v_205, v_206
+
+# Score
+
+
+# Likert
+pers_inn <- quest_clean[, .(v_205, v_206)]
+colnames(pers_inn) <- c("In general, I am hesitant to try out new\ninformation technologies",
+                            "I like to experiment with new\ninformation technologies")
+pers_inn <- melt(pers_inn)
+
+# can be no 0s
+pers_inn[value == 0, value := NA]
+table(pers_inn)
+pers_inn <- pers_inn[complete.cases(pers_inn)]
+
+# N per variable after excluding NAs
+pers_inn[, N:= .N, by = variable]
+
+# 7-point Likert Scale: Adding Scores as Strings
+pers_inn[value == 1, likert :="Strongly disagree"]
+pers_inn[value == 2, likert :="Disagree"]
+pers_inn[value == 3, likert :="Somewhat disagree"]
+pers_inn[value == 4, likert :="Neither agree or disagree"]
+pers_inn[value == 5, likert :="Somewhat agree"]
+pers_inn[value == 6, likert :="Agree"]
+pers_inn[value == 7, likert :="Strongly agree"]
+
+pers_inn$likert <- factor(pers_inn$likert , levels = c("Strongly disagree", "Disagree", "Somewhat disagree", "Neither agree or disagree", 
+                                                               "Somewhat agree", "Agree", "Strongly agree"))
+
+# % distribution of answers
+pers_inn[value == 1 , dis := .N / N, by = variable]
+pers_inn[value == 2 , dis := .N / N, by = variable]
+pers_inn[value == 3 , dis := .N / N, by = variable]
+pers_inn[value == 4 , dis := .N / N, by = variable]
+pers_inn[value == 5 , dis := .N / N, by = variable]
+pers_inn[value == 6 , dis := .N / N, by = variable]
+pers_inn[value == 7 , dis := .N / N, by = variable]
+
+pers_inn_summary <- unique(pers_inn)
+
+ggplot(pers_inn_summary, aes(x = variable, y = dis, fill = likert)) +
+  geom_bar(position = "stack", stat = "identity", width = 0.6) +
+  geom_text(aes(label = scales::percent(dis,accuracy = 1, trim = FALSE)), 
+            position = position_stack(vjust = 0.5), size = 2.5, family = "Times New Roman",
+            check_overlap = T) +
+  coord_flip() +
+  scale_fill_brewer(palette = "BrBG") +
+  guides(fill = guide_legend(reverse=TRUE)) +
+  labs( title = "Distribution of answers on personal innovativeness", y = "%", x = "") +
+  theme_apa(remove.x.gridlines = F) + 
+  scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25)) + 
+  theme(text=element_text(family="Times New Roman", size=12))
+
+
+
+
+
+
+
+
+#### TRI ####
+
+quest_tri_extended
+
+# Extracting relevant questions for TRI subcomponents
+tri_comp_all <- quest_clean[, .(OPT2 = v_108, OPT4 = v_109, INN1 = v_207, INN2 = v_208, INN4 = v_209, 
+                                DIS2 = v_228, DIS3 = v_229, INS1 = v_230, INS2 = v_231, INS4 = v_232)]
+
+tri_comp_all
+
 
 
 
