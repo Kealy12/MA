@@ -49,19 +49,27 @@ heard[value == "1", value := "Yes"]
 heard[value == "2", value := "No"]
 heard$value <- as.factor(heard$value)
 
-# Trick for ordering the axis
+# % distribution
 heard[, N := .N, by = c("variable", "value")]
-heard[value == "No", N:= 0]
-heard
+heard[, N_total := .N, by = variable]
+heard_summary <- unique(heard)
+heard_summary[, dis := N / N_total, by =variable]
+heard_summary
+
+heard[value == "No", N := 0]
 
 plot_heard <- ggplot(heard, aes(reorder(variable, N), fill = factor(value))) + geom_bar(position = "fill") +
   coord_flip() + scale_fill_brewer( palette = "Paired") +
   scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25)) + 
   theme_apa(remove.x.gridlines = F) +
   theme(text=element_text(family="Times New Roman", size=12)) + 
-  labs(y = "%", x = "", title = "Distribution of respondents knowing the following terms") +
-  guides(fill = guide_legend(reverse=TRUE))
+  labs(y = "%", x = "", title = "Distribution of respondents knowing\nthe following terms") +
+  guides(fill = guide_legend(reverse=TRUE)) +
+  geom_text(data = heard_summary, aes(label = scales::percent(dis,accuracy = 1, trim = FALSE), y = dis), 
+            position = position_stack(vjust = 0.5), size = 2.5, family = "Times New Roman",
+            check_overlap = T)
 
+plot_heard
 
 ####  Conditional: Sector you heard about blockchain technology ####
 
@@ -91,7 +99,6 @@ ggplot(sector, aes(x= value, fill = reorder(variable, -N))) + geom_bar(position 
         axis.ticks.x = element_blank(), panel.background = element_blank()) +
   labs( y = "%", title = "Sectors respondents heard about blockchain technology") +
   scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25))
-
 
 
 ####  Conditional: Knowingly used blockchain applications ####
@@ -140,7 +147,7 @@ round(use_crypto_share[, sum(value) / nrow(use_crypto_share)],2)
 
 # v_306, v_307, v_313
 exclude <- quest_clean[, .(v_306, v_307, v_313)]
-colnames(exclude) <- c("I find it difficult to find something where I can learn about cryptocurrencies", 
+colnames(exclude) <- c("I find it difficult to find something\nwhere I can learn about cryptocurrencies", 
                              "I am not interested in cryptocurrencies", 
                              "Other reason")
 exclude <- melt(exclude)
@@ -177,6 +184,13 @@ explain[value == "1", value := "Yes"]
 explain[value == "2", value := "No"]
 explain$value <- as.factor(explain$value)
 
+# % distribution
+explain[, N := .N, by = c("variable", "value")]
+explain[, N_total := .N, by = variable]
+explain_summary <- unique(explain)
+explain_summary[, dis := N / N_total, by =variable]
+explain_summary
+
 # Trick for ordering the axis
 explain[, N := .N, by = c("variable", "value")]
 explain[value == "No", N:= 0]
@@ -187,8 +201,12 @@ plot_explain <- ggplot(explain, aes(reorder(variable, N), fill = factor(value)))
   scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25)) + 
   theme_apa(remove.x.gridlines = F) +
   theme(text=element_text(family="Times New Roman", size=12)) + 
-  labs(y = "%", x = "", title = "Distribution of respondents being able to explain these terms to a friend") +
-  guides(fill = guide_legend(reverse=TRUE))
+  labs(y = "%", x = "", title = "Distribution of respondents being able\nto explain these terms to a friend") +
+  guides(fill = guide_legend(reverse=TRUE)) +
+  geom_text(data = explain_summary, aes(label = scales::percent(dis,accuracy = 1, trim = FALSE), y = dis), 
+            position = position_stack(vjust = 0.5), size = 2.5, family = "Times New Roman",
+            check_overlap = T)
+
 
 plot_heard
 plot_explain
@@ -243,7 +261,6 @@ contact[value == 0, value := NA]
 table(contact)
 contact <- contact[complete.cases(contact)]
 
-
 # 7-point Likert Scale: Adding Scores as Strings
 contact[value == 1, likert :="Very low"]
 contact[value == 2, likert :="Low"]
@@ -276,7 +293,10 @@ ggplot(contact_summary, aes(x = variable, y = dis,
   theme_apa() + scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25)) + 
   theme_apa(remove.x.gridlines = F) +
   theme(text=element_text(family="Times New Roman", size=12)) + 
-  guides(fill = guide_legend(reverse=TRUE))
+  guides(fill = guide_legend(reverse=TRUE)) +
+  geom_text(data = contact_summary, aes(label = scales::percent(dis,accuracy = 1, trim = FALSE), y = dis), 
+            position = position_stack(vjust = 0.5), size = 2, family = "Times New Roman",
+            check_overlap = T)
 
 
 # Higher Contact in Personal Life
@@ -308,7 +328,6 @@ friends_know[, .("Friend's knowledge of blockchain technology (1-10)" = round(me
 social <- quest_clean[, .(v_296)]
 social[, .("Social influence on my blockchain usage (1-10)" = round(mean(v_296, na.rm = T),2))]
 # They would rather discourage me
-
 
 
 
