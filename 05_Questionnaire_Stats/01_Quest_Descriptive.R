@@ -457,12 +457,13 @@ plot_abilityExplain
 # Crypto
 # v_54 (1 = Yes, 2 = No)
 crypto <- quest_clean[, "v_54"]
+crypto[v_54 == 1, .N] # 101 possess crypto in sample
 round(crypto[ v_54 == 1, .("Possession of Crypto (%)" = .N / nrow(crypto))],2) 
 
 # Possession of a NFT #
 # v_331 (1 = Yes, 2 = No, -77 = missing value (conditional question, if person heard of NFT))
 nft <- quest_clean[, "v_331"]
-round(nft[ v_331 == 1, .("Possession of Crypto (%)" = .N / nrow(crypto))],2)
+round(nft[ v_331 == 1, .("Possession of NFT (%)" = .N / nrow(crypto))],2)
 
 
 
@@ -537,27 +538,6 @@ ggplot(manage_crypto, aes(x= value, fill = reorder(variable, -N))) + geom_bar(po
 
 
 
-
-
-
-
-
-
-#### 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ################################## Trust, Personal Innovativeness & TRI   ###################################
 
 #### Trust overall ####
@@ -594,6 +574,7 @@ plot_trust <- ggplot(trust, aes(x= variable, fill = reorder(String, -N))) + geom
   labs( y = "%", title = "Disposition to trust other people") +
   scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25))
 
+plot_trust
 
 #### Privacy ####
 
@@ -799,7 +780,6 @@ ggplot(tri_summary, aes(x = variable, y = dis, fill = likert)) +
   theme(text=element_text(family="Times New Roman", size=12))
 
 tri_comp_all
-
 
 
 

@@ -100,9 +100,52 @@ heard_app_means[order(-Score_Int)]
 
 #### Blockchain usage intention pre-& post-survey ####
 
-# H0: Blockchain usage intention pre-survey is independent from usage intention post-survey
+# Visualization:
+# 1 = Yes, 2 = No, 3 = Don't know enough 
 block_usage <- quest_clean[,c("v_28", "v_334")]
-colnames(block_usage) <- c("Blockchain technology usage intention pre-survey ", "Blockchain technology usage intention post-survey ")
+colnames(block_usage) <- c("Blockchain technology\nusage intention pre-survey ", "Blockchain technology\nusage intention post-survey ")
+
+block_usage <- melt(block_usage)
+
+# can be no 0s
+block_usage[value == 0, value := NA]
+table(block_usage)
+block_usage <- block_usage[complete.cases(block_usage)]
+
+# Calculating distribution of answers
+block_usage[value == "1", likert :="Yes"]
+block_usage[value == "2", likert :="No"]
+block_usage[value == "3", likert :="I don't know enough about it"]
+block_usage$likert <- factor(block_usage$likert, levels = c("No","I don't know enough about it", "Yes"))
+
+# N per variable after excluding NAs
+block_usage[, N:= .N, by = variable]
+
+block_usage[value == 1, dis := .N / N, by = variable]
+block_usage[value == 2, dis := .N / N, by = variable]
+block_usage[value == 3, dis := .N / N, by = variable]
+
+block_usage_summary <- unique(block_usage)
+block_usage_summary
+
+# Plot
+plot_prePostSurvey_blockUsage <- 
+  ggplot(block_usage_summary, aes(x = reorder(variable, -N), y = dis, fill = likert)) +
+  geom_bar(position = "stack", stat = "identity", width = 0.6) +
+  geom_text(aes(label = scales::percent(dis,accuracy = 1, trim = FALSE)), 
+            position = position_stack(vjust = 0.5), size = 2.1, family = "Times New Roman") +
+  coord_flip() +
+  scale_fill_brewer(palette = "BrBG") +
+  guides(fill = guide_legend(reverse=TRUE)) +
+  labs( title = "Pre- and post-survey usage intention\nof blockchain technology", y = "%", x = "") +
+  scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25)) + 
+  theme_apa(remove.x.gridlines = F) +
+  theme(text=element_text(family="Times New Roman", size=12))
+
+plot_prePostSurvey_blockUsage
+
+# Fisher Test
+# H0: Blockchain usage intention pre-survey is independent from usage intention post-survey
 
 # Filter out 3s (=Don't knows) and 0s
 block_usage[block_usage == 3] <- NA
@@ -123,6 +166,26 @@ fisher.test(f, alternative = "greater")
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+################################## Save & Clean ############################################
 #### Clean Environment ####
 rm(list = ls())
 
