@@ -17,6 +17,7 @@ library(poLCA)
 library(RColorBrewer)
 library(extrafont)
 library(ggrepel)
+library(lavaan)
 
 # Set working directory
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
@@ -33,7 +34,7 @@ source("./../04_Data_Prep/99_APA_Theme.R")
 
 # Binding questionnaire to TRI data
 quest_reg <- cbind(quest_clean, tri_comp_all)
-quest_reg
+colnames(quest_reg)[222] <- c("Overall_TRI")
 
 # Extract Application columns
 app_scores <- quest_reg[, .(v_265, v_266, v_267, v_268, v_269, v_270)]
@@ -46,7 +47,7 @@ quest_reg <- quest_reg[v_321 == 2, v_321 := 0]
 quest_reg[, .(v_321)]
 
 #### 2. TRI: Overall TRI (1-7) ####
-quest_reg[, .(`Overall TRI`)]
+quest_reg[, .(`Overall_TRI`)]
 
 #### 3. Knowledge of difference between Bitcoin and Blockchain  ####
 # (yes = 1, no = 0): v_282
@@ -101,6 +102,109 @@ quest_reg[, .("Usage intention score overall" = round(mean(Usage_Int, na.rm = T)
 
 #### 8. Disposition to trust ####
 
+## Integrity: v_247, v_248, v_249
+quest_reg[, .(v_247, v_248, v_249)]
+
+# can be no 0s
+quest_reg[v_247 == 0, v_247 := NA]
+quest_reg[v_248 == 0, v_248 := NA]
+quest_reg[v_249 == 0, v_249 := NA]
+
+# Calculate Average trust_INT:
+quest_reg[, trust_INT := round(rowMeans(quest_reg[, .(v_247, v_248, v_249)], na.rm = T), 2)]
+
+## Benevolence: v_250, v_251, v_252
+quest_reg[, .(v_250, v_251, v_252)]
+
+# can be no 0s
+quest_reg[v_250 == 0, v_250 := NA]
+quest_reg[v_251 == 0, v_251 := NA]
+quest_reg[v_252 == 0, v_252 := NA]
+
+# Calculate Average trust_BEN:
+quest_reg[, trust_BEN := round(rowMeans(quest_reg[, .(v_250, v_251, v_252)], na.rm = T), 2)]
+
+## Ability: v_144, v_145, v_146
+quest_reg[, .(v_144, v_145, v_146)]
+
+# can be no 0s
+quest_reg[v_144 == 0, v_144 := NA]
+quest_reg[v_145 == 0, v_145 := NA]
+quest_reg[v_146 == 0, v_146 := NA]
+
+# Calculate Average trust_ABI:
+quest_reg[, trust_ABI := round(rowMeans(quest_reg[, .(v_144, v_145, v_146)], na.rm = T), 2)]
+
+
+# Score overall
+quest_reg[, .("T_INT score overall" = round(mean(trust_INT, na.rm = T),2))]
+quest_reg[, .("T_BEN score overall" = round(mean(trust_BEN, na.rm = T),2))]
+quest_reg[, .("T_ABI score overall" = round(mean(trust_ABI, na.rm = T),2))]
+
+# Disposition to trust:
+quest_reg[, DISPTRUST := round(rowMeans(quest_reg[, .(trust_INT, trust_BEN, trust_ABI)], na.rm = T), 2)]
+quest_reg[, .("Disposition to trust score overall" = round(mean(DISPTRUST, na.rm = T),2))]
+
+#
+
+#### 9. Perceived Risk ####
+
+# v_149, v_150: Likert (1-7)
+# can be no 0s
+quest_reg[v_149 == 0, v_149 := NA]
+quest_reg[v_150 == 0, v_150 := NA]
+
+# Calculate Average 
+quest_reg[, Perc_Risk := round(rowMeans(quest_reg[, .(v_149, v_150)], na.rm = T), 2)]
+
+# Score overall
+quest_reg[, .("Perceived risk score overall" = round(mean(Perc_Risk, na.rm = T),2))]
+
+
+
+
+
+#### 10. Potential of disruption ####
+
+# v_151, v_152, v_153, v_154 (reverse coded): Likert (1-7)
+# can be no 0s
+quest_reg[v_151 == 0, v_151 := NA]
+quest_reg[v_152 == 0, v_152 := NA]
+quest_reg[v_153 == 0, v_153 := NA]
+quest_reg[v_154 == 0, v_154 := NA]
+
+# reverse code v_154
+quest_reg[, Reverse_v_154 := 8 - v_154]
+
+# Calculate Average 
+quest_reg[, Pot_Dis := round(rowMeans(quest_reg[, .(v_151, v_152, v_153, Reverse_v_154)], na.rm = T), 2)]
+
+# Score overall
+quest_reg[, .("Potential of disruption score overall" = round(mean(Pot_Dis, na.rm = T),2))]
+
+
+
+
+
+
+#### TBD ####
+
+
+############################################# Performing CFA ###############################################################
+reg_model <- '
+Heard_BT =~ v_321
+TRI =~ Overall_TRI
+Know_Diff =~ v_282
+Know_BT =~ v_286
+Poss_Crypto =~ v_54
+Dis_Privacy =~ v_104 + v_105 + Reverse_v_106
+Use_Intent =~ v_132 + v_133
+Dis_Trust =~ trust_INT + trust_BEN + trust_ABI 
+Perceived_Risk =~ v_149 + v_150
+Potential_Dis =~ v_151 + v_152 + v_153 + Reverse_v_154'
+
+cfa <- cfa(reg_model, quest_reg)
+summary(cfa, standardized=TRUE)
 
 
 
