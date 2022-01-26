@@ -63,7 +63,7 @@ plot_heard <- ggplot(heard, aes(reorder(variable, N), fill = factor(value))) + g
   scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25)) + 
   theme_apa(remove.x.gridlines = F) +
   theme(text=element_text(family="Times New Roman", size=12)) + 
-  labs(y = "%", x = "", title = "Distribution of respondents knowing\nthe following terms") +
+  labs(y = "%", x = "", title = "Distribution of respondents knowing the following terms") +
   guides(fill = guide_legend(reverse=TRUE)) +
   geom_text(data = heard_summary, aes(label = scales::percent(dis,accuracy = 1, trim = FALSE), y = dis), 
             position = position_stack(vjust = 0.5), size = 2.5, family = "Times New Roman",
@@ -91,13 +91,14 @@ sector_summary <- unique(sector)
 sector_summary
 
 ggplot(sector, aes(x= value, fill = reorder(variable, -N))) + geom_bar(position = "fill") +
+  theme_apa() +
   theme(text=element_text(family="Times New Roman", size=12))+
   scale_fill_brewer(palette = "Paired") +
   geom_text(data = sector_summary, aes(label = scales::percent(dis,accuracy = 1, trim = FALSE), y = dis), 
             position = position_stack(vjust = 0.5), size = 2.5, family = "Times New Roman") +
   theme(axis.title.x = element_blank(), legend.title = element_blank(), axis.text.x = element_blank(), 
         axis.ticks.x = element_blank(), panel.background = element_blank()) +
-  labs( y = "%", title = "Sectors respondents heard about blockchain technology") +
+  labs(y = "%", title = "Sectors respondents heard about blockchain technology") +
   scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25))
 
 
@@ -319,7 +320,7 @@ quest_clean[, .("Post-Knowledge of Blockchain Technology (1-10)" = round(mean(v_
 # Scale 1 (they never heard of it) - 10 (they are experts)
 friends_know <- quest_clean[, .(v_287)]
 friends_know[, .("Friend's knowledge of blockchain technology (1-10)" = round(mean(v_287, na.rm = T),2))]
-# they have low knowledge about blockchain
+# they have low knowledge about blockchain, similar to mine
 
 #### Social influence on blockchain usage ####
 
@@ -538,6 +539,7 @@ ggplot(manage_crypto, aes(x= value, fill = reorder(variable, -N))) + geom_bar(po
 
 
 
+
 ################################## Trust, Personal Innovativeness & TRI   ###################################
 
 #### Trust overall ####
@@ -575,6 +577,7 @@ plot_trust <- ggplot(trust, aes(x= variable, fill = reorder(String, -N))) + geom
   scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25))
 
 plot_trust
+# Vertrauensgrundeinstellung eher negativ
 
 #### Privacy ####
 
