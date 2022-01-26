@@ -25,7 +25,6 @@ load("./../01_Input/01_RData/lca_4class_analysis.RData")
 load("./../01_Input/01_RData/tri_all_noNA_clusters.RData")
 load("./../01_Input/01_RData/tri_segments_4C_summary.RData")
 
-
 # Binding questionnaire to tri cluster data 
 quest_tri_extended <- cbind(quest_clean, tri_comp_all)
 quest_tri_extended
