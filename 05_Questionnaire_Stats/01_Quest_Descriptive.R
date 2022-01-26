@@ -579,12 +579,11 @@ plot_trust <- ggplot(trust, aes(x= variable, fill = reorder(String, -N))) + geom
 plot_trust
 # Vertrauensgrundeinstellung eher negativ
 
-#### Privacy ####
+#### Disposition to privacy ####
 
-# v_104, v_105, v_106 (reverse coded), v_107, v_205, v_206
-privacy <- quest_clean[, .(v_106, v_107, v_104, v_105)]
-colnames(privacy) <- c("Compared to others, I am less concerned about\npotential threats to my personal privacy",
-                       "I am not bothered by data collection, because my\npersonal information is publicly available anyway", 
+# v_104, v_105, v_106 (reverse coded)
+privacy <- quest_clean[, .(v_106, v_104, v_105)]
+colnames(privacy) <- c("Compared to others, I am less concerned about\npotential threats to my personal privacy\n(reverse coded)",
                        "Compared to others, I am more sensitive about\nthe way other people or organizations handle my\npersonal information",
                        "Compared to others, I see more importance in\nkeeping personal information private")
 
@@ -630,7 +629,7 @@ ggplot(privacy_summary, aes(x = variable, y = dis, fill = likert)) +
   coord_flip() +
   scale_fill_brewer(palette = "BrBG") +
   guides(fill = guide_legend(reverse=TRUE)) +
-  labs( title = "Distribution of answers related to privacy", y = "%", x = "") +
+  labs( title = "Distribution of answers related to disposition to privacy", y = "%", x = "") +
   theme_apa(remove.x.gridlines = F) + 
   scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25)) + 
   theme(text=element_text(family="Times New Roman", size=12))
@@ -638,12 +637,12 @@ ggplot(privacy_summary, aes(x = variable, y = dis, fill = likert)) +
 
 # Scores
 # Average out of all statements -> Own index 
-privacy_scores <- quest_clean[, .(v_104, v_105, v_106, v_107)]
+privacy_scores <- quest_clean[, .(v_104, v_105, v_106)]
 privacy_scores[privacy_scores == 0] <- NA
 
 # Reverse code v_106
 privacy_scores[, Reverse_v_106 := 8 - v_106]
-privacy_scores[, Privacy := round(rowMeans(privacy_scores[, .(v_104, v_105, v_107, Reverse_v_106)], na.rm = T), 2)]
+privacy_scores[, Privacy := round(rowMeans(privacy_scores[, .(v_104, v_105, Reverse_v_106)], na.rm = T), 2)]
 
 # Score overall
 privacy_scores[, .("Privacy score overall" = round(mean(Privacy, na.rm = T),2))]
@@ -653,6 +652,10 @@ privacy_scores[, .("Privacy score overall" = round(mean(Privacy, na.rm = T),2))]
 
 
 
+
+#### Cynism ####
+# v_107
+# "I am not bothered by data collection, because my\npersonal information is publicly available anyway", 
 
 #### Personal innovativeness ####
 # cf. Agarwal & Prasad, 1998 
