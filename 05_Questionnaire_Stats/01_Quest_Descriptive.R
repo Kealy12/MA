@@ -32,7 +32,7 @@ load("./../01_Input/01_RData/tri_all.RData")
 # Loading Theme
 source("./../04_Data_Prep/99_APA_Theme.R")
 
-################################ Descriptive Blockchain Stats ######################
+################################ Descriptive Blockchain Stats ##########################
 
 #### N ####
 quest_clean[, .N]
@@ -540,6 +540,7 @@ ggplot(manage_crypto, aes(x= value, fill = reorder(variable, -N))) + geom_bar(po
 
 
 
+
 ################################## Trust, Personal Innovativeness & TRI   ###################################
 
 #### Trust overall ####
@@ -646,7 +647,7 @@ privacy_scores[, Privacy := round(rowMeans(privacy_scores[, .(v_104, v_105, Reve
 
 # Score overall
 privacy_scores[, .("Privacy score overall" = round(mean(Privacy, na.rm = T),2))]
-
+privacy_scores[, .("Privacy score overall" = round(median(Privacy, na.rm = T),2))]
 
 
 
@@ -804,6 +805,86 @@ tri_comp_all
 
 
 
+
+
+################################## BT Deep-Dive & Applications  ###################################
+
+#### Bank account statement on street ####
+# v_126: (yes = 1, no = 2)
+
+bank <- quest_clean[, .(v_126)]
+bank <- melt(bank)
+bank[, value := as.numeric(ifelse(value == "1", "1", 0))]
+round(bank[, sum(value) / nrow(bank)],2)
+# Only 5% would put bank account statement on the street, without their name on 
+
+
+
+#### BT to buy items ####
+# v_85, v_86, v_87, v_88
+
+# 1 = yes, 2 = no
+buy <- quest_clean[, .(v_85, v_86, v_87, v_88)]
+colnames(buy) <- c("A pizza", "A jacket", "A car", "A house")
+buy <- melt(buy)
+buy$value <- as.character(buy$value)
+buy[value == "1", value := "Yes"]
+buy[value == "2", value := "No"]
+buy$value <- as.factor(buy$value)
+
+# can be no 0s
+buy[value == 0, value := NA]
+table(buy)
+buy <- buy[complete.cases(buy)]
+
+# % distribution
+buy[, N := .N, by = c("variable", "value")]
+buy[, N_total := .N, by = variable]
+buy_summary <- unique(buy)
+buy_summary[, dis := N / N_total, by =variable]
+buy_summary
+
+buy[value == "No", N := 0]
+
+plot_buy <- ggplot(buy, aes(reorder(variable, N), fill = factor(value))) + geom_bar(position = "fill") +
+  coord_flip() + scale_fill_brewer( palette = "Paired") +
+  scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25)) + 
+  theme_apa(remove.x.gridlines = F) +
+  theme(text=element_text(family="Times New Roman", size=12)) + 
+  labs(y = "%", x = "", title = "Distribution of respondents using blockchain technology\nto buy the following items") +
+  guides(fill = guide_legend(reverse=TRUE)) +
+  geom_text(data = buy_summary, aes(label = scales::percent(dis,accuracy = 1, trim = FALSE), y = dis), 
+            position = position_stack(vjust = 0.5), size = 2.5, family = "Times New Roman",
+            check_overlap = T)
+
+plot_buy
+
+
+
+
+
+
+
+
+
+
+
+
+
+#### Verified seller without name ####
+
+# v_234: (yes = 1, no = 2)
+seller <- quest_clean[, .(v_234)]
+seller <- melt(seller)
+seller[, value := as.numeric(ifelse(value == "1", "1", 0))]
+round(seller[, sum(value) / nrow(seller)],2)
+# 38% would transfer money to a verified seller without name for buying a bluetooth speaker 
+
+#### 
+
+
+
+####  Conditional: Knowing that person's name 
 
 
 

@@ -18,6 +18,7 @@ library(RColorBrewer)
 library(extrafont)
 library(ggrepel)
 library(lavaan)
+library(psych)
 
 # Set working directory
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
@@ -45,33 +46,27 @@ app_scores <- quest_reg[, .(v_265, v_266, v_267, v_268, v_269, v_270)]
 
 ############################################# Extracting relevant predictors ###############################################################
 
-#### 1. Have you heard of blockchain ####
+#### 1. Have you heard of BT ####
 # (yes = 1,no = 0): v_321
 quest_reg <- quest_reg[v_321 == 2, v_321 := 0]
 p1 <- quest_reg[, .(v_321)]
 
-#### 2. Knowledge of difference between Bitcoin and Blockchain  ####
-# (yes = 1, no = 0): v_282
-quest_reg <- quest_reg[v_282 == 2, v_282 := 0]
-table(quest_reg[, .(v_282)])
-p2 <- quest_reg[, .(v_282)]
-
-#### 3. Knowledge of BT  ####
+#### 2. Knowledge of BT  ####
 # (1-10 scale): v_286
-p3 <- quest_reg[, .(v_286)]
+p2 <- quest_reg[, .(v_286)]
 
 
-#### 4. Possession of Crypto ####
+#### 3. Possession of Crypto ####
 # v_54: (yes = 1, no = 0)
 quest_reg <- quest_reg[v_54 == 2, v_54 := 0]
 table(quest_reg[, .(v_54)])
-p4 <- quest_reg[, .(v_54)]
+p3 <- quest_reg[, .(v_54)]
 
-####### Constructs & Items ########
+####### Constructs ########
 
-#### 5. TRI: Overall TRI (1-7) ####
+#### 4. TRI: Overall TRI (1-7) ####
 quest_reg[, .(`Overall_TRI`)] # using single items for CFA
-p5 <- quest_reg[, .(`Overall_TRI`)]
+p4 <- quest_reg[, .(`Overall_TRI`)]
 
 # Reversing Items Dis & Ins:
 quest_reg[, Reverse_DIS2 := 8 - DIS2]
@@ -81,7 +76,7 @@ quest_reg[, Reverse_INS2 := 8 - INS2]
 quest_reg[, Reverse_INS4 := 8 - INS4]
 
 
-#### 6. Disposition to privacy ####
+#### 5. Disposition to privacy ####
 # Likert 1 (low privacy concern) - 7 (high privacy concern)): v_104, v_105, v_106
 # can not be 0
 quest_reg[v_104 == 0, v_104 := NA]
@@ -94,7 +89,7 @@ quest_reg[, Reverse_v_106 := 8 - v_106]
 # Calculate Average 
 quest_reg[, DISPPRIV := round(rowMeans(quest_reg[, .(v_104, v_105, Reverse_v_106)], na.rm = T), 2)]
 
-p6 <- quest_reg[, .(DISPPRIV)]
+p5 <- quest_reg[, .(DISPPRIV)]
 
 # Score overall
 quest_reg[, .("Privacy score overall" = round(mean(DISPPRIV, na.rm = T),2))]
@@ -102,7 +97,7 @@ quest_reg[, .("Privacy score overall" = round(mean(DISPPRIV, na.rm = T),2))]
 
 
 
-#### 7. Usage Intention ####
+#### 6. Usage Intention ####
 # v_132, v_133: Likert (1-7)
 # can be no 0s
 quest_reg[v_132 == 0, v_132 := NA]
@@ -111,14 +106,14 @@ quest_reg[v_133 == 0, v_133 := NA]
 # Calculate Average 
 quest_reg[, Usage_Int := round(rowMeans(quest_reg[, .(v_132, v_133)], na.rm = T), 2)]
 
-p7 <- quest_reg[, .(Usage_Int)]
+p6 <- quest_reg[, .(Usage_Int)]
 
 # Score overall
 quest_reg[, .("Usage intention score overall" = round(mean(Usage_Int, na.rm = T),2))]
 
 
 
-#### 8. Disposition to trust ####
+#### 7. Disposition to trust ####
 
 ## Integrity: v_247, v_248, v_249
 quest_reg[, .(v_247, v_248, v_249)]
@@ -161,12 +156,12 @@ quest_reg[, .("T_ABI score overall" = round(mean(trust_ABI, na.rm = T),2))]
 
 # Disposition to trust:
 quest_reg[, DISPTRUST := round(rowMeans(quest_reg[, .(trust_INT, trust_BEN, trust_ABI)], na.rm = T), 2)]
-p8 <- quest_reg[, .(DISPTRUST)]
+p7 <- quest_reg[, .(DISPTRUST)]
 
 quest_reg[, .("Disposition to trust score overall" = round(mean(DISPTRUST, na.rm = T),2))]
 
 
-#### 9. Perceived benefit for society ####
+#### 8. Perceived benefit for society ####
 
 # v_147, v_148: Likert (1-7)
 # can be no 0s
@@ -179,13 +174,13 @@ quest_reg[, Reverse_v_148 := 8 - v_148]
 # Calculate Average 
 quest_reg[, Perc_Benefit := round(rowMeans(quest_reg[, .(v_147, Reverse_v_148)], na.rm = T), 2)]
 
-p9 <- quest_reg[, .(Perc_Benefit)]
+p8 <- quest_reg[, .(Perc_Benefit)]
 
 # Score overall
 quest_reg[, .("Perceived benefit for society score overall" = round(mean(Perc_Benefit, na.rm = T),2))]
 
 
-#### 10. Perceived Risk ####
+#### 9. Perceived Risk ####
 
 # v_149, v_150: Likert (1-7)
 # can be no 0s
@@ -195,7 +190,7 @@ quest_reg[v_150 == 0, v_150 := NA]
 # Calculate Average 
 quest_reg[, Perc_Risk := round(rowMeans(quest_reg[, .(v_149, v_150)], na.rm = T), 2)]
 
-p10 <- quest_reg[, .(Perc_Risk)]
+p9 <- quest_reg[, .(Perc_Risk)]
 
 # Score overall
 quest_reg[, .("Perceived risk score overall" = round(mean(Perc_Risk, na.rm = T),2))]
@@ -204,7 +199,7 @@ quest_reg[, .("Perceived risk score overall" = round(mean(Perc_Risk, na.rm = T),
 
 
 
-#### 11. Potential of disruption ####
+#### 10. Potential of disruption ####
 
 # v_151, v_152, v_153, v_154 (reverse coded): Likert (1-7)
 # can be no 0s
@@ -219,7 +214,7 @@ quest_reg[, Reverse_v_154 := 8 - v_154]
 # Calculate Average 
 quest_reg[, Pot_Dis := round(rowMeans(quest_reg[, .(v_151, v_152, v_153, Reverse_v_154)], na.rm = T), 2)]
 
-p11 <- quest_reg[, .(Pot_Dis)]
+p10 <- quest_reg[, .(Pot_Dis)]
 
 # Score overall
 quest_reg[, .("Potential of disruption score overall" = round(mean(Pot_Dis, na.rm = T),2))]
@@ -232,18 +227,27 @@ quest_reg[, .("Potential of disruption score overall" = round(mean(Pot_Dis, na.r
 
 
 
-#### TBD ####
+
+
+#### Excluded ####
+#### Knowledge of difference between Bitcoin and Blockchain  ####
+# (yes = 1, no = 0): v_282
+quest_reg <- quest_reg[v_282 == 2, v_282 := 0]
+table(quest_reg[, .(v_282)])
+
 quest_reg
+
+
 
 ############################################# CFA  ###############################################################
 
 factors <- 
-# TRI =~ Opt + Inn + Dis + Ins
-# Opt =~ OPT2 + OPT4
-# Inn =~ INN1 + INN2 + INN4 
-# Dis =~ DIS2 + DIS3
-# Ins =~ INS1 + INS2 + INS4
-'Disposition_Privacy =~ v_104 + v_105 + Reverse_v_106
+'TRI =~ Opt + Inn + Dis + Ins
+Opt =~ OPT2 + OPT4
+Inn =~ INN1 + INN2 + INN4 
+Dis =~ DIS2 + DIS3
+Ins =~ INS1 + INS2 + INS4
+Disposition_Privacy =~ v_104 + v_105 + v_106
 Useage_Intent =~ v_132 + v_133
 integrity =~ v_247 + v_248 + v_249
 benevolence =~ v_250 + v_251 + v_252
@@ -253,17 +257,14 @@ Perceived_Risk =~ v_149 + v_150
 Perceived_Benefit_S =~ v_147 + Reverse_v_148
 Potential_Disruption =~ v_151 + v_152 + v_153 + Reverse_v_154'
 
-# Heard_BT =~ v_321
-# TRI =~ Overall_TRI
-# Know_Diff =~ v_282
-# Know_BT =~ v_286
-# Poss_Crypto =~ v_54'
+# Did not include TRI, as it is already validated by Parasuraman and Colby (2015)
+
 
 cfa <- cfa(factors, quest_reg, std.lv=TRUE)
 summary(cfa, standardized=TRUE, fit.measures = T)
 
 # factor loadings
-inspect(cfa,what="std")$lambda
+inspect(cfa,what="std")
 
 semPlot::semPaths(cfa, "std")
 
@@ -271,10 +272,13 @@ semPlot::semPaths(cfa, "std")
 
 ############################################# Correlation Table  ###############################################################
 
-predictors <- cbind(p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11)
+predictors <- cbind(p1,p2,p3,p4,p5,p6,p7,p8,p9,p10)
 cor(predictors, method = "spearman")
 
 apa.cor.table(predictors)
+
+fa(predictors, nfactors = 2, rotate = "oblimin")
+fa.diagram(predictors)
 
 
 ############################################# Regression analysis  ###############################################################
