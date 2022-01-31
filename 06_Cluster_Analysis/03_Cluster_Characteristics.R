@@ -152,6 +152,16 @@ nft_dt[, N := NULL]
 cluster_bc_dt <- merge(cluster_bc_dt, nft_dt, by = "Cluster", all.x = T)
 cluster_bc_dt
 
+#### Know the difference between BT and Bitcoin within Clusters ####
+diff_dt <- quest_tri_extended[ v_282 == 1, .("Know difference between Bitcoin and BT (N)" = .N), by = Cluster ]
+n_c <- quest_tri_extended[, .(N = .N), by = "Cluster"]
+diff_dt <- merge(diff_dt, n_c, by = "Cluster")
+diff_dt[, "Knowledge of difference between Bitcoin and BT (%)" := round(`Know difference between Bitcoin and BT (N)` / `N`,2)][, `Know difference between Bitcoin and BT (N)` := NULL]
+diff_dt[, N := NULL]
+
+cluster_bc_dt <- merge(cluster_bc_dt, diff_dt, by = "Cluster", all.x = T)
+cluster_bc_dt
+
 quest_tri_extended[, .N, by =v_331]
 
 

@@ -46,25 +46,37 @@ app_scores <- quest_reg[, .(v_265, v_266, v_267, v_268, v_269, v_270)]
 
 ############################################# Extracting relevant predictors ###############################################################
 
-#### 1. Have you heard of BT ####
+#### Have you heard of BT ####
 # (yes = 1,no = 0): v_321
 quest_reg <- quest_reg[v_321 == 2, v_321 := 0]
 p1 <- quest_reg[, .(v_321)]
+colnames(p1) <- c("Heard_of_BT")
 
-#### 2. Knowledge of BT  ####
+#### Contact with BT ####
+
+# v_10: in professional life
+# v_11: in personal life
+contact<- quest_clean[, c("v_10", "v_11")]
+colnames(contact) <- c("Contact_in_professional_life", "Contact_in_personal_life")
+
+#### Knowledge of BT  ####
 # (1-10 scale): v_286
 p2 <- quest_reg[, .(v_286)]
+colnames(p2) <- c("Knowledge_of_BT")
 
-
-#### 3. Possession of Crypto ####
+#### Possession of Crypto ####
 # v_54: (yes = 1, no = 0)
 quest_reg <- quest_reg[v_54 == 2, v_54 := 0]
 table(quest_reg[, .(v_54)])
 p3 <- quest_reg[, .(v_54)]
+colnames(p3) <- c("Possess_Crypto")
+
+
+
 
 ####### Constructs ########
 
-#### 4. TRI: Overall TRI (1-7) ####
+#### TRI: Overall TRI (1-7) ####
 quest_reg[, .(`Overall_TRI`)] # using single items for CFA
 p4 <- quest_reg[, .(`Overall_TRI`)]
 
@@ -76,7 +88,7 @@ quest_reg[, Reverse_INS2 := 8 - INS2]
 quest_reg[, Reverse_INS4 := 8 - INS4]
 
 
-#### 5. Disposition to privacy ####
+#### Disposition to privacy ####
 # Likert 1 (low privacy concern) - 7 (high privacy concern)): v_104, v_105, v_106
 # can not be 0
 quest_reg[v_104 == 0, v_104 := NA]
@@ -97,7 +109,7 @@ quest_reg[, .("Privacy score overall" = round(mean(DISPPRIV, na.rm = T),2))]
 
 
 
-#### 6. Usage Intention ####
+#### Usage Intention ####
 # v_132, v_133: Likert (1-7)
 # can be no 0s
 quest_reg[v_132 == 0, v_132 := NA]
@@ -113,7 +125,7 @@ quest_reg[, .("Usage intention score overall" = round(mean(Usage_Int, na.rm = T)
 
 
 
-#### 7. Disposition to trust ####
+#### Disposition to trust ####
 
 ## Integrity: v_247, v_248, v_249
 quest_reg[, .(v_247, v_248, v_249)]
@@ -161,7 +173,7 @@ p7 <- quest_reg[, .(DISPTRUST)]
 quest_reg[, .("Disposition to trust score overall" = round(mean(DISPTRUST, na.rm = T),2))]
 
 
-#### 8. Perceived benefit for society ####
+#### Perceived benefit for society ####
 
 # v_147, v_148: Likert (1-7)
 # can be no 0s
@@ -180,7 +192,7 @@ p8 <- quest_reg[, .(Perc_Benefit)]
 quest_reg[, .("Perceived benefit for society score overall" = round(mean(Perc_Benefit, na.rm = T),2))]
 
 
-#### 9. Perceived Risk ####
+#### Perceived Risk ####
 
 # v_149, v_150: Likert (1-7)
 # can be no 0s
@@ -199,7 +211,7 @@ quest_reg[, .("Perceived risk score overall" = round(mean(Perc_Risk, na.rm = T),
 
 
 
-#### 10. Potential of disruption ####
+#### Potential of disruption ####
 
 # v_151, v_152, v_153, v_154 (reverse coded): Likert (1-7)
 # can be no 0s
@@ -229,6 +241,7 @@ quest_reg[, .("Potential of disruption score overall" = round(mean(Pot_Dis, na.r
 
 
 
+
 #### Excluded ####
 #### Knowledge of difference between Bitcoin and Blockchain  ####
 # (yes = 1, no = 0): v_282
@@ -239,15 +252,12 @@ quest_reg
 
 
 
+
+
 ############################################# CFA  ###############################################################
 
 factors <- 
-'TRI =~ Opt + Inn + Dis + Ins
-Opt =~ OPT2 + OPT4
-Inn =~ INN1 + INN2 + INN4 
-Dis =~ DIS2 + DIS3
-Ins =~ INS1 + INS2 + INS4
-Disposition_Privacy =~ v_104 + v_105 + v_106
+'Disposition_Privacy =~ v_104 + v_105 + v_106
 Useage_Intent =~ v_132 + v_133
 integrity =~ v_247 + v_248 + v_249
 benevolence =~ v_250 + v_251 + v_252
@@ -257,77 +267,92 @@ Perceived_Risk =~ v_149 + v_150
 Perceived_Benefit_S =~ v_147 + Reverse_v_148
 Potential_Disruption =~ v_151 + v_152 + v_153 + Reverse_v_154'
 
-# Did not include TRI, as it is already validated by Parasuraman and Colby (2015)
+# Don't have to include TRI, as it is already a validated index by Parasuraman and Colby (2015)
+'TRI =~ Opt + Inn + Dis + Ins
+Opt =~ OPT2 + OPT4
+Inn =~ INN1 + INN2 + INN4 
+Dis =~ DIS2 + DIS3
+Ins =~ INS1 + INS2 + INS4'
 
-
+# Performing CFA
 cfa <- cfa(factors, quest_reg, std.lv=TRUE)
 summary(cfa, standardized=TRUE, fit.measures = T)
 
 # factor loadings
-inspect(cfa,what="std")
+inspect(cfa,what="std")$lambda
 
-semPlot::semPaths(cfa, "std")
+# semPaths(cfa, "std")
+
+##### Exkurs - EFA ####
+# Performing EFA only on items and contstructs 
+cor_pred <- cor(predictors)
+
+efa_5 <- fa(cor_pred, nfactors = 6, rotate = "varimax")
+efa_3 <- fa(cor_pred, nfactors = 3, rotate = "varimax")
+efa_2 <- fa(cor_pred, nfactors = 2, rotate = "varimax")
+
+efa_5$loadings
+efa_3$loadings
+
+fa.diagram(efa_5)
+fa.diagram(efa_4)
+fa.diagram(efa_3)
+
+fa(r = cor_dt, nfactors = 3)
+
+scree(efa_4, factors = FALSE)
 
 
+# semPaths(predictors, "std")
 
 ############################################# Correlation Table  ###############################################################
+predictors <- cbind(p1,p2,p3,contact,p4,p5,p6,p7,p8,p9,p10)
 
-predictors <- cbind(p1,p2,p3,p4,p5,p6,p7,p8,p9,p10)
-cor(predictors, method = "spearman")
-
-apa.cor.table(predictors)
-
-fa(predictors, nfactors = 2, rotate = "oblimin")
-fa.diagram(predictors)
-
+ggcorr(predictors, geom = "circle")
+apa.cor.table(predictors, show.conf.interval = F)
 
 ############################################# Regression analysis  ###############################################################
 
 #### 1. Tokenization of Assets ####
 token_pred <- cbind(predictors, quest_reg[, .(v_265)])
-lm_token <- lm(v_265 ~ v_321 + v_282 + v_286 + v_54 + Overall_TRI + DISPPRIV +
-                 Usage_Int + DISPTRUST + Perc_Benefit + Perc_Risk + Pot_Dis, data = token_pred)
-summary(lm_token)
-ggplot(quest_reg, aes(v_321, v_265)) + geom_jitter() + geom_smooth(method = "lm")
+lm_token <- lm(v_265 ~ Heard_of_BT + Knowledge_of_BT + Possess_Crypto + Overall_TRI + DISPPRIV +
+                 Usage_Int + DISPTRUST + Perc_Benefit + Perc_Risk + Pot_Dis + Contact_in_professional_life + Contact_in_personal_life, data = token_pred)
 
 apa.reg.table(lm_token)
+ggplot(token_pred, aes(Heard_of_BT, v_265)) + geom_jitter() + geom_smooth(method = "lm")
 
 #### 2. Fractional Ownership ####
 fract_pred <- cbind(predictors, quest_reg[, .(v_266)])
-lm_fract <- lm(v_266 ~ v_321 + v_282 + v_286 + v_54 + Overall_TRI + DISPPRIV +
-                 Usage_Int + DISPTRUST + Perc_Benefit + Perc_Risk + Pot_Dis, data = fract_pred)
-summary(lm_fract)
+lm_fract <- lm(v_266 ~ Heard_of_BT + Knowledge_of_BT + Possess_Crypto + Overall_TRI + DISPPRIV +
+                 Usage_Int + DISPTRUST + Perc_Benefit + Perc_Risk + Pot_Dis + Contact_in_professional_life + Contact_in_personal_life, data = fract_pred)
 apa.reg.table(lm_fract)
 
 #### 3. Self-Sovereign Identity ####
 self_pred <- cbind(predictors, quest_reg[, .(v_267)])
-lm_self <- lm(v_267 ~ v_321 + v_282 + v_286 + v_54 + Overall_TRI + DISPPRIV +
-                 Usage_Int + DISPTRUST + Perc_Benefit + Perc_Risk + Pot_Dis, data = self_pred)
-summary(lm_self)
+lm_self <- lm(v_267 ~ Heard_of_BT + Knowledge_of_BT + Possess_Crypto + Overall_TRI + DISPPRIV +
+                 Usage_Int + DISPTRUST + Perc_Benefit + Perc_Risk + Pot_Dis + Contact_in_professional_life + Contact_in_personal_life, data = self_pred)
 apa.reg.table(lm_self)
 
 #### 4. Smart Contracts ####
 smart_pred <- cbind(predictors, quest_reg[, .(v_268)])
-lm_smart <- lm(v_268 ~ v_321 + v_282 + v_286 + v_54 + Overall_TRI + DISPPRIV +
-                 Usage_Int + DISPTRUST + Perc_Benefit + Perc_Risk + Pot_Dis, data = smart_pred)
-summary(lm_smart)
+lm_smart <- lm(v_268 ~ Heard_of_BT + Knowledge_of_BT + Possess_Crypto + Overall_TRI + DISPPRIV +
+                 Usage_Int + DISPTRUST + Perc_Benefit + Perc_Risk + Pot_Dis + Contact_in_professional_life + Contact_in_personal_life, data = smart_pred)
 apa.reg.table(lm_smart)
+
+contrasts(smart_pred$Heard_of_BT)
 
 #### 5. Micropayments ####
 micro_pred <- cbind(predictors, quest_reg[, .(v_269)])
-lm_micro <- lm(v_269 ~ v_321 + v_282 + v_286 + v_54 + Overall_TRI + DISPPRIV +
-                 Usage_Int + DISPTRUST + Perc_Benefit + Perc_Risk + Pot_Dis, data = micro_pred)
-summary(lm_micro)
+lm_micro <- lm(v_269 ~ Heard_of_BT + Knowledge_of_BT + Possess_Crypto + Overall_TRI + DISPPRIV +
+                 Usage_Int + DISPTRUST + Perc_Benefit + Perc_Risk + Pot_Dis + Contact_in_professional_life + Contact_in_personal_life , data = micro_pred)
 apa.reg.table(lm_micro)
 
 #### 6. Anonymous Transactions ####
 anony_pred <- cbind(predictors, quest_reg[, .(v_270)])
-lm_anony <- lm(v_270 ~ v_321 + v_282 + v_286 + v_54 + Overall_TRI + DISPPRIV +
-                 Usage_Int + DISPTRUST + Perc_Benefit + Perc_Risk + Pot_Dis, data = anony_pred)
-summary(lm_anony)
+lm_anony <- lm(v_270 ~ Heard_of_BT + Knowledge_of_BT + Possess_Crypto + Overall_TRI + DISPPRIV +
+                 Usage_Int + DISPTRUST + Perc_Benefit + Perc_Risk + Pot_Dis + Contact_in_professional_life + Contact_in_personal_life, data = anony_pred)
 apa.reg.table(lm_anony)
 
-summ(lm_anony)
 
 
 

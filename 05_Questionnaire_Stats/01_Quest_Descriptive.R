@@ -249,6 +249,15 @@ diff[, value := as.numeric(ifelse(value == "1", "1", "0"))]
 round(diff[, sum(value) / nrow(diff)],2)
 # only 25 % know the difference
 
+# Who knows the difference? 
+# Categorizing them by Cluster:
+quest_tri_extended[, v_282 := as.numeric(ifelse(v_282 == "1", "1", "0"))]
+diff_clus <- quest_tri_extended[, round(sum(v_282) / nrow(quest_tri_extended),2), by = Cluster]
+diff_clus
+
+# v_169 -> Male = 1, Female = 2
+quest_tri_extended[, .("Know difference between Bitcoin and BT (%)" = round(sum(v_282) / nrow(quest_tri_extended),2)), by = v_169]
+
 
 #### Contact with Blockchain technology ####
 
@@ -541,6 +550,7 @@ ggplot(manage_crypto, aes(x= value, fill = reorder(variable, -N))) + geom_bar(po
 
 
 
+
 ################################## Trust, Personal Innovativeness & TRI   ###################################
 
 #### Trust overall ####
@@ -807,7 +817,9 @@ tri_comp_all
 
 
 
-################################## BT Deep-Dive & Applications  ###################################
+
+
+################################## BT Deep-Dive ###################################
 
 #### Bank account statement on street ####
 # v_126: (yes = 1, no = 2)
@@ -890,6 +902,505 @@ round(seller[, sum(value) / nrow(seller)],2)
 
 
 
+
+
+
+
+
+
+
+
+
+####  Conditional: If you knew the real name ####
+# v_233: (yes = 1, no = 2)
+real_name <- quest_clean[, .(v_233)]
+real_name <- melt(real_name)
+real_name[value == -77, value := NA]
+real_name <- real_name[complete.cases(real_name)]
+real_name[, value := as.numeric(ifelse(value == "1", "1", 0))]
+round(real_name[, sum(value) / nrow(real_name)],2)
+
+# 52% of people who wouldn't send money to a seller without a name would change their opinion,
+# if they knew the real name
+
+
+
+
+
+
+
+
+
+
+
+#### Personal details - String of numbers & letters ####
+
+# v_100
+# Scale 1 (not comfortable at all) - 7 (very comfortable)
+details <- quest_clean[, .(v_100)]
+details[, .("Comfortability concering BT personal details as string of numbers and letters " = round(mean(v_100, na.rm = T),2))]
+# Rather uncomfortable
+
+
+
+
+#### Privacy concerns - BT Financial transactions ####
+
+# v_99
+# Scale 1 (fully disagree) - 7 (fully agree)
+concerns <- quest_clean[, .(v_99)]
+concerns[, .("Privacy concerns of BT for financial transactions" = round(mean(v_99, na.rm = T),2))]
+# Rather concerned 
+
+
+
+#### Losing Blockchain PIN ####
+
+# v_101
+# Scale 1 (not comfortable at all) - 7 (very comfortable)
+losing.pin <- quest_clean[, .(v_101)]
+losing.pin[, .("Comfortability regarding losing blockchain PIN" = round(mean(v_101, na.rm = T),2))]
+# Not comfortable 
+
+
+
+
+
+
+#### BT self-selected use cases ####
+
+# v_120, v_121, v_122, v_284
+# 1 = quoted, 0 = not quoted
+statements <- quest_clean[, .(v_120, v_121, v_122, v_284)]
+colnames(statements) <- c("I know use cases for Blockchain Technology\nOTHER THAN cryptocurrencies (Bitcoin is a\ncryptocurrency)", 
+                      "I have installed an app related to Blockchain\nTechnology on my phone or desktop computer\n(e.g. Metamask)", 
+                      "I advise people on how to use Blockchain\nTechnology applications or have coded some\nmyself (e.g. a real Smart Contract)",
+                      "None of the statements apply to me")
+statements <- melt(statements)
+statements$value <- as.character(statements$value)
+statements[value == "1", value := "Yes"]
+statements[value == "0", value := "No"]
+statements$value <- as.factor(statements$value)
+
+# % distribution
+statements[, N := .N, by = c("variable", "value")]
+statements[, N_total := .N, by = variable]
+statements_summary <- unique(statements)
+statements_summary[, dis := N / N_total, by =variable]
+statements_summary
+
+
+plot_statements <- ggplot(statements, aes(reorder(variable, N), fill = factor(value))) + geom_bar(position = "fill") +
+  coord_flip() + scale_fill_brewer( palette = "Paired") +
+  scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25)) + 
+  theme_apa(remove.x.gridlines = F) +
+  theme(text=element_text(family="Times New Roman", size=12)) + 
+  labs(y = "%", x = "", title = "Distribution of respondents on BT use cases") +
+  guides(fill = guide_legend(reverse=TRUE)) +
+  geom_text(data = statements_summary, aes(label = scales::percent(dis,accuracy = 1, trim = FALSE), y = dis), 
+            position = position_stack(vjust = 0.5), size = 2.5, family = "Times New Roman",
+            check_overlap = T)
+
+plot_statements
+
+
+
+
+
+################################## BT Constructs ###################################
+
+#### Usage intention ####
+# v_132, v_133
+usage.int <- quest_clean[, .(v_132, v_133)]
+colnames(usage.int) <- c("Given the chance, I would use Blockchain\nTechnology applications",
+                       "Given the chance, it is very likely that\nI would use Blockchain Technology")
+
+usage.int <- melt(usage.int)
+
+# can be no 0s
+usage.int[value == 0, value := NA]
+table(usage.int)
+usage.int <- usage.int[complete.cases(usage.int)]
+table(usage.int$variable)
+
+# N per variable after excluding NAs
+usage.int[, N:= .N, by = variable]
+
+# 7-point Likert Scale: Adding Scores as Strings
+usage.int[value == 1, likert :="Strongly disagree"]
+usage.int[value == 2, likert :="Disagree"]
+usage.int[value == 3, likert :="Somewhat disagree"]
+usage.int[value == 4, likert :="Neither agree or disagree"]
+usage.int[value == 5, likert :="Somewhat agree"]
+usage.int[value == 6, likert :="Agree"]
+usage.int[value == 7, likert :="Strongly agree"]
+
+usage.int$likert <- factor(usage.int$likert , levels = c("Strongly disagree", "Disagree", "Somewhat disagree", "Neither agree or disagree", 
+                                                     "Somewhat agree", "Agree", "Strongly agree"))
+
+# % distribution of answers
+usage.int[value == 1 , dis := .N / N, by = variable]
+usage.int[value == 2 , dis := .N / N, by = variable]
+usage.int[value == 3 , dis := .N / N, by = variable]
+usage.int[value == 4 , dis := .N / N, by = variable]
+usage.int[value == 5 , dis := .N / N, by = variable]
+usage.int[value == 6 , dis := .N / N, by = variable]
+usage.int[value == 7 , dis := .N / N, by = variable]
+
+usage.int_summary <- unique(usage.int)
+
+plot_usageint <- ggplot(usage.int_summary, aes(x = variable, y = dis, fill = likert)) +
+  geom_bar(position = "stack", stat = "identity", width = 0.6) +
+  geom_text(aes(label = scales::percent(dis,accuracy = 1, trim = FALSE)), 
+            position = position_stack(vjust = 0.5), size = 2.5, family = "Times New Roman",
+            check_overlap = T) +
+  coord_flip() +
+  scale_fill_brewer(palette = "BrBG") +
+  guides(fill = guide_legend(reverse=TRUE)) +
+  labs( title = "Distribution of answers related to BT usage intention", y = "%", x = "") +
+  theme_apa(remove.x.gridlines = F) + 
+  scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25)) + 
+  theme(text=element_text(family="Times New Roman", size=12))
+
+plot_usageint
+
+# Scores
+# Average out of all statements
+usage.int.mean <- quest_clean[, .(v_132, v_133)]
+usage.int.mean[usage.int.mean == 0] <- NA
+
+usage.int.mean[, Usage_Intention := round(rowMeans(usage.int.mean[, .(v_132, v_133)], na.rm = T), 2)]
+
+# Score overall
+usage.int.mean[, .("Usage Intention score overall" = round(mean(Usage_Intention, na.rm = T),2))]
+# 3.22: Rather not use BT applications 
+
+
+
+
+
+#### Trust BT Users ####
+# v_134, v_135, v_136
+trust_users <- quest_clean[, .(v_134, v_135, v_136)]
+colnames(trust_users) <- c("I would trust people, that use \nBlockchain Technology",
+                       "I would trust organizations that use\nBlockchain Technology",
+                       "I would trust machines that are connected to a\nBlockchain Technology")
+
+trust_users <- melt(trust_users)
+
+# can be no 0s
+trust_users[value == 0, value := NA]
+table(trust_users)
+trust_users <- trust_users[complete.cases(trust_users)]
+table(trust_users$variable)
+
+# N per variable after excluding NAs
+trust_users[, N:= .N, by = variable]
+
+# 7-point Likert Scale: Adding Scores as Strings
+trust_users[value == 1, likert :="Strongly disagree"]
+trust_users[value == 2, likert :="Disagree"]
+trust_users[value == 3, likert :="Somewhat disagree"]
+trust_users[value == 4, likert :="Neither agree or disagree"]
+trust_users[value == 5, likert :="Somewhat agree"]
+trust_users[value == 6, likert :="Agree"]
+trust_users[value == 7, likert :="Strongly agree"]
+
+trust_users$likert <- factor(trust_users$likert , levels = c("Strongly disagree", "Disagree", "Somewhat disagree", "Neither agree or disagree", 
+                                                     "Somewhat agree", "Agree", "Strongly agree"))
+
+# % distribution of answers
+trust_users[value == 1 , dis := .N / N, by = variable]
+trust_users[value == 2 , dis := .N / N, by = variable]
+trust_users[value == 3 , dis := .N / N, by = variable]
+trust_users[value == 4 , dis := .N / N, by = variable]
+trust_users[value == 5 , dis := .N / N, by = variable]
+trust_users[value == 6 , dis := .N / N, by = variable]
+trust_users[value == 7 , dis := .N / N, by = variable]
+
+trust_users_summary <- unique(trust_users)
+
+plot_trustUsers <- ggplot(trust_users_summary, aes(x = variable, y = dis, fill = likert)) +
+  geom_bar(position = "stack", stat = "identity", width = 0.6) +
+  geom_text(aes(label = scales::percent(dis,accuracy = 1, trim = FALSE)), 
+            position = position_stack(vjust = 0.5), size = 2.5, family = "Times New Roman",
+            check_overlap = T) +
+  coord_flip() +
+  scale_fill_brewer(palette = "BrBG") +
+  guides(fill = guide_legend(reverse=TRUE)) +
+  labs( title = "Distribution of answers related to trust in\nblockchain users", y = "%", x = "") +
+  theme_apa(remove.x.gridlines = F) + 
+  scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25)) + 
+  theme(text=element_text(family="Times New Roman", size=12))
+
+plot_trustUsers
+# Low trust independent of machine or person 
+
+# Scores
+# Average out of all statements -> Own index 
+trust_user_score <- quest_clean[, .(v_134, v_135, v_136)]
+trust_user_score[trust_user_score == 0] <- NA
+
+trust_user_score[, trust_user := round(rowMeans(trust_user_score[, .(v_134, v_135, v_136)], na.rm = T), 2)]
+
+# Score overall
+trust_user_score[, .("Trust in users score overall" = round(mean(trust_user, na.rm = T),2))]
+
+# 3.61: rather low trust in other BT users
+
+
+#### Trust BT (integrity, benevolence, ability) ####
+
+# v_247 - v_252, v_144 - v_146
+trust_iba <- quest_clean[, .(v_247, v_248, v_249, v_250, v_251, v_252,
+                              v_144, v_145, v_146)]
+colnames(trust_iba) <- c("Integrity: Blockchain Technology\nprovides reliable information",
+                          "Integrity: Blockchain Technology\nis honest in dealing with my private data",
+                          "Integrity: Blockchain Technology\nadheres to rules and principles", 
+                          "Benevolence: Blockchain Technology\nacts in the interests of its users",
+                          "Benevolence: In general Blockchain\nTechnology is not malicious",
+                          "Benevolence: Blockchain Technology\nhas no bad intentions towards its users",
+                          "Ability: Blockchain Technology\nserves its purpose", 
+                          "Ability: Blockchain Technology\noperates flawlessly",
+                          "Ability: Blockchain Technology\nis capable to offer me a good service")
+trust_iba <- trust_iba[, c(9,8,7,6,5,4,3,2,1)]
+trust_iba <- melt(trust_iba)
+
+# can be no 0s
+trust_iba[value == 0, value := NA]
+table(trust_iba)
+trust_iba <- trust_iba[complete.cases(trust_iba)]
+
+# N per variable after excluding NAs
+trust_iba[, N:= .N, by = variable]
+
+# 7-point Likert Scale: Adding Scores as Strings
+trust_iba[value == 1, likert :="Strongly disagree"]
+trust_iba[value == 2, likert :="Disagree"]
+trust_iba[value == 3, likert :="Somewhat disagree"]
+trust_iba[value == 4, likert :="Neither agree or disagree"]
+trust_iba[value == 5, likert :="Somewhat agree"]
+trust_iba[value == 6, likert :="Agree"]
+trust_iba[value == 7, likert :="Strongly agree"]
+
+trust_iba$likert <- factor(trust_iba$likert , levels = c("Strongly disagree", "Disagree", "Somewhat disagree", "Neither agree or disagree", 
+                                                             "Somewhat agree", "Agree", "Strongly agree"))
+
+# % distribution of answers
+trust_iba[value == 1 , dis := .N / N, by = variable]
+trust_iba[value == 2 , dis := .N / N, by = variable]
+trust_iba[value == 3 , dis := .N / N, by = variable]
+trust_iba[value == 4 , dis := .N / N, by = variable]
+trust_iba[value == 5 , dis := .N / N, by = variable]
+trust_iba[value == 6 , dis := .N / N, by = variable]
+trust_iba[value == 7 , dis := .N / N, by = variable]
+
+trust_iba_summary <- unique(trust_iba)
+
+# Plot
+plot_trust_IBA <- 
+  ggplot(trust_iba_summary, aes(x = variable, y = dis, fill = likert)) +
+  geom_bar(position = "stack", stat = "identity", width = 0.6) +
+  geom_text(aes(label = scales::percent(dis,accuracy = 1, trim = FALSE)), 
+            position = position_stack(vjust = 0.5), size = 2.1, family = "Times New Roman") +
+  coord_flip() +
+  scale_fill_brewer(palette = "BrBG") +
+  guides(fill = guide_legend(reverse=TRUE)) +
+  labs( title = "Trust in blockchain's integrity, benevolence and ability", y = "%", x = "") +
+  scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25)) + 
+  theme_apa(remove.x.gridlines = F) +
+  theme(text=element_text(family="Times New Roman", size=12))
+
+plot_trust_IBA
+
+# Scores
+# Average out of all statements 
+trust_iba_score <- quest_clean[, .(v_247, v_248, v_249, v_250, v_251, v_252,
+                                                v_144, v_145, v_146)]
+trust_iba_score[trust_iba_score == 0] <- NA
+trust_iba_score[, trust := round(rowMeans(trust_iba_score[, .(v_247, v_248, v_249, v_250, v_251, v_252,
+                                                              v_144, v_145, v_146)], na.rm = T), 2)]
+# Scores:
+trust_iba_score[, "Integrity" := round(rowMeans(trust_iba_score[, c(1,2,3)], na.rm = T), 2)]
+trust_iba_score[, "Benevolence" := round(rowMeans(trust_iba_score[, c(4,5,6)], na.rm = T), 2)]
+trust_iba_score[, "Ability" := round(rowMeans(trust_iba_score[, c(7,8,9)], na.rm = T), 2)]
+
+# Score overall
+trust_iba_score[, .("Trust score overall" = round(mean(trust, na.rm = T),2))]
+
+# Overall
+trust_iba_score_table <- trust_iba_score[, .("Integrity" = mean(Integrity),
+                               "Benevolence" = mean(Benevolence),
+                               "Ability" = mean(Ability),
+                               "Trust Overall" = mean(trust))]
+
+trust_iba_score_table <- melt(trust_iba_score_table, variable.name = "Trust Components", value.name = "Mean")
+trust_iba_score_table$Mean <- format(trust_iba_score_table$Mean, digits = 3)
+trust_iba_score_table
+# Overall = 4.29: Rather neutral to rather trustworthy score
+
+#### Perceived benefit for society ####
+
+# v_147, v_148
+sbenefit <- quest_clean[, .(v_148, v_147)]
+colnames(sbenefit) <- c("Using Blockchain Technology has\nmany disadvantages for society",
+                           "Using Blockchain Technology has\nmany advantages for society")
+
+sbenefit <- melt(sbenefit)
+
+# can be no 0s
+sbenefit[value == 0, value := NA]
+table(sbenefit)
+sbenefit <- sbenefit[complete.cases(sbenefit)]
+table(sbenefit$variable)
+
+# N per variable after excluding NAs
+sbenefit[, N:= .N, by = variable]
+
+# 7-point Likert Scale: Adding Scores as Strings
+sbenefit[value == 1, likert :="Strongly disagree"]
+sbenefit[value == 2, likert :="Disagree"]
+sbenefit[value == 3, likert :="Somewhat disagree"]
+sbenefit[value == 4, likert :="Neither agree or disagree"]
+sbenefit[value == 5, likert :="Somewhat agree"]
+sbenefit[value == 6, likert :="Agree"]
+sbenefit[value == 7, likert :="Strongly agree"]
+
+sbenefit$likert <- factor(sbenefit$likert , levels = c("Strongly disagree", "Disagree", "Somewhat disagree", "Neither agree or disagree", 
+                                                             "Somewhat agree", "Agree", "Strongly agree"))
+
+# % distribution of answers
+sbenefit[value == 1 , dis := .N / N, by = variable]
+sbenefit[value == 2 , dis := .N / N, by = variable]
+sbenefit[value == 3 , dis := .N / N, by = variable]
+sbenefit[value == 4 , dis := .N / N, by = variable]
+sbenefit[value == 5 , dis := .N / N, by = variable]
+sbenefit[value == 6 , dis := .N / N, by = variable]
+sbenefit[value == 7 , dis := .N / N, by = variable]
+
+sbenefit_summary <- unique(sbenefit)
+
+plot_benefits_society <- ggplot(sbenefit_summary, aes(x = variable, y = dis, fill = likert)) +
+  geom_bar(position = "stack", stat = "identity", width = 0.6) +
+  geom_text(aes(label = scales::percent(dis,accuracy = 1, trim = FALSE)), 
+            position = position_stack(vjust = 0.5), size = 2.5, family = "Times New Roman",
+            check_overlap = T) +
+  coord_flip() +
+  scale_fill_brewer(palette = "BrBG") +
+  guides(fill = guide_legend(reverse=TRUE)) +
+  labs( title = "Distribution of answers related to\nperceived benefits to society", y = "%", x = "") +
+  theme_apa(remove.x.gridlines = F) + 
+  scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25)) + 
+  theme(text=element_text(family="Times New Roman", size=12))
+
+plot_benefits_society
+
+# Scores
+# Reverse code v_148
+sbenefit_scores <- quest_clean[, .(v_148, v_147)]
+sbenefit_scores[, Reverse_v_148 := 8 - v_148]
+
+# Calculate Average 
+sbenefit_scores[, Perc_Benefit := round(rowMeans(sbenefit_scores[, .(v_147, Reverse_v_148)], na.rm = T), 2)]
+
+sbenefit_scores[, .("Perceived benefit to society" = round(mean(Perc_Benefit, na.rm = T),2))]
+# not negative, rather neutral
+
+
+
+#### Perceived Risk ####
+
+# Low score = not risky, high score risky 
+# v_149, v_150
+risk <- quest_clean[, .(v_150, v_149)]
+colnames(risk) <- c("I would feel unsafe using\nBlockchain Technology",
+                    "In general, it seems risky to\nuse Blockchain Technology")
+
+risk <- melt(risk)
+
+# can be no 0s
+risk[value == 0, value := NA]
+table(risk)
+risk <- risk[complete.cases(risk)]
+table(risk$variable)
+
+# N per variable after excluding NAs
+risk[, N:= .N, by = variable]
+
+# 7-point Likert Scale: Adding Scores as Strings
+risk[value == 1, likert :="Strongly disagree"]
+risk[value == 2, likert :="Disagree"]
+risk[value == 3, likert :="Somewhat disagree"]
+risk[value == 4, likert :="Neither agree or disagree"]
+risk[value == 5, likert :="Somewhat agree"]
+risk[value == 6, likert :="Agree"]
+risk[value == 7, likert :="Strongly agree"]
+
+risk$likert <- factor(risk$likert , levels = c("Strongly disagree", "Disagree", "Somewhat disagree", "Neither agree or disagree", 
+                                                       "Somewhat agree", "Agree", "Strongly agree"))
+
+# % distribution of answers
+risk[value == 1 , dis := .N / N, by = variable]
+risk[value == 2 , dis := .N / N, by = variable]
+risk[value == 3 , dis := .N / N, by = variable]
+risk[value == 4 , dis := .N / N, by = variable]
+risk[value == 5 , dis := .N / N, by = variable]
+risk[value == 6 , dis := .N / N, by = variable]
+risk[value == 7 , dis := .N / N, by = variable]
+
+risk_summary <- unique(risk)
+
+plot_risk <- ggplot(risk_summary, aes(x = variable, y = dis, fill = likert)) +
+  geom_bar(position = "stack", stat = "identity", width = 0.6) +
+  geom_text(aes(label = scales::percent(dis,accuracy = 1, trim = FALSE)), 
+            position = position_stack(vjust = 0.5), size = 2.5, family = "Times New Roman",
+            check_overlap = T) +
+  coord_flip() +
+  scale_fill_brewer(palette = "BrBG") +
+  guides(fill = guide_legend(reverse=TRUE)) +
+  labs( title = "Distribution of answers related to\nperceived risk of BT", y = "%", x = "") +
+  theme_apa(remove.x.gridlines = F) + 
+  scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25)) + 
+  theme(text=element_text(family="Times New Roman", size=12))
+
+plot_risk
+
+# Scores
+risk_scores <- quest_clean[, .(v_149, v_150)]
+risk_scores[risk_scores == 0] <- NA
+
+# Calculate Average 
+risk_scores[, Perc_Risk := round(rowMeans(risk_scores[, .(v_149, v_150)], na.rm = T), 2)]
+
+risk_scores[, .("Perceived risk of BT" = round(mean(Perc_Risk, na.rm = T),2))]
+# rather risky
+
+
+
+
+
+
+
+#### Feeling of disruptive potential ####
+
+
+
+
+
+
+################################## Post-Survey BT questions ###################################
+
+#### More opportunities or risks from BT ####
+
+
+
+
+
+
+
+
+
+
 #### GGplot ####
 ggplot(dt, aes(x, y, fill = ..., color = ...)) +
   # USE HISTOGRAMS TO LOOK AT DIFFERENT DISTRIBUTIONS!
@@ -903,6 +1414,7 @@ scale_x_log10() + scale_y_log10() +
   labs(x = "...", y = "...", title = "...") +
   guides(fill/color = guide_legend(title = "..."))
 
-# Clean Environment
+
+#### Clean Environment ####
 rm(list = ls())
 
