@@ -32,6 +32,7 @@ load("./../01_Input/01_RData/tri_all.RData")
 # Loading Theme
 source("./../04_Data_Prep/99_APA_Theme.R")
 
+
 ################################ Descriptive Blockchain Stats ##########################
 
 #### N ####
@@ -1383,16 +1384,115 @@ risk_scores[, .("Perceived risk of BT" = round(mean(Perc_Risk, na.rm = T),2))]
 
 #### Feeling of disruptive potential ####
 
+# v_151, v_152, v_153, v_154
+dis_pot <- quest_clean[, .(v_154, v_153, v_152, v_151)]
+colnames(dis_pot) <- c("...has no disruptive potential at all",
+                         "...to be as disruptive as the\nintroduction of the internet",
+                         "...to disrupt everyday life", 
+                         "...to disrupt the business world")
+
+dis_pot <- melt(dis_pot)
+
+# can be no 0s
+dis_pot[value == 0, value := NA]
+table(dis_pot)
+dis_pot <- dis_pot[complete.cases(dis_pot)]
+
+# N per variable after excluding NAs
+dis_pot[, N:= .N, by = variable]
+
+# 7-point Likert Scale: Adding Scores as Strings
+dis_pot[value == 1, likert :="Strongly disagree"]
+dis_pot[value == 2, likert :="Disagree"]
+dis_pot[value == 3, likert :="Somewhat disagree"]
+dis_pot[value == 4, likert :="Neither agree or disagree"]
+dis_pot[value == 5, likert :="Somewhat agree"]
+dis_pot[value == 6, likert :="Agree"]
+dis_pot[value == 7, likert :="Strongly agree"]
+
+dis_pot$likert <- factor(dis_pot$likert , levels = c("Strongly disagree", "Disagree", "Somewhat disagree", "Neither agree or disagree", 
+                                                         "Somewhat agree", "Agree", "Strongly agree"))
+
+# % distribution of answers
+dis_pot[value == 1 , dis := .N / N, by = variable]
+dis_pot[value == 2 , dis := .N / N, by = variable]
+dis_pot[value == 3 , dis := .N / N, by = variable]
+dis_pot[value == 4 , dis := .N / N, by = variable]
+dis_pot[value == 5 , dis := .N / N, by = variable]
+dis_pot[value == 6 , dis := .N / N, by = variable]
+dis_pot[value == 7 , dis := .N / N, by = variable]
+
+dis_pot_summary <- unique(dis_pot)
+
+# Plot
+plot_disPotential <- 
+  ggplot(dis_pot_summary, aes(x = variable, y = dis, fill = likert)) +
+  geom_bar(position = "stack", stat = "identity", width = 0.6) +
+  geom_text(aes(label = scales::percent(dis,accuracy = 1, trim = FALSE)), 
+            position = position_stack(vjust = 0.5), size = 2.1, family = "Times New Roman") +
+  coord_flip() +
+  scale_fill_brewer(palette = "BrBG") +
+  guides(fill = guide_legend(reverse=TRUE)) +
+  labs( title = "Feeling of disruptive potential of BT", y = "%", x = "") +
+  scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25)) + 
+  theme_apa(remove.x.gridlines = F) +
+  theme(text=element_text(family="Times New Roman", size=12))
+
+plot_disPotential
+# Contact in professional life lower than in personal life -> However, people
+# see more disruptive potential in the business world (in the future)
+
+# Scores
+# Average out of all statements 
+dis_pot_score <- quest_clean[, .(v_154, v_153, v_152, v_151)]
+dis_pot_score[dis_pot_score == 0] <- NA
+
+# Reverse code v_154
+dis_pot_score[, Reverse_v_154 := 8 - v_154]
+
+dis_pot_score[, Pot_Dis := round(rowMeans(dis_pot_score[, .(v_151, v_152, v_153, Reverse_v_154)], na.rm = T), 2)]
+
+# Score overall
+dis_pot_score[, .("Potential of disruption score overall" = round(mean(Pot_Dis, na.rm = T),2))]
 
 
 
-
+################################## Application scores in 03_Applications_Descriptive ###################################
 
 ################################## Post-Survey BT questions ###################################
 
+#### Post-survey knowledge of BT ####
+#  v_333
+quest_clean[, .("Post-Knowledge of Blockchain Technology (1-10)" = round(mean(v_333, na.rm = T),2))]
+
+# Beginning of Questionnaire: v_286 (1-10 scale)
+quest_clean[, .("Pre-Knowledge of Blockchain Technology (1-10)" = round(mean(v_286, na.rm = T),2))]
+
+
 #### More opportunities or risks from BT ####
 
+#  v_288
+# scale 1 (=more risks) - 10 (more opportunities)
+quest_clean[, .("More risks (1) or more opportunities (10) from BT" = round(mean(v_288, na.rm = T),2))]
+# more opportunities
 
+
+
+
+
+
+
+
+
+
+
+#### German federal ministry BT campaign####
+
+# v_196 (1 = Yes, 2 = No)
+camp <- quest_clean[, .(v_196)]
+camp[v_196 == 1, .N] # 40 know about it
+round(camp[ v_196 == 1, .("Knowledge about German ministry BT campaign" = .N / nrow(camp))],2) 
+# 5% know about it
 
 
 
