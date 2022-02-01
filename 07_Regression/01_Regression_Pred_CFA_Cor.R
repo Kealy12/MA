@@ -265,10 +265,8 @@ ability =~ v_144 + v_145 + v_146
 Disposition_Trust =~ integrity + benevolence + ability
 Perceived_Risk =~ v_149 + v_150
 Perceived_Benefit_S =~ v_147 + Reverse_v_148
-Potential_Disruption =~ v_151 + v_152 + v_153 + Reverse_v_154'
-
-# Don't have to include TRI, as it is already a validated index by Parasuraman and Colby (2015)
-'TRI =~ Opt + Inn + Dis + Ins
+Potential_Disruption =~ v_151 + v_152 + v_153 + Reverse_v_154
+TRI =~ Opt + Inn + Dis + Ins
 Opt =~ OPT2 + OPT4
 Inn =~ INN1 + INN2 + INN4 
 Dis =~ DIS2 + DIS3
@@ -319,10 +317,10 @@ cor_red <- apa.cor.table(predictors_red, show.conf.interval = F)
 cor_red
 
 
-############################################# Regression analysis  ###############################################################
+############################################# Regression analysis - separate Applications  ###############################################################
 
 #### 1. Tokenization of Assets ####
-token_pred <- cbind(predictors, quest_reg[, .(v_265)])
+token_pred <- cbind(predictors_all, quest_reg[, .(v_265)])
 lm_token <- lm(v_265 ~ Heard_of_BT + Knowledge_of_BT + Possess_Crypto + Overall_TRI + DISPPRIV +
                  Usage_Int + DISPTRUST + Perc_Benefit + Perc_Risk + Pot_Dis + Contact_in_professional_life + Contact_in_personal_life, data = token_pred)
 
@@ -339,36 +337,35 @@ anova(lm_token_red, lm_token)
 
 ggplot(token_pred, aes(Heard_of_BT, v_265)) + geom_jitter() + geom_smooth(method = "lm")
 
+# H1: Usage intention has a positive effect on usefulness of application
 
 
 #### 2. Fractional Ownership ####
-fract_pred <- cbind(predictors, quest_reg[, .(v_266)])
+fract_pred <- cbind(predictors_all, quest_reg[, .(v_266)])
 lm_fract <- lm(v_266 ~ Heard_of_BT + Knowledge_of_BT + Possess_Crypto + Overall_TRI + DISPPRIV +
                  Usage_Int + DISPTRUST + Perc_Benefit + Perc_Risk + Pot_Dis + Contact_in_professional_life + Contact_in_personal_life, data = fract_pred)
 apa.reg.table(lm_fract)
 
 #### 3. Self-Sovereign Identity ####
-self_pred <- cbind(predictors, quest_reg[, .(v_267)])
+self_pred <- cbind(predictors_all, quest_reg[, .(v_267)])
 lm_self <- lm(v_267 ~ Heard_of_BT + Knowledge_of_BT + Possess_Crypto + Overall_TRI + DISPPRIV +
                  Usage_Int + DISPTRUST + Perc_Benefit + Perc_Risk + Pot_Dis + Contact_in_professional_life + Contact_in_personal_life, data = self_pred)
 apa.reg.table(lm_self)
 
 #### 4. Smart Contracts ####
-smart_pred <- cbind(predictors, quest_reg[, .(v_268)])
+smart_pred <- cbind(predictors_all, quest_reg[, .(v_268)])
 lm_smart <- lm(v_268 ~ Heard_of_BT + Knowledge_of_BT + Possess_Crypto + Overall_TRI + DISPPRIV +
                  Usage_Int + DISPTRUST + Perc_Benefit + Perc_Risk + Pot_Dis + Contact_in_professional_life + Contact_in_personal_life, data = smart_pred)
 apa.reg.table(lm_smart)
 
-contrasts(smart_pred$Heard_of_BT)
-
 #### 5. Micropayments ####
-micro_pred <- cbind(predictors, quest_reg[, .(v_269)])
+micro_pred <- cbind(predictors_all, quest_reg[, .(v_269)])
 lm_micro <- lm(v_269 ~ Heard_of_BT + Knowledge_of_BT + Possess_Crypto + Overall_TRI + DISPPRIV +
                  Usage_Int + DISPTRUST + Perc_Benefit + Perc_Risk + Pot_Dis + Contact_in_professional_life + Contact_in_personal_life , data = micro_pred)
 apa.reg.table(lm_micro)
 
 #### 6. Anonymous Transactions ####
-anony_pred <- cbind(predictors, quest_reg[, .(v_270)])
+anony_pred <- cbind(predictors_all, quest_reg[, .(v_270)])
 lm_anony <- lm(v_270 ~ Heard_of_BT + Knowledge_of_BT + Possess_Crypto + Overall_TRI + DISPPRIV +
                  Usage_Int + DISPTRUST + Perc_Benefit + Perc_Risk + Pot_Dis + Contact_in_professional_life + Contact_in_personal_life, data = anony_pred)
 apa.reg.table(lm_anony)
@@ -389,6 +386,53 @@ apa.reg.table(lm_anony)
 
 
 
+
+
+
+
+
+
+############################################# Regression analysis - mean Applications Overall  ###############################################################
+
+# Calculating mean over all applications
+quest_reg[, Mean_all_Applic := round(rowMeans(quest_reg[, .(v_265, v_266, v_267, v_268, v_269, v_270)], na.rm = T), 2)]
+
+overall_pred <- cbind(predictors_all, quest_reg[, .(Mean_all_Applic)])
+lm_overall <- lm(Mean_all_Applic ~ Heard_of_BT + Knowledge_of_BT + Possess_Crypto + Overall_TRI + DISPPRIV +
+                 Usage_Int + DISPTRUST + Perc_Benefit + Perc_Risk + Pot_Dis + Contact_in_professional_life + Contact_in_personal_life, data = overall_pred)
+
+apa.reg.table(lm_overall)
+
+############################################# Regression analysis - Intention to use BT (pre-survey) ###############################################################
+
+intention_pre <- quest_clean[, .(v_28)]
+intention_pre <- intention_pre[v_28 == 2, v_28 := 0]
+# Turning "Don't knows" into "Nos"
+intention_pre <- intention_pre[v_28 == 3, v_28 := 0]
+colnames(intention_pre) <- c("Intention_to_use_BT")
+
+#### Logistic Regression, as Y is categorical
+intention_pred <- cbind(predictors_all, intention_pre)
+
+lm_intention <- glm(Intention_to_use_BT ~ Heard_of_BT + Knowledge_of_BT + Possess_Crypto + Overall_TRI + DISPPRIV +
+                   Usage_Int + DISPTRUST + Perc_Benefit + Perc_Risk + Pot_Dis + Contact_in_professional_life + Contact_in_personal_life, 
+                   data = intention_pred,
+                   family = "binomial")
+
+summary(lm_intention)
+
+
+
+
+
+
+
+
+
+
+
+
+############################################# Regression analysis - Knowledge of BT (post-survey)  ###############################################################
 
 
 

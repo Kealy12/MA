@@ -120,14 +120,19 @@ ggplot(apps, aes(Applications, Score_Int)) + geom_boxplot() +
 # Visualization of answers (%) on applications 
 apps_summary <- merge(apps_summary, apps_means, by = "Applications")
 
-ggplot(apps_summary, aes(x = reorder(Applications, Score_Int), y = dis_by_app, 
-                         fill = Score_Factor)) +
-  geom_bar(position = "stack", stat = "identity") +
+plot_apps <- ggplot(apps_summary, aes(x = reorder(Applications, Score_Int), y = dis_by_app, fill = Score_Factor)) +
+  geom_bar(position = "stack", stat = "identity", width = 0.6) +
+  geom_text(aes(label = scales::percent(dis_by_app,accuracy = 1, trim = FALSE)), 
+            position = position_stack(vjust = 0.5), size = 2.1, family = "Times New Roman") +
   coord_flip() +
-  scale_fill_brewer(palette = "PuOr") +
+  scale_fill_brewer(palette = "BrBG") +
   guides(fill = guide_legend(reverse=TRUE)) +
-  labs( x = "Blockchain Applications", y = "Percentage")
+  labs( title = "Feeling of disruptive potential of BT", y = "%", x = "") +
+  scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25)) + 
+  theme_apa(remove.x.gridlines = F) +
+  theme(text=element_text(family="Times New Roman", size=12))
 
+plot_apps
 
 
 ########################################################### Scores by Cluster ###############################################################

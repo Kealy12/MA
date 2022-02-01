@@ -1506,6 +1506,7 @@ dis_pot_score[, .("Potential of disruption score overall" = round(mean(Pot_Dis, 
 
 
 
+
 ################################## Application scores in 03_Applications_Descriptive ###################################
 
 ################################## Post-Survey BT questions ###################################
@@ -1523,7 +1524,7 @@ quest_clean[, .("Pre-Knowledge of Blockchain Technology (1-10)" = round(mean(v_2
 #  v_288
 # scale 1 (=more risks) - 10 (more opportunities)
 quest_clean[, .("More risks (1) or more opportunities (10) from BT" = round(mean(v_288, na.rm = T),2))]
-# more opportunities
+# neutral
 
 
 
@@ -1551,20 +1552,6 @@ round(camp[ v_196 == 1, .("Knowledge about German ministry BT campaign" = .N / n
 
 
 
-#### GGplot ####
-ggplot(dt, aes(x, y, fill = ..., color = ...)) +
-  # USE HISTOGRAMS TO LOOK AT DIFFERENT DISTRIBUTIONS!
-  geom_histogram(position = "dodge") + geom_bar() +
-  geom_jitter() + geom_point() + geom_smooth()
-geom_boxplot(width = ..., factor(x)) + geom_violin() + geom_dotplot(binaxis="y", stackdir="center", dotsize=0.3) +
-  geom_line( "x has to be numeric") + geom_text_repel(aes(label = ...))
-scale_x_log10() + scale_y_log10() +
-  facet_grid(~..., scales = "free") + facet_wrap() +
-  stat_summary(fun.y=mean, geom="point", col="darkred") +
-  labs(x = "...", y = "...", title = "...") +
-  guides(fill/color = guide_legend(title = "..."))
-
-
-#### Clean Environment ####
+################################## Cleaning ###################################
 rm(list = ls())
 
