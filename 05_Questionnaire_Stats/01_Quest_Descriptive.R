@@ -633,7 +633,7 @@ privacy[value == 7 , dis := .N / N, by = variable]
 
 privacy_summary <- unique(privacy)
 
-ggplot(privacy_summary, aes(x = variable, y = dis, fill = likert)) +
+plot_privacy <- ggplot(privacy_summary, aes(x = variable, y = dis, fill = likert)) +
   geom_bar(position = "stack", stat = "identity", width = 0.6) +
   geom_text(aes(label = scales::percent(dis,accuracy = 1, trim = FALSE)), 
             position = position_stack(vjust = 0.5), size = 2.5, family = "Times New Roman",
@@ -646,7 +646,8 @@ ggplot(privacy_summary, aes(x = variable, y = dis, fill = likert)) +
   scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25)) + 
   theme(text=element_text(family="Times New Roman", size=12))
 
-
+plot_privacy 
+  
 # Scores
 # Average out of all statements -> Own index 
 privacy_scores <- quest_clean[, .(v_104, v_105, v_106)]
@@ -658,16 +659,63 @@ privacy_scores[, Privacy := round(rowMeans(privacy_scores[, .(v_104, v_105, Reve
 
 # Score overall
 privacy_scores[, .("Privacy score overall" = round(mean(Privacy, na.rm = T),2))]
-privacy_scores[, .("Privacy score overall" = round(median(Privacy, na.rm = T),2))]
-
-
-
 
 
 
 #### Cynism ####
 # v_107
 # "I am not bothered by data collection, because my\npersonal information is publicly available anyway", 
+cynism <- quest_clean[, .(v_107)]
+colnames(cynism) <- c("I am not bothered by data collection, because my\npersonal information is publicly available anyway")
+
+cynism <- melt(cynism)
+
+# can be no 0s
+cynism[value == 0, value := NA]
+table(cynism)
+cynism <- cynism[complete.cases(cynism)]
+
+# N per variable after excluding NAs
+cynism[, N:= .N, by = variable]
+
+# 7-point Likert Scale: Adding Scores as Strings
+cynism[value == 1, likert :="Strongly disagree"]
+cynism[value == 2, likert :="Disagree"]
+cynism[value == 3, likert :="Somewhat disagree"]
+cynism[value == 4, likert :="Neither agree or disagree"]
+cynism[value == 5, likert :="Somewhat agree"]
+cynism[value == 6, likert :="Agree"]
+cynism[value == 7, likert :="Strongly agree"]
+
+cynism$likert <- factor(cynism$likert , levels = c("Strongly disagree", "Disagree", "Somewhat disagree", "Neither agree or disagree", 
+                                                     "Somewhat agree", "Agree", "Strongly agree"))
+
+# % distribution of answers
+cynism[value == 1 , dis := .N / N, by = variable]
+cynism[value == 2 , dis := .N / N, by = variable]
+cynism[value == 3 , dis := .N / N, by = variable]
+cynism[value == 4 , dis := .N / N, by = variable]
+cynism[value == 5 , dis := .N / N, by = variable]
+cynism[value == 6 , dis := .N / N, by = variable]
+cynism[value == 7 , dis := .N / N, by = variable]
+
+cynism_summary <- unique(cynism)
+
+plot_cynism <- plot_privacy <- ggplot(cynism_summary, aes(x = variable, y = dis, fill = likert)) +
+  geom_bar(position = "stack", stat = "identity", width = 0.6) +
+  geom_text(aes(label = scales::percent(dis,accuracy = 1, trim = FALSE)), 
+            position = position_stack(vjust = 0.5), size = 2.5, family = "Times New Roman",
+            check_overlap = T) +
+  coord_flip() +
+  scale_fill_brewer(palette = "BrBG") +
+  guides(fill = guide_legend(reverse=TRUE)) +
+  labs( title = "Distribution of answers related to cynism", y = "%", x = "") +
+  theme_apa(remove.x.gridlines = F) + 
+  scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25)) + 
+  theme(text=element_text(family="Times New Roman", size=12))
+
+plot_cynism 
+
 
 #### Personal innovativeness ####
 # cf. Agarwal & Prasad, 1998 
@@ -798,6 +846,7 @@ ggplot(tri_summary, aes(x = variable, y = dis, fill = likert)) +
   theme(text=element_text(family="Times New Roman", size=12))
 
 tri_comp_all
+
 
 
 
@@ -1493,6 +1542,7 @@ camp <- quest_clean[, .(v_196)]
 camp[v_196 == 1, .N] # 40 know about it
 round(camp[ v_196 == 1, .("Knowledge about German ministry BT campaign" = .N / nrow(camp))],2) 
 # 5% know about it
+
 
 
 

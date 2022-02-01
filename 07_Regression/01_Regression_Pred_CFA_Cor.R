@@ -281,7 +281,9 @@ summary(cfa, standardized=TRUE, fit.measures = T)
 # factor loadings
 inspect(cfa,what="std")$lambda
 
-# semPaths(cfa, "std")
+parameterEstimates(cfa)
+#semPaths(cfa, "std")
+residuals(cfa)$cov
 
 ##### Exkurs - EFA ####
 # Performing EFA only on items and contstructs 
@@ -300,16 +302,22 @@ fa.diagram(efa_3)
 
 fa(r = cor_dt, nfactors = 3)
 
-scree(efa_4, factors = FALSE)
-
+scree(cor_pred, factors = FALSE)
 
 # semPaths(predictors, "std")
 
 ############################################# Correlation Table  ###############################################################
-predictors <- cbind(p1,p2,p3,contact,p4,p5,p6,p7,p8,p9,p10)
+predictors_all <- cbind(p1,p2,p3,contact,p4,p5,p6,p7,p8,p9,p10)
 
-ggcorr(predictors, geom = "circle")
-apa.cor.table(predictors, show.conf.interval = F)
+ggcorr(predictors_all, geom = "circle")
+cor_all <- apa.cor.table(predictors_all, show.conf.interval = F)
+cor_all
+
+# Reduced
+predictors_red <- cbind(p2,p3,contact,p4,p5,p6,p7,p9)
+cor_red <- apa.cor.table(predictors_red, show.conf.interval = F)
+cor_red
+
 
 ############################################# Regression analysis  ###############################################################
 
@@ -319,7 +327,19 @@ lm_token <- lm(v_265 ~ Heard_of_BT + Knowledge_of_BT + Possess_Crypto + Overall_
                  Usage_Int + DISPTRUST + Perc_Benefit + Perc_Risk + Pot_Dis + Contact_in_professional_life + Contact_in_personal_life, data = token_pred)
 
 apa.reg.table(lm_token)
+
+token_pred_red <- cbind(predictors_red, quest_reg[, .(v_265)])
+lm_token_red <- lm(v_265 ~  Knowledge_of_BT + Possess_Crypto + Overall_TRI + DISPPRIV +
+                 Usage_Int + DISPTRUST + Perc_Risk + Contact_in_professional_life + Contact_in_personal_life, data = token_pred_red)
+
+apa.reg.table(lm_token_red)
+
+anova(lm_token_red, lm_token)
+# anova yields that full model models the data significantly better than reduced model 
+
 ggplot(token_pred, aes(Heard_of_BT, v_265)) + geom_jitter() + geom_smooth(method = "lm")
+
+
 
 #### 2. Fractional Ownership ####
 fract_pred <- cbind(predictors, quest_reg[, .(v_266)])
