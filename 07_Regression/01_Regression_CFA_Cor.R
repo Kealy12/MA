@@ -74,6 +74,7 @@ colnames(p3) <- c("Possess_Crypto")
 
 
 
+
 ####### Constructs ########
 
 #### TRI: Overall TRI (1-7) ####
@@ -125,7 +126,7 @@ quest_reg[, .("Usage intention score overall" = round(mean(Usage_Int, na.rm = T)
 
 
 
-#### Disposition to trust ####
+#### Trust in blockchain technology ####
 
 ## Integrity: v_247, v_248, v_249
 quest_reg[, .(v_247, v_248, v_249)]
@@ -242,6 +243,7 @@ quest_reg[, .("Potential of disruption score overall" = round(mean(Pot_Dis, na.r
 
 
 
+
 #### Excluded ####
 #### Knowledge of difference between Bitcoin and Blockchain  ####
 # (yes = 1, no = 0): v_282
@@ -249,6 +251,7 @@ quest_reg <- quest_reg[v_282 == 2, v_282 := 0]
 table(quest_reg[, .(v_282)])
 
 quest_reg
+
 
 
 
@@ -262,7 +265,7 @@ Useage_Intent =~ v_132 + v_133
 integrity =~ v_247 + v_248 + v_249
 benevolence =~ v_250 + v_251 + v_252
 ability =~ v_144 + v_145 + v_146
-Disposition_Trust =~ integrity + benevolence + ability
+Trust_in_BT =~ integrity + benevolence + ability
 Perceived_Risk =~ v_149 + v_150
 Perceived_Benefit_S =~ v_147 + Reverse_v_148
 Potential_Disruption =~ v_151 + v_152 + v_153 + Reverse_v_154
@@ -279,9 +282,9 @@ summary(cfa, standardized=TRUE, fit.measures = T)
 # factor loadings
 inspect(cfa,what="std")$lambda
 
-parameterEstimates(cfa)
+#parameterEstimates(cfa)
 #semPaths(cfa, "std")
-residuals(cfa)$cov
+#residuals(cfa)$cov
 
 ##### Exkurs - EFA ####
 # Performing EFA only on items and contstructs 
@@ -312,17 +315,18 @@ cor_all <- apa.cor.table(predictors_all, show.conf.interval = F)
 cor_all
 
 # Reduced
-predictors_red <- cbind(p2,p3,contact,p4,p5,p6,p7,p9)
+predictors_red <- cbind(p2,p3,contact,p4,p5,p6,p7,p9,p10)
 cor_red <- apa.cor.table(predictors_red, show.conf.interval = F)
 cor_red
 
 
 ############################################# Regression analysis - separate Applications  ###############################################################
 
+
 #### 1. Tokenization of Assets ####
-token_pred <- cbind(predictors_all, quest_reg[, .(v_265)])
-lm_token <- lm(v_265 ~ Heard_of_BT + Knowledge_of_BT + Possess_Crypto + Overall_TRI + DISPPRIV +
-                 Usage_Int + DISPTRUST + Perc_Benefit + Perc_Risk + Pot_Dis + Contact_in_professional_life + Contact_in_personal_life, data = token_pred)
+token_pred <- cbind(predictors_red, quest_reg[, .(v_265)])
+lm_token <- lm(v_265 ~  Knowledge_of_BT + Possess_Crypto + Overall_TRI + DISPPRIV +
+                 Usage_Int + DISPTRUST + Perc_Risk + Pot_Dis + Contact_in_professional_life + Contact_in_personal_life, data = token_pred)
 
 apa.reg.table(lm_token)
 
@@ -337,25 +341,25 @@ anova(lm_token_red, lm_token)
 
 ggplot(token_pred, aes(Heard_of_BT, v_265)) + geom_jitter() + geom_smooth(method = "lm")
 
-# H1: Usage intention has a positive effect on usefulness of application
+# H1: Usage intention has a positive effect on usefulness of tokenization of assets
 
 
 #### 2. Fractional Ownership ####
-fract_pred <- cbind(predictors_all, quest_reg[, .(v_266)])
-lm_fract <- lm(v_266 ~ Heard_of_BT + Knowledge_of_BT + Possess_Crypto + Overall_TRI + DISPPRIV +
-                 Usage_Int + DISPTRUST + Perc_Benefit + Perc_Risk + Pot_Dis + Contact_in_professional_life + Contact_in_personal_life, data = fract_pred)
+fract_pred <- cbind(predictors_red, quest_reg[, .(v_266)])
+lm_fract <- lm(v_266 ~ Knowledge_of_BT + Possess_Crypto + Overall_TRI + DISPPRIV +
+                 Usage_Int + DISPTRUST + Perc_Risk + Pot_Dis + Contact_in_professional_life + Contact_in_personal_life, data = fract_pred)
 apa.reg.table(lm_fract)
 
 #### 3. Self-Sovereign Identity ####
-self_pred <- cbind(predictors_all, quest_reg[, .(v_267)])
-lm_self <- lm(v_267 ~ Heard_of_BT + Knowledge_of_BT + Possess_Crypto + Overall_TRI + DISPPRIV +
-                 Usage_Int + DISPTRUST + Perc_Benefit + Perc_Risk + Pot_Dis + Contact_in_professional_life + Contact_in_personal_life, data = self_pred)
+self_pred <- cbind(predictors_red, quest_reg[, .(v_267)])
+lm_self <- lm(v_267 ~ Knowledge_of_BT + Possess_Crypto + Overall_TRI + DISPPRIV +
+                 Usage_Int + DISPTRUST + Perc_Risk + Pot_Dis + Contact_in_professional_life + Contact_in_personal_life, data = self_pred)
 apa.reg.table(lm_self)
 
 #### 4. Smart Contracts ####
-smart_pred <- cbind(predictors_all, quest_reg[, .(v_268)])
-lm_smart <- lm(v_268 ~ Heard_of_BT + Knowledge_of_BT + Possess_Crypto + Overall_TRI + DISPPRIV +
-                 Usage_Int + DISPTRUST + Perc_Benefit + Perc_Risk + Pot_Dis + Contact_in_professional_life + Contact_in_personal_life, data = smart_pred)
+smart_pred <- cbind(predictors_red, quest_reg[, .(v_268)])
+lm_smart <- lm(v_268 ~  Knowledge_of_BT + Possess_Crypto + Overall_TRI + DISPPRIV +
+                 Usage_Int + DISPTRUST + Perc_Risk + Pot_Dis + Contact_in_professional_life + Contact_in_personal_life, data = smart_pred)
 apa.reg.table(lm_smart)
 
 #### 5. Micropayments ####
@@ -411,22 +415,15 @@ intention_pre <- intention_pre[v_28 == 2, v_28 := 0]
 intention_pre <- intention_pre[v_28 == 3, v_28 := 0]
 colnames(intention_pre) <- c("Intention_to_use_BT")
 
-#### Logistic Regression, as Y is categorical
+#### Logistic Regression, as Y is categorical 
 intention_pred <- cbind(predictors_all, intention_pre)
 
 lm_intention <- glm(Intention_to_use_BT ~ Heard_of_BT + Knowledge_of_BT + Possess_Crypto + Overall_TRI + DISPPRIV +
-                   Usage_Int + DISPTRUST + Perc_Benefit + Perc_Risk + Pot_Dis + Contact_in_professional_life + Contact_in_personal_life, 
+                    DISPTRUST + Perc_Benefit + Perc_Risk + Pot_Dis + Contact_in_professional_life + Contact_in_personal_life, 
                    data = intention_pred,
                    family = "binomial")
 
 summary(lm_intention)
-
-
-
-
-
-
-
 
 
 

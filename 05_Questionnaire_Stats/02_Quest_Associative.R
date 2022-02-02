@@ -103,7 +103,7 @@ heard_app_means[order(-Score_Int)]
 # Visualization:
 # 1 = Yes, 2 = No, 3 = Don't know enough 
 block_usage <- quest_clean[,c("v_28", "v_334")]
-colnames(block_usage) <- c("Blockchain technology\nusage intention pre-survey ", "Blockchain technology\nusage intention post-survey ")
+colnames(block_usage) <- c("Pre-survey BT usage intention", "Post-survey BT usage intention")
 
 block_usage <- melt(block_usage)
 
@@ -145,23 +145,25 @@ plot_prePostSurvey_blockUsage <-
 plot_prePostSurvey_blockUsage
 
 # Fisher Test
-# H0: Blockchain usage intention pre-survey is independent from usage intention post-survey
+# H0: Pre-survey BT usage intention is independent from post-survey BT usage intention
 
-# Filter out 3s (=Don't knows) and 0s
-block_usage[block_usage == 3] <- NA
-block_usage[block_usage == 0] <- NA
-block_usage <- block_usage[complete.cases(block_usage)]
+# Don't knows (3) are treated as Nos: 1 = Yes, 0 = No
+fisher_blockusage <- copy(block_usage)
+fisher_blockusage[value == 3, fisher_score := 0]
+fisher_blockusage[value == 2, fisher_score := 0]
+fisher_blockusage[value == 1, fisher_score := 1]
 
-# 1 = Yes, 0 = No
-block_usage[block_usage == 2] <- 0
-f <- table(block_usage)
-f
+table(fisher_blockusage$variable)
+table(fisher_blockusage$fisher_score)
 
-fisher.test(f, alternative = "greater")
+f_table <- table(fisher_blockusage$variable, fisher_blockusage$fisher_score)
 
-# p-value 1.06e-41 -> Reject H0 at alpha = 1% level
+f_test <- fisher.test(f_table, alternative = "greater")
+f_test$p.value
+# p-value = 2.018713e-16 -> Reject H0 at alpha = 1% level
 # Usage intention pre-survey not independent from usage intention post-survey
 # --> the difference in ratios did not arrive by pure chance
+
 
 
 
