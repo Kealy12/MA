@@ -1,6 +1,6 @@
 #######################################################################################################################################
 
-# Multivariate Linear Regression on Application Scores 
+# Multivariate Linear Regression Analysis
 
 ############################################# Set Up ###############################################################
 
@@ -168,10 +168,10 @@ quest_reg[, .("T_BEN score overall" = round(mean(trust_BEN, na.rm = T),2))]
 quest_reg[, .("T_ABI score overall" = round(mean(trust_ABI, na.rm = T),2))]
 
 # Disposition to trust:
-quest_reg[, DISPTRUST := round(rowMeans(quest_reg[, .(trust_INT, trust_BEN, trust_ABI)], na.rm = T), 2)]
-p7 <- quest_reg[, .(DISPTRUST)]
+quest_reg[, Trust_in_BT := round(rowMeans(quest_reg[, .(trust_INT, trust_BEN, trust_ABI)], na.rm = T), 2)]
+p7 <- quest_reg[, .(Trust_in_BT)]
 
-quest_reg[, .("Disposition to trust score overall" = round(mean(DISPTRUST, na.rm = T),2))]
+quest_reg[, .("Tust in BT score overall" = round(mean(Trust_in_BT, na.rm = T),2))]
 
 
 #### Perceived benefit for society ####
@@ -257,18 +257,19 @@ quest_reg
 
 
 
-############################################# CFA  ###############################################################
+############################################# Total model: CFA  ###############################################################
 
+# Full CFA model
 factors <- 
 'Disposition_Privacy =~ v_104 + v_105 + v_106
 Useage_Intent =~ v_132 + v_133
 integrity =~ v_247 + v_248 + v_249
 benevolence =~ v_250 + v_251 + v_252
 ability =~ v_144 + v_145 + v_146
-Trust_in_BT =~ integrity + benevolence + ability
+Trust_BT =~ integrity + benevolence + ability
 Perceived_Risk =~ v_149 + v_150
-Perceived_Benefit_S =~ v_147 + Reverse_v_148
-Potential_Disruption =~ v_151 + v_152 + v_153 + Reverse_v_154
+Perceived_Benefit_S =~ v_147 + v_148
+Potential_Disruption =~ v_151 + v_152 + v_153 + v_154
 TRI =~ Opt + Inn + Dis + Ins
 Opt =~ OPT2 + OPT4
 Inn =~ INN1 + INN2 + INN4 
@@ -276,15 +277,75 @@ Dis =~ DIS2 + DIS3
 Ins =~ INS1 + INS2 + INS4'
 
 # Performing CFA
-cfa <- cfa(factors, quest_reg, std.lv=TRUE)
-summary(cfa, standardized=TRUE, fit.measures = T)
+cfa_all <- cfa(factors, quest_reg, std.lv=TRUE)
+summary(cfa_all, standardized=TRUE, fit.measures = T)
 
 # factor loadings
-inspect(cfa,what="std")$lambda
+inspect(cfa_all,what="std")$lambda
 
-#parameterEstimates(cfa)
-#semPaths(cfa, "std")
-#residuals(cfa)$cov
+standardizedsolution(cfa_all)
+
+############################################# Total model: C's alpha & AVE  ###############################################################
+
+# Average Variance extracted > 0.5  Cf. Parasuraman and Colby (2015)
+# Alpha > 0.7 Cf. Nunnally & Bernstein (1978)
+semTools::reliability(cfa_all)
+
+
+############################################# Total model: Correlations ###############################################################
+# Correlations
+predictors_all <- cbind(p1,p2,p3,contact,p4,p5,p6,p7,p8,p9,p10)
+
+ggcorr(predictors_all, geom = "circle")
+cor_all <- apa.cor.table(predictors_all, show.conf.interval = F)
+cor_all
+
+# Variance Inflation Factor is checked in Regression analysis
+
+############################################# Total model: Adjustments to be made  ###############################################################
+
+# Cutoff value on factor loadings < 0.4 -> DIS3 = 0.378 deleted
+# AVE < 0.5 -> DIS
+# Alpha < 0.7 -> Disp. to Privacy, Perceived benefit to Society, Potential of Disruption and DIS 
+
+############################################# Fitted Model: CFA #######################################################################
+
+factors_fit <- 
+'Disposition_Privacy =~ v_104 + v_105 + v_106
+Useage_Intent =~ v_132 + v_133
+integrity =~ v_247 + v_248 + v_249
+benevolence =~ v_250 + v_251 + v_252
+ability =~ v_144 + v_145 + v_146
+Trust_BT =~ integrity + benevolence + ability
+Perceived_Risk =~ v_149 + v_150
+Potential_Disruption =~ v_151 + v_152 + v_153 + v_154
+TRI =~ Opt + Inn + Dis + Ins
+Opt =~ OPT2 + OPT4
+Inn =~ INN1 + INN2 + INN4 
+Dis =~ DIS2
+Ins =~ INS1 + INS2 + INS4'
+
+# CFA - reduced
+cfa_fit <- cfa(factors_fit, quest_reg, std.lv=TRUE)
+summary(cfa_fit, standardized=TRUE, fit.measures = T)
+standardizedsolution(cfa_fit)
+
+
+# Deleted Perceived Benefit for Society and Heard of BT due to high Correlations
+
+
+############################################# Reduced Model: Correlations ###############################################################
+
+
+# Reduced
+predictors_red <- cbind(p2,p3,contact,p4,p5,p6,p7,p9,p10)
+cor_red <- apa.cor.table(predictors_red, show.conf.interval = F)
+cor_red
+
+
+
+
+
 
 ##### Exkurs - EFA ####
 # Performing EFA only on items and contstructs 
@@ -307,29 +368,24 @@ scree(cor_pred, factors = FALSE)
 
 # semPaths(predictors, "std")
 
-############################################# Correlation Table  ###############################################################
-predictors_all <- cbind(p1,p2,p3,contact,p4,p5,p6,p7,p8,p9,p10)
 
-ggcorr(predictors_all, geom = "circle")
-cor_all <- apa.cor.table(predictors_all, show.conf.interval = F)
-cor_all
 
-# Reduced
-predictors_red <- cbind(p2,p3,contact,p4,p5,p6,p7,p9,p10)
-cor_red <- apa.cor.table(predictors_red, show.conf.interval = F)
-cor_red
 
 
 ############################################# Regression analysis - separate Applications  ###############################################################
 
 
 #### 1. Tokenization of Assets ####
-token_pred <- cbind(predictors_red, quest_reg[, .(v_265)])
-lm_token <- lm(v_265 ~  Knowledge_of_BT + Possess_Crypto + Overall_TRI + DISPPRIV +
-                 Usage_Int + DISPTRUST + Perc_Risk + Pot_Dis + Contact_in_professional_life + Contact_in_personal_life, data = token_pred)
+
+# test on all predictors
+token_pred <- cbind(predictors_all, quest_reg[, .(v_265)])
+lm_token <- lm(v_265 ~  Heard_of_BT + Knowledge_of_BT + Possess_Crypto + Overall_TRI + DISPPRIV +
+                 Usage_Int + Trust_in_BT + Perc_Benefit + Perc_Risk + Pot_Dis + Contact_in_professional_life + Contact_in_personal_life, data = token_pred)
 
 apa.reg.table(lm_token)
+car::vif(lm_token)
 
+# Fitted model
 token_pred_red <- cbind(predictors_red, quest_reg[, .(v_265)])
 lm_token_red <- lm(v_265 ~  Knowledge_of_BT + Possess_Crypto + Overall_TRI + DISPPRIV +
                  Usage_Int + DISPTRUST + Perc_Risk + Contact_in_professional_life + Contact_in_personal_life, data = token_pred_red)
