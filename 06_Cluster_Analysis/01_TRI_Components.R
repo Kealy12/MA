@@ -80,8 +80,6 @@ ggplot(tri_comp, aes(tri_comp$`Discomfort.(DIS)`, tri_comp$`Innovativeness.(INN)
 ggplot(tri_comp, aes(tri_comp$`Optimism.(OPT)`, tri_comp$`Insecurity.(INS)`)) + 
   geom_point() + geom_smooth(method = "lm")
 
-# Check for multicollinearity TBD
-
 
 
 ########################################## Means & Overall TRI for each respondent ##########################################################

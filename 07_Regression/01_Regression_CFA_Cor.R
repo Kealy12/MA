@@ -74,12 +74,27 @@ colnames(p3) <- c("Possess_Crypto")
 
 
 
+#### Social influence on blockchain usage ####
+
+# v_296
+# Scale 1 (they never heard of it) - 10 (they are experts)
+social <- quest_reg[, .(v_296)]
+colnames(social) <- c("Social_Influence")
+social[, .("Social influence on my blockchain usage (1-10)" = round(mean(Social_Influence, na.rm = T),2))]
+# They would rather discourage me
+
+
+
 
 ####### Constructs ########
 
-#### TRI: Overall TRI (1-7) ####
+#### TRI ####
 quest_reg[, .(`Overall_TRI`)] # using single items for CFA
 p4 <- quest_reg[, .(`Overall_TRI`)]
+optimism <- quest_reg[, .(Optimism)]
+innovativeness <- quest_reg[, .(Innovativeness)]
+discomfort <- quest_reg[, .(Discomfort)]
+insecurity <- quest_reg[, .(Insecurity)]
 
 # Reversing Items Dis & Ins:
 quest_reg[, Reverse_DIS2 := 8 - DIS2]
@@ -244,32 +259,20 @@ quest_reg[, .("Potential of disruption score overall" = round(mean(Pot_Dis, na.r
 
 
 
-#### Excluded ####
-#### Knowledge of difference between Bitcoin and Blockchain  ####
-# (yes = 1, no = 0): v_282
-quest_reg <- quest_reg[v_282 == 2, v_282 := 0]
-table(quest_reg[, .(v_282)])
-
-quest_reg
-
-
-
-
-
-
 ############################################# Total model: CFA  ###############################################################
 
 # Full CFA model
 factors <- 
-'Disposition_Privacy =~ v_104 + v_105 + v_106
+'Disposition_Privacy =~ v_104 + v_105 + Reverse_v_106
 Useage_Intent =~ v_132 + v_133
 integrity =~ v_247 + v_248 + v_249
 benevolence =~ v_250 + v_251 + v_252
 ability =~ v_144 + v_145 + v_146
 Trust_BT =~ integrity + benevolence + ability
 Perceived_Risk =~ v_149 + v_150
-Perceived_Benefit_S =~ v_147 + v_148
-Potential_Disruption =~ v_151 + v_152 + v_153 + v_154
+Perceived_Benefit_S =~ v_147 + Reverse_v_148
+Potential_Disruption =~ v_151 + v_152 + v_153 + Reverse_v_154
+Social_Influence =~ v_296
 TRI =~ Opt + Inn + Dis + Ins
 Opt =~ OPT2 + OPT4
 Inn =~ INN1 + INN2 + INN4 
@@ -294,7 +297,7 @@ semTools::reliability(cfa_all)
 
 ############################################# Total model: Correlations ###############################################################
 # Correlations
-predictors_all <- cbind(p1,p2,p3,contact,p4,p5,p6,p7,p8,p9,p10)
+predictors_all <- cbind(p1,p2,p3,contact,social,p4, optimism, innovativeness, discomfort, insecurity, p5,p6,p7,p8,p9,p10)
 
 ggcorr(predictors_all, geom = "circle")
 cor_all <- apa.cor.table(predictors_all, show.conf.interval = F)
@@ -306,129 +309,123 @@ cor_all
 
 # Cutoff value on factor loadings < 0.4 -> DIS3 = 0.378 deleted
 # AVE < 0.5 -> DIS
-# Alpha < 0.7 -> Disp. to Privacy, Perceived benefit to Society, Potential of Disruption and DIS 
+# Alpha < 0.7 -> Perceived benefit to Society and DIS 
+# Deleted Perceived Benefit for Society and Heard of BT due to high Correlations (VIF)
 
 ############################################# Fitted Model: CFA #######################################################################
 
 factors_fit <- 
-'Disposition_Privacy =~ v_104 + v_105 + v_106
+'Disposition_Privacy =~ v_104 + v_105 + Reverse_v_106
 Useage_Intent =~ v_132 + v_133
 integrity =~ v_247 + v_248 + v_249
 benevolence =~ v_250 + v_251 + v_252
 ability =~ v_144 + v_145 + v_146
 Trust_BT =~ integrity + benevolence + ability
 Perceived_Risk =~ v_149 + v_150
-Potential_Disruption =~ v_151 + v_152 + v_153 + v_154
+Potential_Disruption =~ v_151 + v_152 + v_153 + Reverse_v_154
 TRI =~ Opt + Inn + Dis + Ins
 Opt =~ OPT2 + OPT4
 Inn =~ INN1 + INN2 + INN4 
 Dis =~ DIS2
 Ins =~ INS1 + INS2 + INS4'
 
-# CFA - reduced
+# CFA - fitted
 cfa_fit <- cfa(factors_fit, quest_reg, std.lv=TRUE)
 summary(cfa_fit, standardized=TRUE, fit.measures = T)
 standardizedsolution(cfa_fit)
 
+# Insecurity construct < 0.4
 
-# Deleted Perceived Benefit for Society and Heard of BT due to high Correlations
+############################################# Fitted model: C's alpha & AVE  ###############################################################
 
+# Average Variance extracted > 0.5  Cf. Parasuraman and Colby (2015)
+# Alpha > 0.7 Cf. Nunnally & Bernstein (1978)
+semTools::reliability(cfa_fit)
 
-############################################# Reduced Model: Correlations ###############################################################
-
-
-# Reduced
-predictors_red <- cbind(p2,p3,contact,p4,p5,p6,p7,p9,p10)
-cor_red <- apa.cor.table(predictors_red, show.conf.interval = F)
-cor_red
+# keep INS due to high Alpha and AVE
 
 
+############################################# Fitted Model: Correlations ###############################################################
 
-
-
-
-##### Exkurs - EFA ####
-# Performing EFA only on items and contstructs 
-cor_pred <- cor(predictors)
-
-efa_5 <- fa(cor_pred, nfactors = 6, rotate = "varimax")
-efa_3 <- fa(cor_pred, nfactors = 3, rotate = "varimax")
-efa_2 <- fa(cor_pred, nfactors = 2, rotate = "varimax")
-
-efa_5$loadings
-efa_3$loadings
-
-fa.diagram(efa_5)
-fa.diagram(efa_4)
-fa.diagram(efa_3)
-
-fa(r = cor_dt, nfactors = 3)
-
-scree(cor_pred, factors = FALSE)
-
-# semPaths(predictors, "std")
-
-
-
+predictors_fit <- cbind(p2,p3,contact,social, optimism, innovativeness, discomfort, insecurity, p5,p6,p7,p9,p10)
+cor_fit <- apa.cor.table(predictors_fit, show.conf.interval = F)
+cor_fit
 
 
 ############################################# Regression analysis - separate Applications  ###############################################################
 
 
+indep_var_all <- c("Heard_of_BT + Knowledge_of_BT + Possess_Crypto + Social_Influence + Contact_in_professional_life + Contact_in_personal_life + Optimism + Innovativeness + Discomfort + Insecurity + DISPPRIV + Usage_Int + Trust_in_BT + Perc_Benefit + Perc_Risk + Pot_Dis")
+indep_var_fitted <- c("Knowledge_of_BT + Possess_Crypto + Social_Influence + Contact_in_professional_life + Contact_in_personal_life + Optimism + Innovativeness + Discomfort + Insecurity + DISPPRIV + Usage_Int + Trust_in_BT + Perc_Risk + Pot_Dis")
+
+
 #### 1. Tokenization of Assets ####
 
-# test on all predictors
+## ALL predictors
 token_pred <- cbind(predictors_all, quest_reg[, .(v_265)])
-lm_token <- lm(v_265 ~  Heard_of_BT + Knowledge_of_BT + Possess_Crypto + Overall_TRI + DISPPRIV +
-                 Usage_Int + Trust_in_BT + Perc_Benefit + Perc_Risk + Pot_Dis + Contact_in_professional_life + Contact_in_personal_life, data = token_pred)
+outcome_1 <- c("v_265")
+f1 <- as.formula(paste(outcome_1, paste(indep_var_all, collapse = " + "), sep = " ~ "))
+lm_token <- lm(f1, data = token_pred)
 
 apa.reg.table(lm_token)
 car::vif(lm_token)
+# low VIFs
 
-# Fitted model
-token_pred_red <- cbind(predictors_red, quest_reg[, .(v_265)])
-lm_token_red <- lm(v_265 ~  Knowledge_of_BT + Possess_Crypto + Overall_TRI + DISPPRIV +
-                 Usage_Int + DISPTRUST + Perc_Risk + Contact_in_professional_life + Contact_in_personal_life, data = token_pred_red)
+## FITTED model
+token_pred_fit <- cbind(predictors_fit, quest_reg[, .(v_265)])
+outcome_1 <- c("v_265")
+f1 <- as.formula(paste(outcome_1, paste(indep_var_fitted, collapse = " + "), sep = " ~ "))
+lm_token_fit <- lm(f1, data = token_pred_fit)
 
-apa.reg.table(lm_token_red)
+apa.reg.table(lm_token_fit)
+car::vif(lm_token_fit)
 
-anova(lm_token_red, lm_token)
-# anova yields that full model models the data significantly better than reduced model 
 
-ggplot(token_pred, aes(Heard_of_BT, v_265)) + geom_jitter() + geom_smooth(method = "lm")
+
+## Clusters
+
+
 
 # H1: Usage intention has a positive effect on usefulness of tokenization of assets
 
 
 #### 2. Fractional Ownership ####
-fract_pred <- cbind(predictors_red, quest_reg[, .(v_266)])
-lm_fract <- lm(v_266 ~ Knowledge_of_BT + Possess_Crypto + Overall_TRI + DISPPRIV +
-                 Usage_Int + DISPTRUST + Perc_Risk + Pot_Dis + Contact_in_professional_life + Contact_in_personal_life, data = fract_pred)
+fract_pred <- cbind(predictors_fit, quest_reg[, .(v_266)])
+outcome_2 <- c("v_266")
+f2 <- as.formula(paste(outcome_2, paste(indep_var_fitted, collapse = " + "), sep = " ~ "))
+lm_fract <- lm(f2, data = fract_pred)
 apa.reg.table(lm_fract)
 
 #### 3. Self-Sovereign Identity ####
-self_pred <- cbind(predictors_red, quest_reg[, .(v_267)])
-lm_self <- lm(v_267 ~ Knowledge_of_BT + Possess_Crypto + Overall_TRI + DISPPRIV +
-                 Usage_Int + DISPTRUST + Perc_Risk + Pot_Dis + Contact_in_professional_life + Contact_in_personal_life, data = self_pred)
+self_pred <- cbind(predictors_fit, quest_reg[, .(v_267)])
+outcome_3 <- c("v_267")
+f3 <- as.formula(paste(outcome_3, paste(indep_var_fitted, collapse = " + "), sep = " ~ "))
+lm_self <- lm(f3, data = self_pred)
 apa.reg.table(lm_self)
 
 #### 4. Smart Contracts ####
-smart_pred <- cbind(predictors_red, quest_reg[, .(v_268)])
-lm_smart <- lm(v_268 ~  Knowledge_of_BT + Possess_Crypto + Overall_TRI + DISPPRIV +
-                 Usage_Int + DISPTRUST + Perc_Risk + Pot_Dis + Contact_in_professional_life + Contact_in_personal_life, data = smart_pred)
+smart_pred <- cbind(predictors_fit, quest_reg[, .(v_268)])
+outcome_4 <- c("v_268")
+f4 <- as.formula(paste(outcome_4, paste(indep_var_fitted, collapse = " + "), sep = " ~ "))
+lm_smart <- lm(f4, data = smart_pred)
 apa.reg.table(lm_smart)
 
 #### 5. Micropayments ####
-micro_pred <- cbind(predictors_all, quest_reg[, .(v_269)])
-lm_micro <- lm(v_269 ~ Heard_of_BT + Knowledge_of_BT + Possess_Crypto + Overall_TRI + DISPPRIV +
-                 Usage_Int + DISPTRUST + Perc_Benefit + Perc_Risk + Pot_Dis + Contact_in_professional_life + Contact_in_personal_life , data = micro_pred)
+micro_pred <- cbind(predictors_fit, quest_reg[, .(v_269)])
+outcome_5 <- c("v_269")
+f5 <- as.formula(paste(outcome_5, paste(indep_var_fitted, collapse = " + "), sep = " ~ "))
+lm_micro <- lm(f5 , data = micro_pred)
 apa.reg.table(lm_micro)
 
 #### 6. Anonymous Transactions ####
-anony_pred <- cbind(predictors_all, quest_reg[, .(v_270)])
-lm_anony <- lm(v_270 ~ Heard_of_BT + Knowledge_of_BT + Possess_Crypto + Overall_TRI + DISPPRIV +
-                 Usage_Int + DISPTRUST + Perc_Benefit + Perc_Risk + Pot_Dis + Contact_in_professional_life + Contact_in_personal_life, data = anony_pred)
+anony_pred <- cbind(predictors_fit, quest_reg[, .(v_270)])
+outcome_6 <- c("v_270")
+f6 <- as.formula(paste(outcome_6, paste(indep_var_fitted, collapse = " + "), sep = " ~ "))
+lm_anony <- lm(f6, data = anony_pred)
 apa.reg.table(lm_anony)
+
+
+
 
 
 
@@ -457,9 +454,10 @@ apa.reg.table(lm_anony)
 # Calculating mean over all applications
 quest_reg[, Mean_all_Applic := round(rowMeans(quest_reg[, .(v_265, v_266, v_267, v_268, v_269, v_270)], na.rm = T), 2)]
 
-overall_pred <- cbind(predictors_all, quest_reg[, .(Mean_all_Applic)])
-lm_overall <- lm(Mean_all_Applic ~ Heard_of_BT + Knowledge_of_BT + Possess_Crypto + Overall_TRI + DISPPRIV +
-                 Usage_Int + DISPTRUST + Perc_Benefit + Perc_Risk + Pot_Dis + Contact_in_professional_life + Contact_in_personal_life, data = overall_pred)
+overall_pred <- cbind(predictors_fit, quest_reg[, .(Mean_all_Applic)])
+outcome_overall <- c("Mean_all_Applic")
+f_overall <- as.formula(paste(outcome_overall, paste(indep_var_fitted, collapse = " + "), sep = " ~ "))
+lm_overall <- lm(f_overall, data = overall_pred)
 
 apa.reg.table(lm_overall)
 
@@ -472,12 +470,11 @@ intention_pre <- intention_pre[v_28 == 3, v_28 := 0]
 colnames(intention_pre) <- c("Intention_to_use_BT")
 
 #### Logistic Regression, as Y is categorical 
-intention_pred <- cbind(predictors_all, intention_pre)
+intention_pred <- cbind(predictors_fit, intention_pre)
+outcome_usage <- c("Intention_to_use_BT")
+f_usage <- as.formula(paste(outcome_usage, paste(indep_var_fitted, collapse = " + "), sep = " ~ "))
 
-lm_intention <- glm(Intention_to_use_BT ~ Heard_of_BT + Knowledge_of_BT + Possess_Crypto + Overall_TRI + DISPPRIV +
-                    DISPTRUST + Perc_Benefit + Perc_Risk + Pot_Dis + Contact_in_professional_life + Contact_in_personal_life, 
-                   data = intention_pred,
-                   family = "binomial")
+lm_intention <- glm(f_usage, data = intention_pred, family = "binomial")
 
 summary(lm_intention)
 
@@ -485,7 +482,6 @@ summary(lm_intention)
 
 
 
-############################################# Regression analysis - Knowledge of BT (post-survey)  ###############################################################
 
 
 
