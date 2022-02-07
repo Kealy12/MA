@@ -85,6 +85,19 @@ social[, .("Social influence on my blockchain usage (1-10)" = round(mean(Social_
 
 
 
+#### Personal Innovativeness ####
+pers_inn <- quest_reg[, .(v_205, v_206)]
+pers_inn[pers_inn == 0] <- NA
+quest_reg[v_205 == 0, v_205 := NA]
+quest_reg[v_206 == 0, v_206 := NA]
+
+# Reverse code v_205
+pers_inn[, Reverse_v_205 := 8 - v_205]
+quest_reg[, Reverse_v_205 := 8 - v_205]
+pers_inn[, PIIT := round(rowMeans(pers_inn_score[, .(v_206, Reverse_v_205)], na.rm = T), 2)]
+
+pers_inn_pred <- pers_inn[, .(PIIT)]
+
 
 ####### Constructs ########
 
@@ -279,6 +292,9 @@ Inn =~ INN1 + INN2 + INN4
 Dis =~ DIS2 + DIS3
 Ins =~ INS1 + INS2 + INS4'
 
+# Excluded PIIT due to similarity with TRI
+# Personal_Innovativeness =~ v_206 + Reverse_v_205
+
 # Performing CFA
 cfa_all <- cfa(factors, quest_reg, std.lv=TRUE)
 summary(cfa_all, standardized=TRUE, fit.measures = T)
@@ -297,7 +313,7 @@ semTools::reliability(cfa_all)
 
 ############################################# Total model: Correlations ###############################################################
 # Correlations
-predictors_all <- cbind(p1,p2,p3,contact,social,p4, optimism, innovativeness, discomfort, insecurity, p5,p6,p7,p8,p9,p10)
+predictors_all <- cbind(p1,p2,p3,contact,social,p4, optimism, innovativeness, discomfort, insecurity,pers_inn_pred, p5,p6,p7,p8,p9,p10)
 
 ggcorr(predictors_all, geom = "circle")
 cor_all <- apa.cor.table(predictors_all, show.conf.interval = F)
@@ -311,6 +327,7 @@ cor_all
 # AVE < 0.5 -> DIS
 # Alpha < 0.7 -> Perceived benefit to Society and DIS 
 # Deleted Perceived Benefit for Society and Heard of BT due to high Correlations (VIF)
+# Delete PIIT due to high correlations and VIF
 
 ############################################# Fitted Model: CFA #######################################################################
 
@@ -508,7 +525,7 @@ cor(predictors_clus)
 ############################################# Regression analysis - separate Applications  ###############################################################
 
 
-indep_var_all <- c("Heard_of_BT + Knowledge_of_BT + Possess_Crypto + Social_Influence + Contact_in_professional_life + Contact_in_personal_life + Optimism + Innovativeness + Discomfort + Insecurity + DISPPRIV + Usage_Int + Trust_in_BT + Perc_Benefit + Perc_Risk + Pot_Dis")
+indep_var_all <- c("Heard_of_BT + Knowledge_of_BT + Possess_Crypto + Social_Influence + Contact_in_professional_life + Contact_in_personal_life + Optimism + Innovativeness + Discomfort + Insecurity + DISPPRIV + PIIT + Usage_Int + Trust_in_BT + Perc_Benefit + Perc_Risk + Pot_Dis")
 indep_var_fitted <- c("Knowledge_of_BT + Possess_Crypto + Social_Influence + Contact_in_professional_life + Contact_in_personal_life + Optimism + Innovativeness + Discomfort + Insecurity + DISPPRIV + Usage_Int + Trust_in_BT + Perc_Risk + Pot_Dis")
 indep_var_clus <-   c("Knowledge_of_BT + Possess_Crypto + Social_Influence + Contact_in_professional_life + Contact_in_personal_life + Optimism + Innovativeness + Discomfort + Insecurity + Explorers + Pioneers + Hesitators + Avoiders + DISPPRIV + Usage_Int + Trust_in_BT + Perc_Risk + Pot_Dis")
 
