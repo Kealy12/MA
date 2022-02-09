@@ -44,13 +44,13 @@ colnames(quest_reg)[219] <- c("Insecurity")
 # Extract Application columns
 app_scores <- quest_reg[, .(v_265, v_266, v_267, v_268, v_269, v_270)]
 
-############################################# Extracting relevant predictors ###############################################################
+############################################# Extracting predictors ###############################################################
 
 #### Have you heard of BT ####
 # (yes = 1,no = 0): v_321
 quest_reg <- quest_reg[v_321 == 2, v_321 := 0]
-p1 <- quest_reg[, .(v_321)]
-colnames(p1) <- c("Heard_of_BT")
+heard <- quest_reg[, .(v_321)]
+colnames(heard) <- c("Heard_of_BT")
 
 #### Contact with BT ####
 
@@ -61,15 +61,15 @@ colnames(contact) <- c("Contact_in_professional_life", "Contact_in_personal_life
 
 #### Knowledge of BT  ####
 # (1-10 scale): v_286
-p2 <- quest_reg[, .(v_286)]
-colnames(p2) <- c("Knowledge_of_BT")
+knowledge <- quest_reg[, .(v_286)]
+colnames(knowledge) <- c("Knowledge_of_BT")
 
 #### Possession of Crypto ####
 # v_54: (yes = 1, no = 0)
 quest_reg <- quest_reg[v_54 == 2, v_54 := 0]
 table(quest_reg[, .(v_54)])
-p3 <- quest_reg[, .(v_54)]
-colnames(p3) <- c("Possess_Crypto")
+poss_crypto <- quest_reg[, .(v_54)]
+colnames(poss_crypto) <- c("Possess_Crypto")
 
 
 
@@ -103,7 +103,7 @@ pers_inn_pred <- pers_inn[, .(PIIT)]
 
 #### TRI ####
 quest_reg[, .(`Overall_TRI`)] # using single items for CFA
-p4 <- quest_reg[, .(`Overall_TRI`)]
+tri_overall <- quest_reg[, .(`Overall_TRI`)]
 optimism <- quest_reg[, .(Optimism)]
 innovativeness <- quest_reg[, .(Innovativeness)]
 discomfort <- quest_reg[, .(Discomfort)]
@@ -130,7 +130,7 @@ quest_reg[, Reverse_v_106 := 8 - v_106]
 # Calculate Average 
 quest_reg[, DISPPRIV := round(rowMeans(quest_reg[, .(v_104, v_105, Reverse_v_106)], na.rm = T), 2)]
 
-p5 <- quest_reg[, .(DISPPRIV)]
+disp_priv <- quest_reg[, .(DISPPRIV)]
 
 # Score overall
 quest_reg[, .("Privacy score overall" = round(mean(DISPPRIV, na.rm = T),2))]
@@ -147,7 +147,7 @@ quest_reg[v_133 == 0, v_133 := NA]
 # Calculate Average 
 quest_reg[, Usage_Int := round(rowMeans(quest_reg[, .(v_132, v_133)], na.rm = T), 2)]
 
-p6 <- quest_reg[, .(Usage_Int)]
+usage_int <- quest_reg[, .(Usage_Int)]
 
 # Score overall
 quest_reg[, .("Usage intention score overall" = round(mean(Usage_Int, na.rm = T),2))]
@@ -197,7 +197,7 @@ quest_reg[, .("T_ABI score overall" = round(mean(trust_ABI, na.rm = T),2))]
 
 # Disposition to trust:
 quest_reg[, Trust_in_BT := round(rowMeans(quest_reg[, .(trust_INT, trust_BEN, trust_ABI)], na.rm = T), 2)]
-p7 <- quest_reg[, .(Trust_in_BT)]
+disp_trust <- quest_reg[, .(Trust_in_BT)]
 
 quest_reg[, .("Tust in BT score overall" = round(mean(Trust_in_BT, na.rm = T),2))]
 
@@ -215,7 +215,7 @@ quest_reg[, Reverse_v_148 := 8 - v_148]
 # Calculate Average 
 quest_reg[, Perc_Benefit := round(rowMeans(quest_reg[, .(v_147, Reverse_v_148)], na.rm = T), 2)]
 
-p8 <- quest_reg[, .(Perc_Benefit)]
+perc_benf_s <- quest_reg[, .(Perc_Benefit)]
 
 # Score overall
 quest_reg[, .("Perceived benefit for society score overall" = round(mean(Perc_Benefit, na.rm = T),2))]
@@ -231,7 +231,7 @@ quest_reg[v_150 == 0, v_150 := NA]
 # Calculate Average 
 quest_reg[, Perc_Risk := round(rowMeans(quest_reg[, .(v_149, v_150)], na.rm = T), 2)]
 
-p9 <- quest_reg[, .(Perc_Risk)]
+perc_risk <- quest_reg[, .(Perc_Risk)]
 
 # Score overall
 quest_reg[, .("Perceived risk score overall" = round(mean(Perc_Risk, na.rm = T),2))]
@@ -255,7 +255,7 @@ quest_reg[, Reverse_v_154 := 8 - v_154]
 # Calculate Average 
 quest_reg[, Pot_Dis := round(rowMeans(quest_reg[, .(v_151, v_152, v_153, Reverse_v_154)], na.rm = T), 2)]
 
-p10 <- quest_reg[, .(Pot_Dis)]
+pot_disrup <- quest_reg[, .(Pot_Dis)]
 
 # Score overall
 quest_reg[, .("Potential of disruption score overall" = round(mean(Pot_Dis, na.rm = T),2))]
@@ -270,6 +270,28 @@ quest_reg[, .("Potential of disruption score overall" = round(mean(Pot_Dis, na.r
 
 
 
+
+
+
+
+############################################# Potential Moderators ###############################################################
+#### Age ####
+
+# v_285 -> Need to recode data: +14 on score to show age (nobody < 15 and > 85)
+age <- quest_reg[, c("v_285")]
+age <- age[, v_285 := v_285 + 14]
+colnames(age) <- c("Age")
+
+#### Gender ####
+# v_169 -> Male = 1, Female = 0
+gender <- quest_reg[, .(v_169)]
+gender <- gender[v_169 == 2, v_169 := 0]
+colnames(gender) <- c("Gender")
+gender$Gender <- as.factor(gender$Gender)
+
+
+
+#### Experience? ####
 
 
 ############################################# Total model: CFA  ###############################################################
@@ -313,9 +335,7 @@ semTools::reliability(cfa_all)
 
 ############################################# Total model: Correlations ###############################################################
 # Correlations
-predictors_all <- cbind(p1,p2,p3,contact,social,p4, optimism, innovativeness, discomfort, insecurity,pers_inn_pred, p5,p6,p7,p8,p9,p10)
-
-ggcorr(predictors_all, geom = "circle")
+predictors_all <- cbind(heard,knowledge,poss_crypto,contact,social,tri_overall, optimism, innovativeness, discomfort, insecurity, disp_priv,usage_int,disp_trust,perc_benf_s,perc_risk,pot_disrup)
 cor_all <- apa.cor.table(predictors_all, show.conf.interval = F)
 cor_all
 
@@ -325,8 +345,8 @@ cor_all
 
 # Cutoff value on factor loadings < 0.4 -> DIS3 = 0.378 deleted
 # AVE < 0.5 -> DIS
-# Alpha < 0.7 -> Perceived benefit to Society and DIS 
-# Deleted Perceived Benefit for Society and Heard of BT due to high Correlations (VIF)
+# Alpha < 0.7 -> DIS, (Perceived benefit to Society)
+# Deleted Perceived Benefit for Society and Heard of BT due to higher Correlations (VIF)
 # Delete PIIT due to high correlations and VIF
 
 ############################################# Fitted Model: CFA #######################################################################
@@ -339,6 +359,7 @@ benevolence =~ v_250 + v_251 + v_252
 ability =~ v_144 + v_145 + v_146
 Trust_BT =~ integrity + benevolence + ability
 Perceived_Risk =~ v_149 + v_150
+Perceived_Benefit_S =~ v_147 + Reverse_v_148
 Potential_Disruption =~ v_151 + v_152 + v_153 + Reverse_v_154
 TRI =~ Opt + Inn + Dis + Ins
 Opt =~ OPT2 + OPT4
@@ -364,170 +385,15 @@ semTools::reliability(cfa_fit)
 
 ############################################# Fitted Model: Correlations ###############################################################
 
-predictors_fit <- cbind(p2,p3,contact,social, optimism, innovativeness, discomfort, insecurity, p5,p6,p7,p9,p10)
+predictors_fit <- cbind(knowledge,poss_crypto,contact,social, optimism, innovativeness, discomfort, insecurity, disp_priv,usage_int,disp_trust,perc_benf_s,perc_risk,pot_disrup)
 cor_fit <- apa.cor.table(predictors_fit, show.conf.interval = F)
 cor_fit
 
-############################################# CLUSTER TEST ############################################# 
-
-# Base table
-dim(quest_tri_extended)
-
-# extend base table with additional columns from predictors
-dim(quest_reg)
-
-clus_table <- merge(quest_tri_extended, quest_reg, by.x = "lfdn", by.y = "lfdn", all.x = T)
-dim(clus_table)
-clus_table[, grep(pattern=".y$", colnames(clus_table)) := NULL]
-clus_table
-
-# Separate Cluster Indicators to 0 and 1
-clus_table <- dcast(clus_table, ... ~ Cluster,  value.var = "Cluster")
-
-# Convert Factor into character
-clus_table$Explorers <- as.character(clus_table$Explorers)
-clus_table$Pioneers <- as.character(clus_table$Pioneers)
-clus_table$Hesitators <- as.character(clus_table$Hesitators)
-clus_table$Avoiders <- as.character(clus_table$Avoiders)
-
-# Assign 0 and 1
-clus_table[!is.na(Explorers), Explorers := "1"]
-clus_table[is.na(Explorers), Explorers := "0"]
-clus_table[!is.na(Avoiders), Avoiders := "1"]
-clus_table[is.na(Avoiders), Avoiders := "0"]
-clus_table[!is.na(Hesitators), Hesitators := "1"]
-clus_table[is.na(Hesitators), Hesitators := "0"]
-clus_table[!is.na(Pioneers), Pioneers := "1"]
-clus_table[is.na(Pioneers), Pioneers := "0"]
-
-# Back to Factor
-clus_table$Explorers <- as.numeric(clus_table$Explorers)
-clus_table$Pioneers <- as.numeric(clus_table$Pioneers)
-clus_table$Hesitators <- as.numeric(clus_table$Hesitators)
-clus_table$Avoiders <- as.numeric(clus_table$Avoiders)
-
-# Extracting Predictors
-# Have you heard of BT #
-# (yes = 1,no = 0): v_321
-clus_table <- clus_table[v_321.x == 2, v_321.x := 0]
-pc1 <- clus_table[, .(v_321.x)]
-colnames(pc1) <- c("Heard_of_BT")
-
-# Contact with BT
-# v_10: in professional life
-# v_11: in personal life
-contact_c<- clus_table[, c("v_10.x", "v_11.x")]
-colnames(contact_c) <- c("Contact_in_professional_life", "Contact_in_personal_life")
-
-# Knowledge of BT
-# (1-10 scale): v_286
-pc2 <- clus_table[, .(v_286.x)]
-colnames(pc2) <- c("Knowledge_of_BT")
-
-# Possession of Crypto
-# v_54: (yes = 1, no = 0)
-clus_table <- clus_table[v_54.x == 2, v_54.x := 0]
-table(clus_table[, .(v_54.x)])
-pc3 <- clus_table[, .(v_54.x)]
-colnames(pc3) <- c("Possess_Crypto")
-
-# Social influence on blockchain usage
-# v_296
-# Scale 1 (they never heard of it) - 10 (they are experts)
-social_c <- clus_table[, .(v_296.x)]
-colnames(social_c) <- c("Social_Influence")
-social_c[, .("Social influence on my blockchain usage (1-10)" = round(mean(Social_Influence, na.rm = T),2))]
-# They would rather discourage me
-
-
-# TRI 
-clus_table
-clus_table[, .(`Overall_TRI`)] # using single items for CFA
-pc4 <- clus_table[, .(`Overall_TRI`)]
-
-optimism_c <- clus_table[, .(Optimism)]
-innovativeness_c <- clus_table[, .(Innovativeness)]
-discomfort_c <- clus_table[, .(Discomfort)]
-insecurity_c <- clus_table[, .(`Insecurity (INS)`)]
-colnames(insecurity_c) <- c("Insecurity")
-
-explorers <- clus_table[, .(Explorers)]
-pioneers <- clus_table[, .(Pioneers)]
-hesitators <- clus_table[, .(Hesitators)]
-avoiders <- clus_table[, .(Avoiders)]
-
-# Disposition to privacy
-# Likert 1 (low privacy concern) - 7 (high privacy concern)): v_104, v_105, v_106
-# can not be 0
-clus_table[v_104.x == 0, v_104.x := NA]
-clus_table[v_105.x == 0, v_105.x := NA]
-clus_table[v_106.x == 0, v_106.x := NA]
-
-pc5 <- clus_table[, .(DISPPRIV)]
-
-
-# Usage Intention
-# v_132, v_133: Likert (1-7)
-# can be no 0s
-clus_table[v_132.x == 0, v_132.x := NA]
-clus_table[v_133.x == 0, v_133.x := NA]
-
-pc6 <- clus_table[, .(Usage_Int)]
-
-
-# Trust in blockchain technology
-pc7 <- clus_table[, .(Trust_in_BT)]
-
-# Perceived benefit for society
-pc8 <- clus_table[, .(Perc_Benefit)]
-
-# Perceived Risk
-pc9 <- clus_table[, .(Perc_Risk)]
-
-# Potential of disruption
-
-pc10 <- clus_table[, .(Pot_Dis)]
-# Test
-# a <- "2910"
-# contain <- function(searchValue, table){
-#   for(i in 1:nrow(table)){
-#     id <- table[i, c(1)]$lfdn
-#     if(id ==a) return(T)
-#   } 
-#   return(F)
-# }
-# contain(a, quest_tri_extended)
-# 
-# 
-# for(i in 1:nrow(quest_tri_extended)){
-#   id <- quest_tri_extended[i, c(1)]$lfdn
-#   if(contain(id, quest_reg) == T){
-#     get <- quest_reg$Usage_Int[id]
-#     quest_tri_extended[, addedColum := get]
-#   }else print("not here")
-# }
-# 
-# uniqueN(quest_tri_extended$lfdn)
-# uniqueN(quest_reg$lfdn)
-
-
-
-# Correlations
-clus_table
-# Omitted Posession of Crypto as only 17 predictors can be shown
-predictors_clus <- cbind(pc2,pc3, contact_c,social_c, optimism_c, innovativeness_c, discomfort_c, insecurity_c, explorers, pioneers, hesitators, avoiders, pc5,pc6,pc7,pc9,pc10)
-cor_clus <- apa.cor.table(predictors_clus, show.conf.interval = F)
-cor_clus
-cor(predictors_clus)
-
-
-
 ############################################# Regression analysis - separate Applications  ###############################################################
-
-
-indep_var_all <- c("Heard_of_BT + Knowledge_of_BT + Possess_Crypto + Social_Influence + Contact_in_professional_life + Contact_in_personal_life + Optimism + Innovativeness + Discomfort + Insecurity + DISPPRIV + PIIT + Usage_Int + Trust_in_BT + Perc_Benefit + Perc_Risk + Pot_Dis")
-indep_var_fitted <- c("Knowledge_of_BT + Possess_Crypto + Social_Influence + Contact_in_professional_life + Contact_in_personal_life + Optimism + Innovativeness + Discomfort + Insecurity + DISPPRIV + Usage_Int + Trust_in_BT + Perc_Risk + Pot_Dis")
-indep_var_clus <-   c("Knowledge_of_BT + Possess_Crypto + Social_Influence + Contact_in_professional_life + Contact_in_personal_life + Optimism + Innovativeness + Discomfort + Insecurity + Explorers + Pioneers + Hesitators + Avoiders + DISPPRIV + Usage_Int + Trust_in_BT + Perc_Risk + Pot_Dis")
+#### Setup ####
+indep_var_all <- c("Heard_of_BT + Knowledge_of_BT + Possess_Crypto + Social_Influence + Contact_in_professional_life + Contact_in_personal_life + Optimism + Innovativeness + Discomfort + Insecurity + DISPPRIV + Usage_Int + Trust_in_BT + Perc_Benefit + Perc_Risk + Pot_Dis")
+indep_var_fitted <- c("Knowledge_of_BT + Possess_Crypto + Social_Influence + Contact_in_professional_life + Contact_in_personal_life + Optimism + Innovativeness + Discomfort + Insecurity + DISPPRIV + Mean_all_Applic + Trust_in_BT + Perc_Risk + Perc_Benefit + Pot_Dis")
+indep_var_moderated <- c(" Knowledge_of_BT + Possess_Crypto + Social_Influence*Gender + Contact_in_professional_life*Gender + Contact_in_personal_life*Gender + Optimism*Gender + Innovativeness*Gender + Discomfort*Gender + Insecurity*Gender + DISPPRIV*Gender + Usage_Int*Gender + Trust_in_BT*Gender + Perc_Risk*Gender + Perc_Benefit*Gender + Pot_Dis*Gender")
 
 #### 1. Tokenization of Assets ####
 
@@ -541,6 +407,7 @@ apa.reg.table(lm_token)
 car::vif(lm_token)
 # low VIFs
 
+
 ## FITTED model
 token_pred_fit <- cbind(predictors_fit, quest_reg[, .(v_265)])
 outcome_1 <- c("v_265")
@@ -550,18 +417,15 @@ lm_token_fit <- lm(f1, data = token_pred_fit)
 apa.reg.table(lm_token_fit)
 car::vif(lm_token_fit)
 
-# H1: Usage intention has a positive effect on usefulness of tokenization of assets
+## Moderated Model ##
+token_pred_mod <- cbind(predictors_fit, quest_reg[, .(v_265)], gender, age)
+outcome_1 <- c("v_265")
+f1 <- as.formula(paste(outcome_1, paste(indep_var_moderated, collapse = " + "), sep = " ~ "))
+lm_token_mod <- lm(f1, data = token_pred_mod)
 
-## Cluster model ##
-token_pred_clus <- cbind(predictors_clus, clus_table[, .(v_265.x)])
-outcome_1 <- c("v_265.x")
-f1 <- as.formula(paste(outcome_1, paste(indep_var_clus, collapse = " + "), sep = " ~ "))
-lm_token_clus <- lm(f1, data = token_pred_clus)
+apa.reg.table(lm_token_mod)
+car::vif(lm_token_mod)
 
-apa.reg.table(lm_token_clus)
-car::vif(lm_token_clus)
-
-alias(lm_token_clus)
 
 
 
@@ -578,6 +442,15 @@ outcome_2 <- c("v_266.x")
 fc2 <- as.formula(paste(outcome_2, paste(indep_var_clus, collapse = " + "), sep = " ~ "))
 lm_fract <- lm(fc2, data = fract_pred_clus)
 apa.reg.table(lm_fract)
+
+## Moderated Model ##
+fract_pred_mod <- cbind(predictors_fit, quest_reg[, .(v_266)], gender, age)
+outcome_2 <- c("v_266")
+fm2 <- as.formula(paste(outcome_2, paste(indep_var_moderated, collapse = " + "), sep = " ~ "))
+lm_fract_mod <- lm(fm2, data = fract_pred_mod)
+
+apa.reg.table(lm_fract_mod)
+car::vif(lm_fract_mod)
 
 #### 3. Self-Sovereign Identity ####
 self_pred <- cbind(predictors_fit, quest_reg[, .(v_267)])
@@ -637,12 +510,25 @@ apa.reg.table(lm_anony)
 # Calculating mean over all applications
 quest_reg[, Mean_all_Applic := round(rowMeans(quest_reg[, .(v_265, v_266, v_267, v_268, v_269, v_270)], na.rm = T), 2)]
 
+# FITTED model
 overall_pred <- cbind(predictors_fit, quest_reg[, .(Mean_all_Applic)])
-outcome_overall <- c("Mean_all_Applic")
+outcome_overall <- c("Usage_Int")
 f_overall <- as.formula(paste(outcome_overall, paste(indep_var_fitted, collapse = " + "), sep = " ~ "))
 lm_overall <- lm(f_overall, data = overall_pred)
 
 apa.reg.table(lm_overall)
+car::vif(lm_overall)
+
+
+# MODERATED model
+overall_mod <- cbind(predictors_fit, quest_reg[, .(Mean_all_Applic)], gender, age)
+outcome_overall <- c("Mean_all_Applic")
+f_overall <- as.formula(paste(outcome_overall, paste(indep_var_moderated, collapse = " + "), sep = " ~ "))
+lm_overall_mod <- lm(f_overall, data = overall_mod)
+
+apa.reg.table(lm_overall_mod)
+car::vif(lm_overall_mod)
+
 
 ############################################# Regression analysis - Intention to use BT (pre-survey) ###############################################################
 
@@ -653,14 +539,15 @@ intention_pre <- intention_pre[v_28 == 3, v_28 := 0]
 colnames(intention_pre) <- c("Intention_to_use_BT")
 
 #### Logistic Regression, as Y is categorical 
+indep_var_logistic<- c("Knowledge_of_BT + Possess_Crypto + Social_Influence + Contact_in_professional_life + Contact_in_personal_life + Optimism + Innovativeness + Discomfort + Insecurity + DISPPRIV + Trust_in_BT + Perc_Risk + Perc_Benefit + Pot_Dis")
 intention_pred <- cbind(predictors_fit, intention_pre)
 outcome_usage <- c("Intention_to_use_BT")
-f_usage <- as.formula(paste(outcome_usage, paste(indep_var_fitted, collapse = " + "), sep = " ~ "))
+f_usage <- as.formula(paste(outcome_usage, paste(indep_var_logistic, collapse = " + "), sep = " ~ "))
 
 lm_intention <- glm(f_usage, data = intention_pred, family = "binomial")
 
 summary(lm_intention)
-
+car::vif(lm_intention)
 
 
 ###### Save and Clean ####
