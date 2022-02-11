@@ -19,6 +19,8 @@ library(extrafont)
 library(ggrepel)
 library(lavaan)
 library(psych)
+library(semTools)
+library(cSEM)
 
 # Set working directory
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
@@ -60,6 +62,13 @@ quest_reg_mod[, Reverse_INS1 := 8 - INS1]
 quest_reg_mod[, Reverse_INS2 := 8 - INS2]
 quest_reg_mod[, Reverse_INS4 := 8 - INS4]
 
+# Adjusting Discomfort to fit CFA: Deleted DIS3; Only DIS2 relevant for Discomfort
+discomfort_fitted <- quest_reg_mod[, .(Discomfort_fit = DIS2)]
+discomfort_fitted <- cbind(discomfort, discomfort_fitted)
+discomfort_fitted[, Discomfort := NULL]
+colnames(discomfort_fitted) <- c("Discomfort")
+discomfort_fitted
+
 #### Social influence ####
 # v_296
 # Scale 1 (they never heard of it) - 10 (they are experts)
@@ -95,8 +104,8 @@ quest_reg_mod[v_247 == 0, v_247 := NA]
 quest_reg_mod[v_248 == 0, v_248 := NA]
 quest_reg_mod[v_249 == 0, v_249 := NA]
 
-# Calculate Average trust_INT:
-quest_reg_mod[, trust_INT := round(rowMeans(quest_reg_mod[, .(v_247, v_248, v_249)], na.rm = T), 2)]
+# Calculate Average Integrity:
+quest_reg_mod[, Integrity := round(rowMeans(quest_reg_mod[, .(v_247, v_248, v_249)], na.rm = T), 2)]
 
 ## Benevolence: v_250, v_251, v_252
 quest_reg_mod[, .(v_250, v_251, v_252)]
@@ -106,8 +115,8 @@ quest_reg_mod[v_250 == 0, v_250 := NA]
 quest_reg_mod[v_251 == 0, v_251 := NA]
 quest_reg_mod[v_252 == 0, v_252 := NA]
 
-# Calculate Average trust_BEN:
-quest_reg_mod[, trust_BEN := round(rowMeans(quest_reg_mod[, .(v_250, v_251, v_252)], na.rm = T), 2)]
+# Calculate Average Benevolence:
+quest_reg_mod[, Benevolence := round(rowMeans(quest_reg_mod[, .(v_250, v_251, v_252)], na.rm = T), 2)]
 
 ## Ability: v_144, v_145, v_146
 quest_reg_mod[, .(v_144, v_145, v_146)]
@@ -117,17 +126,17 @@ quest_reg_mod[v_144 == 0, v_144 := NA]
 quest_reg_mod[v_145 == 0, v_145 := NA]
 quest_reg_mod[v_146 == 0, v_146 := NA]
 
-# Calculate Average trust_ABI:
-quest_reg_mod[, trust_ABI := round(rowMeans(quest_reg_mod[, .(v_144, v_145, v_146)], na.rm = T), 2)]
+# Calculate Average Ability:
+quest_reg_mod[, Ability := round(rowMeans(quest_reg_mod[, .(v_144, v_145, v_146)], na.rm = T), 2)]
 
 
 # Score overall
-quest_reg_mod[, .("T_INT score overall" = round(mean(trust_INT, na.rm = T),2))]
-quest_reg_mod[, .("T_BEN score overall" = round(mean(trust_BEN, na.rm = T),2))]
-quest_reg_mod[, .("T_ABI score overall" = round(mean(trust_ABI, na.rm = T),2))]
+quest_reg_mod[, .("T_INT score overall" = round(mean(Integrity, na.rm = T),2))]
+quest_reg_mod[, .("T_BEN score overall" = round(mean(Benevolence, na.rm = T),2))]
+quest_reg_mod[, .("T_ABI score overall" = round(mean(Ability, na.rm = T),2))]
 
 # Disposition to trust:
-quest_reg_mod[, Trust := round(rowMeans(quest_reg_mod[, .(trust_INT, trust_BEN, trust_ABI)], na.rm = T), 2)]
+quest_reg_mod[, Trust := round(rowMeans(quest_reg_mod[, .(Integrity, Benevolence, Ability)], na.rm = T), 2)]
 trust <- quest_reg_mod[, .(Trust)]
 
 quest_reg_mod[, .("Tust in BT score overall" = round(mean(Trust, na.rm = T),2))]
@@ -211,7 +220,6 @@ gender <- gender[v_169 == 2, v_169 := 0]
 colnames(gender) <- c("Gender")
 
 
-
 #### Experience ####
 # Mean of contact with BT and knowledge
 
@@ -241,7 +249,7 @@ colnames(poss_crypto) <- c("Possession_of_cryptocurrency")
 #### National culture TBD ####
 # TBD
 
-############################################# CFA ###############################################################
+############################################# Preliminary CFA ###############################################################
 
 cfa_mod_model <- 
 'tri =~ optimism + innovativeness + discomfort + insecurity
@@ -273,27 +281,147 @@ summary(cfa_mod, standardized=TRUE, fit.measures = T)
 
 # factor loadings
 inspect(cfa_mod,what="std")$lambda
-standardizedsolution(cfa_mod)
+cfa_mod_table <- standardizedsolution(cfa_mod)
+cfa_mod_table
 
-############################################# C's alpha & AVE ###############################################################
+############################################# Preliminary Reliability & Validity Criteria ###############################################################
 # Average Variance extracted > 0.5  Cf. Parasuraman and Colby (2015)
 # Alpha > 0.7 Cf. Nunnally & Bernstein (1978)
 semTools::reliability(cfa_mod)
 
-############################################# Correlations  ###############################################################
+############################################# Preliminary Correlations  ###############################################################
 predictors_mod <- cbind(optimism, innovativeness, discomfort, insecurity, social, disp_priv, trust, perc_benf_s, percieved_risk, pot_disrup, usage_int,
-                        age, gender, experience, poss_crypto)
-cor_all <- apa.cor.table(predictors_mod, show.conf.interval = F)
+                        age, gender, experience[, .(Experience)], poss_crypto)
+cor_all <- apa.cor.table(predictors_mod, show.conf.interval = FALSE)
 cor_all
 
-############################################# Regression results incl. VIF ###############################################################
-gender$Gender <- as.factor(gender$Gender)
-poss_crypto$Possession_of_cryptocurrency <- as.factor(poss_crypto$Possession_of_cryptocurrency)
+############################################# Adjustments  ###############################################################
+# Cutoff value on factor loadings < 0.5 (Hair et al. 2009) -> DIS3 = 0.378 deleted, insecurity = 0.406 -> Validated through AVE and Cronbach's alpha
+# AVE < 0.5 -> DIS
+
+# Discomfort only consists of DIS2
+quest_reg_mod
+
+############################################# 1. Fitted CFA  ###############################################################
+
+cfa_mod_model_fit <- 
+'tri =~ optimism + innovativeness + discomfort + insecurity
+optimism =~ OPT2 + OPT4
+innovativeness =~ INN1 + INN2 + INN4 
+discomfort =~ DIS2
+insecurity =~ INS1 + INS2 + INS4
+disposition_to_privacy =~ v_104 + v_105 + Reverse_v_106
+integrity =~ v_247 + v_248 + v_249
+benevolence =~ v_250 + v_251 + v_252
+ability =~ v_144 + v_145 + v_146
+trust =~ integrity + benevolence + ability
+perceived_benefit_for_society =~ v_147 + Reverse_v_148
+perceived_risk =~ v_149 + v_150
+potential_of_disruption =~ v_151 + v_152 + v_153 + Reverse_v_154
+usage_intention =~ v_132 + v_133
+experience =~ v_10 + v_11 + v_286
+'
+
+cfa_mod_fit <- cfa(cfa_mod_model_fit, quest_reg_mod, std.lv=TRUE)
+summary(cfa_mod_fit, standardized=TRUE, fit.measures = T)
+
+# factor loadings
+inspect(cfa_mod_fit,what="std")$lambda
+cfa_mod_fit_table <- standardizedsolution(cfa_mod_fit)
+cfa_mod_fit_table
+
+############################################# 2. Fitted Reliability & Validity Criteria ###############################################################
+# See Paper: Rönkkö & Cho (2022)
+# Average Variance extracted > 0.5  Cf. Parasuraman and Colby (2015)
+# Alpha > 0.7 Cf. Nunnally & Bernstein (1978), Hair et al. (2009)
+reliability(cfa_mod_fit)
+discriminantValidity(cfa_mod_fit)
+
+# HTMT Analysis for discriminant Validity (Cross-Loadings): CF. Henseler et al. (2015)
+htmt_factors <- 
+'Optimism =~ OPT2 + OPT4
+Innovativeness =~ INN1 + INN2 + INN4 
+Insecurity =~ INS1 + INS2 + INS4
+disposition_to_privacy =~ v_104 + v_105 + Reverse_v_106
+Integrity =~ v_247 + v_248 + v_249
+Benevolence =~ v_250 + v_251 + v_252
+Ability =~ v_144 + v_145 + v_146
+perceived_benefit_for_society =~ v_147 + Reverse_v_148
+perceived_risk =~ v_149 + v_150
+potential_of_disruption =~ v_151 + v_152 + v_153 + Reverse_v_154
+usage_intention =~ v_132 + v_133
+experience =~ v_10 + v_11 + v_286
+'
+# Note: Single-Item constructs are excluded as htmt computation can only be performend on multi-item constructs
+htmt(model = htmt_factors, data = quest_reg_mod)
+# 4 HTMTs > 0.9 -> some degree of cross-loadings -> However, VIF very low
+
+# Fornell-Larcker Criterion TBD
+csem()
+
+
+############################################# 3. Fitted Correlations  ###############################################################
+predictors_mod_fit <- cbind(optimism, innovativeness, discomfort_fitted, insecurity, social, disp_priv, trust, perc_benf_s, percieved_risk, pot_disrup, usage_int,
+                        age, gender, experience[, .(Experience)], poss_crypto)
+cor_all <- apa.cor.table(predictors_mod_fit, show.conf.interval = FALSE)
+cor_all
+
+############################################# 4.1 Multiple linear regression: Mean Applications Overall  ###############################################################
+
+# Calculating mean over all applications
+quest_reg[, Mean_all_Applic := round(rowMeans(quest_reg[, .(v_265, v_266, v_267, v_268, v_269, v_270)], na.rm = T), 2)]
+
+# FITTED model
+overall_pred <- cbind(predictors_fit, quest_reg[, .(Mean_all_Applic)])
+outcome_overall <- c("Usage_Int")
+f_overall <- as.formula(paste(outcome_overall, paste(indep_var_fitted, collapse = " + "), sep = " ~ "))
+lm_overall <- lm(f_overall, data = overall_pred)
+
+apa.reg.table(lm_overall)
+car::vif(lm_overall)
+
+
+# MODERATED model
+overall_mod <- cbind(predictors_fit, quest_reg[, .(Mean_all_Applic)], gender, age)
+outcome_overall <- c("Mean_all_Applic")
+f_overall <- as.formula(paste(outcome_overall, paste(indep_var_moderated, collapse = " + "), sep = " ~ "))
+lm_overall_mod <- lm(f_overall, data = overall_mod)
+
+apa.reg.table(lm_overall_mod)
+car::vif(lm_overall_mod)
+############################################# 4.2 Logistic regression analysis: Intention to use BT (pre-survey) ###############################################################
+
+intention_pre <- quest_clean[, .(v_28)]
+intention_pre <- intention_pre[v_28 == 2, v_28 := 0]
+# Turning "Don't knows" into "Nos"
+intention_pre <- intention_pre[v_28 == 3, v_28 := 0]
+colnames(intention_pre) <- c("Intention_to_use_BT")
+
+# 1. Age Moderator
+indep_var_logistic <- c("Optimism", "Innovativeness", "Discomfort", "Insecurity", "Social_Influence", "Disposition_to_privacy", "Trust", "Perceived_benefit_for_society",
+                        "Percieved_risk", "Potential_of_disruption")
+intention_pred <- cbind(predictors_mod_fit, intention_pre)
+outcome_usage <- c("Intention_to_use_BT")
+f_usage <- as.formula(paste(outcome_usage, paste(indep_var_logistic, collapse = " + "), sep = " ~ "))
+
+lm_intention <- glm(f_usage, data = intention_pred, family = "binomial")
+
+summary(lm_intention)
+car::vif(lm_intention)
 
 
 
 
 
+
+
+
+
+
+
+#### Residual Plot ####
+predict(lm_model)
+resid(lm_model)
 
 
 
