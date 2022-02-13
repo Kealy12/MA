@@ -308,7 +308,6 @@ cfa_mod_model_fit <-
 'tri =~ optimism + innovativeness + discomfort + insecurity
 optimism =~ OPT2 + OPT4
 innovativeness =~ INN1 + INN2 + INN4 
-discomfort =~ DIS2
 insecurity =~ INS1 + INS2 + INS4
 disposition_to_privacy =~ v_104 + v_105 + Reverse_v_106
 integrity =~ v_247 + v_248 + v_249
@@ -321,6 +320,9 @@ potential_of_disruption =~ v_151 + v_152 + v_153 + Reverse_v_154
 usage_intention =~ v_132 + v_133
 experience =~ v_10 + v_11 + v_286
 '
+# Excluded single item factors
+# discomfort =~ DIS2
+
 
 cfa_mod_fit <- cfa(cfa_mod_model_fit, quest_reg_mod, std.lv=TRUE)
 summary(cfa_mod_fit, standardized=TRUE, fit.measures = T)
@@ -366,68 +368,279 @@ predictors_mod_fit <- cbind(optimism, innovativeness, discomfort_fitted, insecur
 cor_all <- apa.cor.table(predictors_mod_fit, show.conf.interval = FALSE)
 cor_all
 
-############################################# 4.1 Multiple linear regression: Mean Applications Overall  ###############################################################
+############################################# 4.0 Setup Regressions ############################################# 
+
+gender$Gender <- as.factor(gender$Gender)
+poss_crypto$Possession_of_cryptocurrency <- as.factor(poss_crypto$Possession_of_cryptocurrency)
+
+predictors_all_NonModerated <- c("Optimism", "Innovativeness", "Discomfort", "Insecurity", "Social_Influence", "Disposition_to_privacy", "Trust", "Percieved_risk",
+                        "Perceived_benefit_for_society", "Potential_of_disruption", "Usage_Intention")
+
+predictors_all_age <- c("Optimism*Age", "Innovativeness*Age", "Discomfort*Age", "Insecurity*Age", "Social_Influence*Age", "Disposition_to_privacy*Age", "Trust*Age", "Percieved_risk*Age",
+                        "Perceived_benefit_for_society*Age", "Potential_of_disruption*Age", "Usage_Intention*Age")
+
+predictors_all_gender <- c("Optimism*Gender", "Innovativeness*Gender", "Discomfort*Gender", "Insecurity*Gender", "Social_Influence*Gender", "Disposition_to_privacy*Gender", "Trust*Gender", "Percieved_risk*Gender",
+                        "Perceived_benefit_for_society*Gender", "Potential_of_disruption*Gender", "Usage_Intention*Gender")
+
+predictors_all_experience <- c("Optimism*Experience", "Innovativeness*Experience", "Discomfort*Experience", "Insecurity*Experience", "Social_Influence*Experience", "Disposition_to_privacy*Experience", "Trust*Experience", "Percieved_risk*Experience",
+                        "Perceived_benefit_for_society*Experience", "Potential_of_disruption*Experience", "Usage_Intention*Experience")
+
+predictors_all_possCrypto <- c("Optimism*Possession_of_cryptocurrency", "Innovativeness*Possession_of_cryptocurrency", "Discomfort*Possession_of_cryptocurrency", "Insecurity*Possession_of_cryptocurrency", "Social_Influence*Possession_of_cryptocurrency", "Disposition_to_privacy*Possession_of_cryptocurrency", "Trust*Possession_of_cryptocurrency", "Percieved_risk*Possession_of_cryptocurrency",
+                        "Perceived_benefit_for_society*Possession_of_cryptocurrency", "Potential_of_disruption*Possession_of_cryptocurrency", "Usage_Intention*Possession_of_cryptocurrency")
+
+predictors_all_national <- 0
+
+predictors_without_Usage_NonModerated <- c("Optimism", "Innovativeness", "Discomfort", "Insecurity", "Social_Influence", "Disposition_to_privacy", "Trust", "Percieved_risk",
+                                 "Perceived_benefit_for_society", "Potential_of_disruption", "Usefulness_Applications")
+
+predictors_without_Usage_age <- c("Optimism*Age", "Innovativeness*Age", "Discomfort*Age", "Insecurity*Age", "Social_Influence*Age", "Disposition_to_privacy*Age", "Trust*Age", "Percieved_risk*Age",
+                        "Perceived_benefit_for_society*Age", "Potential_of_disruption*Age", "Usefulness_Applications*Age")
+
+predictors_without_Usage_gender <- c("Optimism*Gender", "Innovativeness*Gender", "Discomfort*Gender", "Insecurity*Gender", "Social_Influence*Gender", "Disposition_to_privacy*Gender", "Trust*Gender", "Percieved_risk*Gender",
+                           "Perceived_benefit_for_society*Gender", "Potential_of_disruption*Gender", "Usefulness_Applications*Gender")
+
+predictors_without_Usage_experience <- c("Optimism*Experience", "Innovativeness*Experience", "Discomfort*Experience", "Insecurity*Experience", "Social_Influence*Experience", "Disposition_to_privacy*Experience", "Trust*Experience", "Percieved_risk*Experience",
+                               "Perceived_benefit_for_society*Experience", "Potential_of_disruption*Experience", "Usefulness_Applications*Experience")
+
+predictors_without_Usage_possCrypto <- c("Optimism*Possession_of_cryptocurrency", "Innovativeness*Possession_of_cryptocurrency", "Discomfort*Possession_of_cryptocurrency", "Insecurity*Possession_of_cryptocurrency", "Social_Influence*Possession_of_cryptocurrency", "Disposition_to_privacy*Possession_of_cryptocurrency", "Trust*Possession_of_cryptocurrency", "Percieved_risk*Possession_of_cryptocurrency",
+                               "Perceived_benefit_for_society*Possession_of_cryptocurrency", "Potential_of_disruption*Possession_of_cryptocurrency", "Usefulness_Applications*Possession_of_cryptocurrency")
+
+predictors_without_Usage_national <- 0
+
+# Generalized function for regression
+perform_linear_regression <- function(dependent_var, predictors, data){
+  f_usefulness <- as.formula(paste(dependent_var, paste(predictors, collapse = " + "), sep = " ~ "))
+  lm_usefulness_nonMod <- lm(f_usefulness, data)
+}
+
+#  Assessing the significance of a polynomial or interaction term is accomplished by evaluating
+# incremental R2, not the significance of individual coefficients, due to high multicollinearity (Cf. Hair et al.2009)
+
+############################################# 4.1 Regression: Usefulness Applications (Mean)  ###############################################################
+# Setting Dependent variable
+outcome_usefulness <- c("Usefulness_Applications")
 
 # Calculating mean over all applications
-quest_reg[, Mean_all_Applic := round(rowMeans(quest_reg[, .(v_265, v_266, v_267, v_268, v_269, v_270)], na.rm = T), 2)]
+quest_reg_mod[, Usefulness_Applications := round(rowMeans(quest_reg_mod[, .(v_265, v_266, v_267, v_268, v_269, v_270)], na.rm = T), 2)]
+lm_data_usefulness <- cbind(predictors_mod_fit, quest_reg_mod[, .(Usefulness_Applications)])
 
-# FITTED model
-overall_pred <- cbind(predictors_fit, quest_reg[, .(Mean_all_Applic)])
-outcome_overall <- c("Usage_Int")
-f_overall <- as.formula(paste(outcome_overall, paste(indep_var_fitted, collapse = " + "), sep = " ~ "))
-lm_overall <- lm(f_overall, data = overall_pred)
+# 0. Non-moderated
+lm_usefulness_nonMod <- perform_linear_regression(outcome_usefulness, predictors_all_NonModerated, data = lm_data_usefulness )
+apa.reg.table(lm_usefulness_nonMod)
+car::vif(lm_usefulness_nonMod)
 
-apa.reg.table(lm_overall)
-car::vif(lm_overall)
+# 1. Moderated by AGE
+lm_usefulness_age <- perform_linear_regression(outcome_usefulness, predictors_all_age, data = lm_data_usefulness)
+apa.reg.table(lm_usefulness_age)
 
+# 2. Moderated by GENDER
+lm_usefulness_gender <- perform_linear_regression(outcome_usefulness, predictors_all_gender, data = lm_data_usefulness )
+apa.reg.table(lm_usefulness_gender)
 
-# MODERATED model
-overall_mod <- cbind(predictors_fit, quest_reg[, .(Mean_all_Applic)], gender, age)
-outcome_overall <- c("Mean_all_Applic")
-f_overall <- as.formula(paste(outcome_overall, paste(indep_var_moderated, collapse = " + "), sep = " ~ "))
-lm_overall_mod <- lm(f_overall, data = overall_mod)
+# 3. Moderated by EXPERIENCE
+lm_usefulness_experience <- perform_linear_regression(outcome_usefulness, predictors_all_experience, data = lm_data_usefulness)
+apa.reg.table(lm_usefulness_experience)
 
-apa.reg.table(lm_overall_mod)
-car::vif(lm_overall_mod)
-############################################# 4.2 Logistic regression analysis: Intention to use BT (pre-survey) ###############################################################
+# 4. Moderated by POSESSION OF CRYPTO
+lm_usefulness_crypto <- perform_linear_regression(outcome_usefulness, predictors_all_possCrypto, data = lm_data_usefulness)
+apa.reg.table(lm_usefulness_crypto)
 
-intention_pre <- quest_clean[, .(v_28)]
-intention_pre <- intention_pre[v_28 == 2, v_28 := 0]
-# Turning "Don't knows" into "Nos"
-intention_pre <- intention_pre[v_28 == 3, v_28 := 0]
-colnames(intention_pre) <- c("Intention_to_use_BT")
+# Plots
+# QQ-Plot: Do residuals follow gaussian assumption?
+plot(lm_usefulness_nonMod) # Yes
 
-# 1. Age Moderator
-indep_var_logistic <- c("Optimism", "Innovativeness", "Discomfort", "Insecurity", "Social_Influence", "Disposition_to_privacy", "Trust", "Perceived_benefit_for_society",
-                        "Percieved_risk", "Potential_of_disruption")
-intention_pred <- cbind(predictors_mod_fit, intention_pre)
-outcome_usage <- c("Intention_to_use_BT")
-f_usage <- as.formula(paste(outcome_usage, paste(indep_var_logistic, collapse = " + "), sep = " ~ "))
+############################################# 4.2 Regression: Usage Intention  ###############################################################
 
-lm_intention <- glm(f_usage, data = intention_pred, family = "binomial")
+outcome_usage <- c("Usage_Intention")
 
-summary(lm_intention)
-car::vif(lm_intention)
+# 0. Non-moderated
+lm_usageIntention_nonMod <- perform_linear_regression(outcome_usage, predictors_without_Usage_NonModerated, data = lm_data_usefulness)
+apa.reg.table(lm_usageIntention_nonMod)
+plot(lm_usageIntention_nonMod)
 
+# 1. Moderated by AGE
+lm_usageIntention_age <- perform_linear_regression(outcome_usage, predictors_without_Usage_age, data = lm_data_usefulness)
+apa.reg.table(lm_usageIntention_age)
 
+# 2. Moderated by GENDER
+lm_usageIntention_gender <- perform_linear_regression(outcome_usage, predictors_without_Usage_gender, data = lm_data_usefulness)
+apa.reg.table(lm_usageIntention_gender)
 
+# 3. Moderated by EXPERIENCE
+lm_usageIntention_experience <- perform_linear_regression(outcome_usage, predictors_without_Usage_experience, data = lm_data_usefulness)
+apa.reg.table(lm_usageIntention_experience)
 
-
-
-
-
-
-
-
-#### Residual Plot ####
-predict(lm_model)
-resid(lm_model)
-
+# 4. Moderated by POSESSION OF CRYPTO
+lm_usageIntention_crypto <- perform_linear_regression(outcome_usage, predictors_without_Usage_possCrypto, data = lm_data_usefulness)
+apa.reg.table(lm_usageIntention_crypto)
 
 
+############################################# 4.3 Regression: Usefulness Applications - Separate Applications  ###############################################################
+
+#### 1. Tokenization of Assets ####
+# Setup
+outcome_token <- c("Usefulness_of_tokenization_of_assets")
+lm_data_usefulness <- cbind(predictors_mod_fit, quest_reg_mod[, .(Usefulness_Applications)], quest_reg_mod[, .(Usefulness_of_tokenization_of_assets = v_265)])
+
+# 0. Non-moderated
+lm_token_nonMod <- perform_linear_regression(outcome_token, predictors_all_NonModerated, data = lm_data_usefulness)
+apa.reg.table(lm_token_nonMod)
+car::vif(lm_token_nonMod)
+
+# 1. Moderated by AGE
+lm_token_age <- perform_linear_regression(outcome_token, predictors_all_age, data = lm_data_usefulness)
+apa.reg.table(lm_token_age)
+
+# 2. Moderated by GENDER
+lm_token_gender<- perform_linear_regression(outcome_token, predictors_all_gender, data = lm_data_usefulness)
+apa.reg.table(lm_token_gender)
+
+# 3. Moderated by EXPERIENCE
+lm_token_experience <- perform_linear_regression(outcome_token, predictors_all_experience, data = lm_data_usefulness)
+apa.reg.table(lm_token_experience)
+
+# 4. Moderated by POSESSION OF CRYPTO
+lm_token_crypto <- perform_linear_regression(outcome_token, predictors_all_possCrypto, data = lm_data_usefulness)
+apa.reg.table(lm_token_crypto)
+
+#### 2. Fractional Ownership ####
+# Setup
+outcome_fract <- c("Usefulness_of_fractional_ownership")
+lm_data_usefulness <- cbind(lm_data_usefulness, quest_reg_mod[, .(Usefulness_of_fractional_ownership = v_266)])
+
+# 0. Non-moderated
+lm_fract_nonMod <- perform_linear_regression(outcome_fract, predictors_all_NonModerated, data = lm_data_usefulness)
+apa.reg.table(lm_fract_nonMod)
+car::vif(lm_fract_nonMod)
+
+# 1. Moderated by AGE
+lm_fract_age <- perform_linear_regression(outcome_fract, predictors_all_age, data = lm_data_usefulness)
+apa.reg.table(lm_fract_age)
+
+# 2. Moderated by GENDER
+lm_fract_gender<- perform_linear_regression(outcome_fract, predictors_all_gender, data = lm_data_usefulness)
+apa.reg.table(lm_fract_gender)
+
+# 3. Moderated by EXPERIENCE
+lm_fract_experience <- perform_linear_regression(outcome_fract, predictors_all_experience, data = lm_data_usefulness)
+apa.reg.table(lm_fract_experience)
+
+# 4. Moderated by POSESSION OF CRYPTO
+lm_fract_crypto <- perform_linear_regression(outcome_fract, predictors_all_possCrypto, data = lm_data_usefulness)
+apa.reg.table(lm_fract_crypto)
+
+#### 3. Self-Sovereign Identity ####
+# Setup
+outcome_self <- c("Usefulness_of_self_sovereign_identity")
+lm_data_usefulness <- cbind(lm_data_usefulness, quest_reg_mod[, .(Usefulness_of_self_sovereign_identity = v_267)])
+
+# 0. Non-moderated
+lm_self_nonMod <- perform_linear_regression(outcome_self, predictors_all_NonModerated, data = lm_data_usefulness)
+apa.reg.table(lm_self_nonMod)
+car::vif(lm_self_nonMod)
+
+# 1. Moderated by AGE
+lm_self_age <- perform_linear_regression(outcome_self, predictors_all_age, data = lm_data_usefulness)
+apa.reg.table(lm_self_age)
+
+# 2. Moderated by GENDER
+lm_self_gender<- perform_linear_regression(outcome_self, predictors_all_gender, data = lm_data_usefulness)
+apa.reg.table(lm_self_gender)
+
+# 3. Moderated by EXPERIENCE
+lm_self_experience <- perform_linear_regression(outcome_self, predictors_all_experience, data = lm_data_usefulness)
+apa.reg.table(lm_self_experience)
+
+# 4. Moderated by POSESSION OF CRYPTO
+lm_self_crypto <- perform_linear_regression(outcome_self, predictors_all_possCrypto, data = lm_data_usefulness)
+apa.reg.table(lm_self_crypto)
+
+#### 4. Smart Contracts ####
+# Setup
+outcome_smart <- c("Usefulness_of_smart_contracts")
+lm_data_usefulness <- cbind(lm_data_usefulness, quest_reg_mod[, .(Usefulness_of_smart_contracts = v_268)])
+
+# 0. Non-moderated
+lm_smart_nonMod <- perform_linear_regression(outcome_smart, predictors_all_NonModerated, data = lm_data_usefulness)
+apa.reg.table(lm_smart_nonMod)
+car::vif(lm_smart_nonMod)
+
+# 1. Moderated by AGE
+lm_smart_age <- perform_linear_regression(outcome_smart, predictors_all_age, data = lm_data_usefulness)
+apa.reg.table(lm_smart_age)
+
+# 2. Moderated by GENDER
+lm_smart_gender<- perform_linear_regression(outcome_smart, predictors_all_gender, data = lm_data_usefulness)
+apa.reg.table(lm_smart_gender)
+
+# 3. Moderated by EXPERIENCE
+lm_smart_experience <- perform_linear_regression(outcome_smart, predictors_all_experience, data = lm_data_usefulness)
+apa.reg.table(lm_smart_experience)
+
+# 4. Moderated by POSESSION OF CRYPTO
+lm_smart_crypto <- perform_linear_regression(outcome_smart, predictors_all_possCrypto, data = lm_data_usefulness)
+apa.reg.table(lm_smart_crypto)
 
 
-###### Save and Clean ####
+#### 5. Micropayments ####
+# Setup
+outcome_micro <- c("Usefulness_of_micropayments")
+lm_data_usefulness <- cbind(lm_data_usefulness, quest_reg_mod[, .(Usefulness_of_micropayments = v_269)])
+
+# 0. Non-moderated
+lm_smart_nonMod <- perform_linear_regression(outcome_micro, predictors_all_NonModerated, data = lm_data_usefulness)
+apa.reg.table(lm_smart_nonMod)
+car::vif(lm_smart_nonMod)
+
+# 1. Moderated by AGE
+lm_smart_age <- perform_linear_regression(outcome_micro, predictors_all_age, data = lm_data_usefulness)
+apa.reg.table(lm_smart_age)
+
+# 2. Moderated by GENDER
+lm_smart_gender<- perform_linear_regression(outcome_micro, predictors_all_gender, data = lm_data_usefulness)
+apa.reg.table(lm_smart_gender)
+
+# 3. Moderated by EXPERIENCE
+lm_smart_experience <- perform_linear_regression(outcome_micro, predictors_all_experience, data = lm_data_usefulness)
+apa.reg.table(lm_smart_experience)
+
+# 4. Moderated by POSESSION OF CRYPTO
+lm_smart_crypto <- perform_linear_regression(outcome_micro, predictors_all_possCrypto, data = lm_data_usefulness)
+apa.reg.table(lm_smart_crypto)
+
+#### 6. Anonymous Transactions ####
+# Setup
+outcome_anony <- c("Usefulness_of_anonymous_transactions")
+lm_data_usefulness <- cbind(lm_data_usefulness, quest_reg_mod[, .(Usefulness_of_anonymous_transactions = v_270)])
+
+# 0. Non-moderated
+lm_anony_nonMod <- perform_linear_regression(outcome_anony, predictors_all_NonModerated, data = lm_data_usefulness)
+apa.reg.table(lm_anony_nonMod)
+car::vif(lm_anony_nonMod)
+
+# 1. Moderated by AGE
+lm_anony_age <- perform_linear_regression(outcome_anony, predictors_all_age, data = lm_data_usefulness)
+apa.reg.table(lm_anony_age)
+
+# 2. Moderated by GENDER
+lm_anony_gender<- perform_linear_regression(outcome_anony, predictors_all_gender, data = lm_data_usefulness)
+apa.reg.table(lm_anony_gender)
+
+# 3. Moderated by EXPERIENCE
+lm_anony_experience <- perform_linear_regression(outcome_anony, predictors_all_experience, data = lm_data_usefulness)
+apa.reg.table(lm_anony_experience)
+
+# 4. Moderated by POSESSION OF CRYPTO
+lm_anony_crypto <- perform_linear_regression(outcome_anony, predictors_all_possCrypto, data = lm_data_usefulness)
+apa.reg.table(lm_anony_crypto)
+
+
+
+
+
+
+
+############################################# Cleaning ###############################################################
 
 # Clean Environment
 rm(list = ls())
