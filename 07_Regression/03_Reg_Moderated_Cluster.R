@@ -457,7 +457,6 @@ lm_data_usefulness <- cbind(predictors_mod_fit, clus_table[, .(Usefulness_Applic
 # 0. Non-moderated
 lm_usageIntention_nonMod <- perform_linear_regression(outcome_usage, predictors_without_Usage_NonModerated, data = lm_data_usefulness)
 apa.reg.table(lm_usageIntention_nonMod)
-plot(lm_usageIntention_nonMod)
 
 # 1. Moderated by AGE
 lm_usageIntention_age <- perform_linear_regression(outcome_usage, predictors_without_Usage_age, data = lm_data_usefulness)
@@ -475,7 +474,7 @@ apa.reg.table(lm_usageIntention_nonMod,lm_usageIntention_experience)
 lm_usageIntention_crypto <- perform_linear_regression(outcome_usage, predictors_without_Usage_possCrypto, data = lm_data_usefulness)
 apa.reg.table(lm_usageIntention_nonMod,lm_usageIntention_crypto)
 
-
+plot(lm_usageIntention_nonMod)
 
 ############################################# 4.2 Regression: Usefulness Applications (Mean)  ###############################################################
 # Setting Dependent variable

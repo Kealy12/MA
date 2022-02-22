@@ -25,6 +25,7 @@ load("./../01_Input/01_RData/tri_all.RData")
 load("./../01_Input/01_RData/tri_all_noNA_clusters.RData")
 load("./../01_Input/01_RData/lca_5class_analysis.RData")
 load("./../01_Input/01_RData/lca_4class_analysis.RData")
+source("./../04_Data_Prep/99_APA_Theme.R")
 
 # Binding questionnaire to tri cluster data 
 quest_tri_extended <- cbind(quest_clean, tri_comp_all)
@@ -127,7 +128,7 @@ plot_apps <- ggplot(apps_summary, aes(x = reorder(Applications, Score_Int), y = 
   coord_flip() +
   scale_fill_brewer(palette = "BrBG") +
   guides(fill = guide_legend(reverse=TRUE)) +
-  labs( title = "Feeling of disruptive potential of BT", y = "%", x = "") +
+  labs( title = "Usefulness of BT application", y = "%", x = "") +
   scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25)) + 
   theme_apa(remove.x.gridlines = F) +
   theme(text=element_text(family="Times New Roman", size=12))

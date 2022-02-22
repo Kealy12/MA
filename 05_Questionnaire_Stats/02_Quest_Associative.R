@@ -190,6 +190,19 @@ f_test$p.value
 
 
 
+
+
+#### Knowledge vs. Gender ####
+
+# Beginning of Questionnaire: v_286 (1-10 scale)
+know <- quest_clean[, .("Pre-Knowledge of Blockchain Technology (1-10)" = v_286)]
+gender <- quest_clean[, .("Gender" = v_169)]
+know_gender <- cbind(know, gender)
+know_gender
+
+mean_know_gender <- know_gender[, .("Mean knowledge" = round(mean(`Pre-Knowledge of Blockchain Technology (1-10)`, na.rm = T),2)), by = Gender]
+mean_know_gender
+
 ################################## Save & Clean ############################################
 #### Clean Environment ####
 rm(list = ls())
