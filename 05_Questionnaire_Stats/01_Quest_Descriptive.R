@@ -72,6 +72,7 @@ plot_heard <- ggplot(heard, aes(reorder(variable, N), fill = factor(value))) + g
 
 plot_heard
 
+
 ####  Conditional: Sector you heard about blockchain technology ####
 
 # Conditional Question

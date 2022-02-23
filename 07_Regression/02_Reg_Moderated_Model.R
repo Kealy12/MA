@@ -362,7 +362,7 @@ csem()
 ############################################# 3. Fitted Correlations  ###############################################################
 predictors_mod_fit <- cbind(optimism, innovativeness, discomfort_fitted, insecurity, social, disp_priv, trust, perc_benf_s, Perceived_risk, pot_disrup, usage_int,
                         age, gender, experience[, .(Experience)], poss_crypto)
-cor_all <- apa.cor.table(predictors_mod_fit, show.conf.interval = FALSE, filename = "Cortable.doc")
+cor_all <- apa.cor.table(predictors_mod_fit, show.conf.interval = FALSE, filename = "Cortable.tex")
 cor_all
 
 ############################################# 4.0 Setup Regressions ############################################# 
