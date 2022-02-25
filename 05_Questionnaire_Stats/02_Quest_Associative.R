@@ -203,6 +203,53 @@ know_gender
 mean_know_gender <- know_gender[, .("Mean knowledge" = round(mean(`Pre-Knowledge of Blockchain Technology (1-10)`, na.rm = T),2)), by = Gender]
 mean_know_gender
 
+#### Mediation: Knowledge -> Perceived risk -> Usage intention ####
+# Experience
+contact<- quest_clean[, c("v_10", "v_11")]
+colnames(contact) <- c("Contact_in_professional_life", "Contact_in_personal_life")
+
+# Knowledge 
+# (1-10 scale): v_286
+knowledge <- quest_clean[, .(v_286)]
+colnames(knowledge) <- c("Knowledge_of_BT")
+
+# Binding together and creating mean
+experience <- cbind(contact, knowledge)
+experience[, Experience := round(rowMeans(experience[, .(Contact_in_professional_life, Contact_in_personal_life, Knowledge_of_BT)], na.rm = T), 2)]
+
+# perceived risk
+# v_149, v_150: Likert (1-7)
+# can be no 0s
+quest_clean[v_149 == 0, v_149 := NA]
+quest_clean[v_150 == 0, v_150 := NA]
+
+# Calculate Average 
+quest_clean[, Perceived_risk := round(rowMeans(quest_clean[, .(v_149, v_150)], na.rm = T), 2)]
+perceived_risk <- quest_clean[, .(Perceived_risk)]
+
+# Usage intention
+# v_132, v_133: Likert (1-7)
+# can be no 0s
+quest_clean[v_132 == 0, v_132 := NA]
+quest_clean[v_133 == 0, v_133 := NA]
+
+# Calculate Average 
+quest_clean[, Usage_Intention := round(rowMeans(quest_clean[, .(v_132, v_133)], na.rm = T), 2)]
+usage_int <- quest_clean[, .(Usage_Intention)]
+
+# MEDIATION: X → Y, X → M, and X + M → Y
+mediation <- cbind(experience,perceived_risk,usage_int)
+# X (Experience) → Y (Usage Intention)
+summary(lm(Usage_Intention ~ Experience, data = mediation)) # significant: b(experience)= 0.67577
+# X (Experience) → M (Perceived_risk)
+summary(lm(Perceived_risk ~ Experience, data = mediation)) # significant
+# X + M → Y
+summary(lm(Usage_Intention ~ Experience + Perceived_risk, data = mediation)) # significant: b(experience) = 0.4211
+# Mediation successfully supported, as absolute b-coef is reduced 
+
+
+
+
 ################################## Save & Clean ############################################
 #### Clean Environment ####
 rm(list = ls())
