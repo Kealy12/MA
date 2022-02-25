@@ -135,6 +135,49 @@ plot_apps <- ggplot(apps_summary, aes(x = reorder(Applications, Score_Int), y = 
 
 plot_apps
 
+##### Significant difference between Applications - T-Tests #####
+# t-test
+apps_t_test <- quest_clean[, .(v_265, v_266, v_267, v_268, v_269, v_270)]
+# Renaming
+colnames(apps_t_test) <- c("Tokenization", "Fractional", "Identity",
+                           "Smart", "Micropayments", "Anonymous")
+
+apps_t_test <- melt(apps_t_test)
+
+# SSI vs. Tokenization of Assets
+ssi_token <- apps_t_test[variable %in% c("Identity", "Tokenization")]
+t.test(value ~ variable, data = ssi_token, alternative = "two.sided" , var.equal=F)
+# p-value > 0.05 -> NO significant difference
+
+# Tokenization of Assets vs. Anonymous Transactions
+token_anony <- apps_t_test[variable %in% c("Anonymous", "Tokenization")]
+t.test(value ~ variable, data = token_anony, alternative = "two.sided" , var.equal=F)
+# p-value < 0.05 -> significant difference
+
+# Anonymous Transactions vs. Smart Contracts
+anony_smart <- apps_t_test[variable %in% c("Anonymous", "Smart")]
+t.test(value ~ variable, data = anony_smart, alternative = "two.sided" , var.equal=F)
+# p-value > 0.05 -> NO significant difference
+
+# Smart Contracts vs. Micropayments
+smart_micro <- apps_t_test[variable %in% c("Smart", "Micropayments")]
+t.test(value ~ variable, data = smart_micro, alternative = "two.sided" , var.equal=F)
+# p-value < 0.05 -> Significant difference
+
+# Micropayments vs. Fractional Ownership
+micro_fractional <- apps_t_test[variable %in% c("Micropayments", "Fractional")]
+t.test(value ~ variable, data = micro_fractional, alternative = "two.sided" , var.equal=F)
+# p-value > 0.05 -> NO Significant difference
+
+# SSI vs. Fractional Ownership
+ssi_fractional <- apps_t_test[variable %in% c("Identity", "Fractional")]
+t.test(value ~ variable, data = ssi_fractional, alternative = "two.sided" ,var.equal=F)
+# p-value < 0.05 -> Significant difference
+
+# -> 3 Groups, where there is no significant difference: SSI & token, Anony & Smart Cs, Microp & Frac. Own
+# -> Significant Differences between these groups
+
+dim(quest_clean)
 
 ########################################################### Scores by Cluster ###############################################################
 

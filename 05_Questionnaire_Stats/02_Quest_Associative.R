@@ -250,6 +250,8 @@ summary(lm(Usage_Intention ~ Experience + Perceived_risk, data = mediation)) # s
 
 
 
+
+
 ################################## Save & Clean ############################################
 #### Clean Environment ####
 rm(list = ls())
