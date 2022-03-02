@@ -1549,7 +1549,7 @@ round(camp[ v_196 == 1, .("Knowledge about German ministry BT campaign" = .N / n
 
 
 
-
+quest_clean_UK[, .(v_193)]
 
 
 

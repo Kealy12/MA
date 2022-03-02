@@ -22,12 +22,8 @@ library(ggrepel)
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 
 # Loading Data 
-quest_raw <- fread("./../01_Input/raw_data_field_2021_10_21.csv")
-load("./../01_Input/01_RData/00_clean_data_field.RData")
-load("./../01_Input/01_RData/tri_all_noNA_clusters.RData")
-load("./../01_Input/01_RData/01_quest_cluster_extended.RData")
-load("./../01_Input/01_RData/tri_all.RData")
-
+quest_raw <- fread("./01_Input/raw_data_field_UK_2022_02_24.csv")
+load("./01_Input/00_clean_data_field_UK.RData")
 
 # Loading Theme
 source("./../04_Data_Prep/99_APA_Theme.R")
@@ -36,13 +32,13 @@ source("./../04_Data_Prep/99_APA_Theme.R")
 ################################ Descriptive Blockchain Stats ##########################
 
 #### N ####
-quest_clean[, .N]
+quest_clean_UK[, .N]
 
 
 #### Have you heard of the following terms ####
 # v_321 - v_325
 # 1 = yes, 2 = no
-heard <- quest_clean[, .(v_321, v_322, v_323, v_324, v_325)]
+heard <- quest_clean_UK[, .(v_321, v_322, v_323, v_324, v_325)]
 colnames(heard) <- c("Blockchain Technology", "Bitcoin", "NFT", "Cryptocurrency", "Ethereum")
 heard <- melt(heard)
 heard$value <- as.character(heard$value)
@@ -78,7 +74,7 @@ plot_heard
 # Conditional Question
 # v_31 - v_35, v_292, v_293
 # 1 = quoted, 0 = not quoted
-sector <- quest_clean[, .(v_31, v_32, v_33, v_34, v_35, v_292, v_293)]
+sector <- quest_clean_UK[, .(v_31, v_32, v_33, v_34, v_35, v_292, v_293)]
 colnames(sector) <- c("I have not heard of any Blockchain Technology applications", 
                       "Finance and banking", "Transport and logistics", "Energy and utilities", 
                       "Healthcare and pharmaceuticals", "Art and collectibles", "Other")
@@ -108,14 +104,14 @@ ggplot(sector, aes(x= value, fill = reorder(variable, -N))) + geom_bar(position 
 # v_55
 # 1 = Yes, 2 = No
 
-# Out of all respondents: 3%
-used <- quest_clean[, .(v_55)]
+# Out of all respondents: 6%
+used <- quest_clean_UK[, .(v_55)]
 used <- melt(used)
 used[, value := as.numeric(ifelse(value == "1", "1", 0))]
 round(used[, sum(value) / nrow(used)],2)
 
-# Out of share who heard about blockchain technology: 7% 
-used_share <- quest_clean[, .(v_55)]
+# Out of share who heard about blockchain technology: 10% 
+used_share <- quest_clean_UK[, .(v_55)]
 used_share <- melt(used_share)
 used_share[value == -77, value := NA]
 used_share <- used_share[complete.cases(used_share)]
@@ -127,15 +123,15 @@ round(used_share[, sum(value) / nrow(used_share)],2)
 # v_56
 # 1 = Yes, 2 = No
 
-# Out of all respondents: 27%
-use_crypto <- quest_clean[, .(v_56)]
+# Out of all respondents: 47%
+use_crypto <- quest_clean_UK[, .(v_56)]
 use_crypto <- melt(use_crypto)
 table(use_crypto)
 use_crypto[, value := as.numeric(ifelse(value == "1", "1", 0))]
 round(use_crypto[, sum(value) / nrow(use_crypto)],2)
 
-# Out of share who heard about Cryptocurrencyy: 28% 
-use_crypto_share <- quest_clean[, .(v_56)]
+# Out of share who heard about Cryptocurrencyy: 47% 
+use_crypto_share <- quest_clean_UK[, .(v_56)]
 use_crypto_share <- melt(use_crypto_share)
 use_crypto_share[value == -77, value := NA]
 use_crypto_share <- use_crypto_share[complete.cases(use_crypto_share)]
@@ -149,7 +145,7 @@ round(use_crypto_share[, sum(value) / nrow(use_crypto_share)],2)
 ####  Conditional: Why exclude possibility to use crypto  ####
 
 # v_306, v_307, v_313
-exclude <- quest_clean[, .(v_306, v_307, v_313)]
+exclude <- quest_clean_UK[, .(v_306, v_307, v_313)]
 colnames(exclude) <- c("I find it difficult to find something\nwhere I can learn about cryptocurrencies", 
                        "I am not interested in cryptocurrencies", 
                        "Other reason")
@@ -179,7 +175,7 @@ plot_exclude
 #### Can you explain these to a friend ####
 # v_326 - v_330
 # 1 = yes, 2 = no
-explain <- quest_clean[, .(v_326, v_327, v_328, v_329, v_330)]
+explain <- quest_clean_UK[, .(v_326, v_327, v_328, v_329, v_330)]
 colnames(explain) <- c("Blockchain Technology", "Bitcoin", "NFT", "Cryptocurrency", "Ethereum")
 explain <- melt(explain)
 explain$value <- as.character(explain$value)
@@ -219,11 +215,11 @@ plot_explain
 #### Age ####
 
 # v_285 -> Need to recode data: +14 on score to show age (nobody < 15 and > 85)
-quest_clean[, v_285 := v_285 + 14]
-quest_clean[ v_285 == 79, .N]
+quest_clean_UK[, v_285 := v_285 + 14]
+quest_clean_UK[ v_285 == 79, .N]
 
 # Mean Age of respondents 
-mean(quest_clean$v_285)
+mean(quest_clean_UK$v_285)
 
 # Age distribution 
 quest_raw[, "v_285"]
@@ -234,7 +230,7 @@ ggplot(quest_raw[, "v_285"], aes(v_285)) +
 # Age - Heard of Blockchain Technology
 # x = Age: Continuous, Y = Heard of Blockchain Tech: Categorical
 # Logistic Model
-# age_HeardOfBC <- quest_clean[, .(v_321, v_285)]
+# age_HeardOfBC <- quest_clean_UK[, .(v_321, v_285)]
 # age_HeardOfBC[, v_321 := as.numeric(ifelse(v_321 == "1", "1", "0"))]
 # glm <- glm(age_HeardOfBC$v_321 ~ age_HeardOfBC$v_285, age_HeardOfBC, family = "binomial")
 # 
@@ -245,14 +241,14 @@ ggplot(quest_raw[, "v_285"], aes(v_285)) +
 
 # v_282
 # 1 = Yes, 2 = No
-diff <- quest_clean[, "v_282"]
+diff <- quest_clean_UK[, "v_282"]
 diff <- melt(diff)
 diff[, value := as.numeric(ifelse(value == "1", "1", "0"))]
 round(diff[, sum(value) / nrow(diff)],2)
-# only 25 % know the difference
+# only 37 % know the difference
 
 # Who knows the difference? 
-# Categorizing them by Cluster:
+# Categorizing them by Cluster TBD
 quest_tri_extended[, v_282 := as.numeric(ifelse(v_282 == "1", "1", "0"))]
 diff_clus <- quest_tri_extended[, round(sum(v_282) / nrow(quest_tri_extended),2), by = Cluster]
 diff_clus
@@ -265,7 +261,7 @@ quest_tri_extended[, .("Know difference between Bitcoin and BT (%)" = round(sum(
 
 # v_10: in professional life
 # v_11: in personal life
-contact<- quest_clean[, c("v_10", "v_11")]
+contact<- quest_clean_UK[, c("v_10", "v_11")]
 colnames(contact) <- c("Contact in professional life", "Contact in personal life")
 contact <- melt(contact)
 # can be no 0s
@@ -285,13 +281,13 @@ contact[value == 7, likert :="Very high"]
 contact$likert <- factor(contact$likert  , levels = c("Very low", "Low", "Below average", "Average", 
                                                       "Above average", "High", "Very high"))
 
-contact[value == 1, dis := .N / nrow(quest_clean), by = variable]
-contact[value == 2, dis := .N / nrow(quest_clean), by = variable]
-contact[value == 3, dis := .N / nrow(quest_clean), by = variable]
-contact[value == 4, dis := .N / nrow(quest_clean), by = variable]
-contact[value == 5, dis := .N / nrow(quest_clean), by = variable]
-contact[value == 6, dis := .N / nrow(quest_clean), by = variable]
-contact[value == 7, dis := .N / nrow(quest_clean), by = variable]
+contact[value == 1, dis := .N / nrow(quest_clean_UK), by = variable]
+contact[value == 2, dis := .N / nrow(quest_clean_UK), by = variable]
+contact[value == 3, dis := .N / nrow(quest_clean_UK), by = variable]
+contact[value == 4, dis := .N / nrow(quest_clean_UK), by = variable]
+contact[value == 5, dis := .N / nrow(quest_clean_UK), by = variable]
+contact[value == 6, dis := .N / nrow(quest_clean_UK), by = variable]
+contact[value == 7, dis := .N / nrow(quest_clean_UK), by = variable]
 
 contact_summary <- unique(contact)
 
@@ -319,17 +315,17 @@ contact[, mean(value), by = variable]
 #### Knowledge of Blockchain technology ####
 
 # Beginning of Questionnaire: v_286 (1-10 scale)
-quest_clean[, .("Pre-Knowledge of Blockchain Technology (1-10)" = round(mean(v_286, na.rm = T),2))]
+quest_clean_UK[, .("Pre-Knowledge of Blockchain Technology (1-10)" = round(mean(v_286, na.rm = T),2))]
 
 # End of Questionnaire: v_333
-quest_clean[, .("Post-Knowledge of Blockchain Technology (1-10)" = round(mean(v_333, na.rm = T),2))]
+quest_clean_UK[, .("Post-Knowledge of Blockchain Technology (1-10)" = round(mean(v_333, na.rm = T),2))]
 
 
 #### Friend's knowledge of blockchain technology ####
 
 # v_287
 # Scale 1 (they never heard of it) - 10 (they are experts)
-friends_know <- quest_clean[, .(v_287)]
+friends_know <- quest_clean_UK[, .(v_287)]
 friends_know[, .("Friend's knowledge of blockchain technology (1-10)" = round(mean(v_287, na.rm = T),2))]
 # they have low knowledge about blockchain, similar to mine
 
@@ -337,7 +333,7 @@ friends_know[, .("Friend's knowledge of blockchain technology (1-10)" = round(me
 
 # v_296
 # Scale 1 (they never heard of it) - 10 (they are experts)
-social <- quest_clean[, .(v_296)]
+social <- quest_clean_UK[, .(v_296)]
 social[, .("Social influence on my blockchain usage (1-10)" = round(mean(v_296, na.rm = T),2))]
 # They would rather discourage me
 
@@ -347,7 +343,7 @@ social[, .("Social influence on my blockchain usage (1-10)" = round(mean(v_296, 
 
 # v_19 - v_30
 # 1 = Yes, 2 = No, 3 = Don't know enough 
-tech_usage <- quest_clean[, c("v_19", "v_20", "v_21", "v_22", "v_23", "v_24", 
+tech_usage <- quest_clean_UK[, c("v_19", "v_20", "v_21", "v_22", "v_23", "v_24", 
                               "v_25", "v_26", "v_27", "v_28", "v_29", "v_30")]
 colnames(tech_usage) <- c("Cloud computing", "Big data", "Internet of things", "Smart Home products",
                           "3D printing", "Artificial intelligence", "Machine learning", "Neural networks",
@@ -403,15 +399,15 @@ plot_usageIntention
 
 ## Mean: Explain the Internet
 # v_49 (1-10 scale)
-internet <- quest_clean[, .("Ability to Explain the Internet (1-10)" = round(mean(v_49, na.rm = T),2))]
+internet <- quest_clean_UK[, .("Ability to Explain the Internet (1-10)" = round(mean(v_49, na.rm = T),2))]
 internet
 ## Mean: Explain Blockchain
 # v_50 (1-10 scale)
-blockchain <- quest_clean[, .("Ability to Explain Blockchain Technology (1-10)" = round(mean(v_50, na.rm = T),2))]
+blockchain <- quest_clean_UK[, .("Ability to Explain Blockchain Technology (1-10)" = round(mean(v_50, na.rm = T),2))]
 blockchain
 
 ## Likert visualization
-ability <- quest_clean[, c("v_50", "v_49")]
+ability <- quest_clean_UK[, c("v_50", "v_49")]
 colnames(ability) <- c("Blockchain technology", "The internet")
 ability <- melt(ability)
 
@@ -468,13 +464,13 @@ plot_abilityExplain
 #### Possession of Crypto / NFT ####
 # Crypto
 # v_54 (1 = Yes, 2 = No)
-crypto <- quest_clean[, "v_54"]
+crypto <- quest_clean_UK[, "v_54"]
 crypto[v_54 == 1, .N] # 101 possess crypto in sample
 round(crypto[ v_54 == 1, .("Possession of Crypto (%)" = .N / nrow(crypto))],2) 
 
 # Possession of a NFT #
 # v_331 (1 = Yes, 2 = No, -77 = missing value (conditional question, if person heard of NFT))
-nft <- quest_clean[, "v_331"]
+nft <- quest_clean_UK[, "v_331"]
 round(nft[ v_331 == 1, .("Possession of NFT (%)" = .N / nrow(crypto))],2)
 
 
@@ -482,7 +478,7 @@ round(nft[ v_331 == 1, .("Possession of NFT (%)" = .N / nrow(crypto))],2)
 ####  Conditional: When first became crypto owner ####
 
 # v_297
-when <- quest_clean[, "v_297"]
+when <- quest_clean_UK[, "v_297"]
 when[v_297 == -77, v_297 := NA]
 
 # Missing values (-77) to NAs
@@ -514,7 +510,7 @@ ggplot(when, aes(Year, dis)) +
 ####  Conditional: Difficulty buying crypto ####
 # v_298 (Scale: 1 (Very easy) - 7 (Very hard))
 
-diff <- quest_clean[, .(v_298)]
+diff <- quest_clean_UK[, .(v_298)]
 diff[v_298 == -77 | v_298 == 0, v_298 := NA]
 diff[, mean(v_298, na.rm = T)] # relatively easy
 
@@ -522,7 +518,7 @@ diff[, mean(v_298, na.rm = T)] # relatively easy
 
 ####  Conditional: How manage crypto ####
 
-manage_crypto <- quest_clean[, .(v_316, v_317, v_318, v_319)]
+manage_crypto <- quest_clean_UK[, .(v_316, v_317, v_318, v_319)]
 colnames(manage_crypto) <- c("On Coinbase, Binance or other exchange", 
                              "On MetaMask or other digital (browser) wallet", 
                              "On a piece of paper, USB-Storage or other offline wallet", 
@@ -559,7 +555,7 @@ ggplot(manage_crypto, aes(x= value, fill = reorder(variable, -N))) + geom_bar(po
 
 # Disposition to trust other people
 # v_314
-trust <- quest_clean[, .(v_314)]
+trust <- quest_clean_UK[, .(v_314)]
 trust <- melt(trust)
 
 # can be no 0s
@@ -595,7 +591,7 @@ plot_trust
 #### Disposition to privacy ####
 
 # v_104, v_105, v_106 (reverse coded)
-privacy <- quest_clean[, .(v_106, v_104, v_105)]
+privacy <- quest_clean_UK[, .(v_106, v_104, v_105)]
 colnames(privacy) <- c("Compared to others, I am less concerned about\npotential threats to my personal privacy\n(reverse coded)",
                        "Compared to others, I am more sensitive about\nthe way other people or organizations handle my\npersonal information",
                        "Compared to others, I see more importance in\nkeeping personal information private")
@@ -651,7 +647,7 @@ plot_privacy
 
 # Scores
 # Average out of all statements -> Own index 
-privacy_scores <- quest_clean[, .(v_104, v_105, v_106)]
+privacy_scores <- quest_clean_UK[, .(v_104, v_105, v_106)]
 privacy_scores[privacy_scores == 0] <- NA
 
 # Reverse code v_106
@@ -666,7 +662,7 @@ privacy_scores[, .("Privacy score overall" = round(mean(Privacy, na.rm = T),2))]
 #### Cynism ####
 # v_107
 # "I am not bothered by data collection, because my\npersonal information is publicly available anyway", 
-cynism <- quest_clean[, .(v_107)]
+cynism <- quest_clean_UK[, .(v_107)]
 colnames(cynism) <- c("I am not bothered by data collection, because my\npersonal information is publicly available anyway")
 
 cynism <- melt(cynism)
@@ -723,7 +719,7 @@ plot_cynism
 # v_205, v_206
 
 ## Likert
-pers_inn <- quest_clean[, .(v_205, v_206)]
+pers_inn <- quest_clean_UK[, .(v_205, v_206)]
 colnames(pers_inn) <- c("In general, I am hesitant to try out new\ninformation technologies",
                         "I like to experiment with new\ninformation technologies")
 pers_inn <- melt(pers_inn)
@@ -771,7 +767,7 @@ ggplot(pers_inn_summary, aes(x = variable, y = dis, fill = likert)) +
 
 
 ## Score: Average out of statements
-pers_inn_score <- quest_clean[, .(v_205, v_206)]
+pers_inn_score <- quest_clean_UK[, .(v_205, v_206)]
 pers_inn_score[pers_inn_score == 0] <- NA
 
 # Reverse code v_205
@@ -787,7 +783,7 @@ pers_inn_score[, .("Personal innovativeness overall" = round(mean(PIIT, na.rm = 
 
 #### TRI ####
 
-tri <- quest_clean[, .(v_108, v_109, v_207, v_208, v_209, 
+tri <- quest_clean_UK[, .(v_108, v_109, v_207, v_208, v_209, 
                        v_228, v_229, v_230, v_231, v_232)]
 colnames(tri) <- c("Optimism:\nNew technology gives me more freedom of\nmobility",
                    "Optimism:\nNew technology makes me more productive",
@@ -875,11 +871,11 @@ tri_comp_all
 #### Bank account statement on street ####
 # v_126: (yes = 1, no = 2)
 
-bank <- quest_clean[, .(v_126)]
+bank <- quest_clean_UK[, .(v_126)]
 bank <- melt(bank)
 bank[, value := as.numeric(ifelse(value == "1", "1", 0))]
 round(bank[, sum(value) / nrow(bank)],2)
-# Only 5% would put bank account statement on the street, without their name on 
+# Only 2% would put bank account statement on the street, without their name on 
 
 
 
@@ -887,7 +883,7 @@ round(bank[, sum(value) / nrow(bank)],2)
 # v_85, v_86, v_87, v_88
 
 # 1 = yes, 2 = no
-buy <- quest_clean[, .(v_85, v_86, v_87, v_88)]
+buy <- quest_clean_UK[, .(v_85, v_86, v_87, v_88)]
 colnames(buy) <- c("A pizza", "A jacket", "A car", "A house")
 buy <- melt(buy)
 buy$value <- as.character(buy$value)
@@ -937,49 +933,24 @@ plot_buy
 #### Verified seller without name ####
 
 # v_234: (yes = 1, no = 2)
-seller <- quest_clean[, .(v_234)]
+seller <- quest_clean_UK[, .(v_234)]
 seller <- melt(seller)
 seller[, value := as.numeric(ifelse(value == "1", "1", 0))]
 round(seller[, sum(value) / nrow(seller)],2)
-# 38% would transfer money to a verified seller without name for buying a bluetooth speaker 
-
-#### 
-
-
-
-####  Conditional: Knowing that person's name 
-
-
-
-
-
-
-
-
-
-
-
-
+# 47% would transfer money to a verified seller without name for buying a bluetooth speaker 
 
 
 ####  Conditional: If you knew the real name ####
 # v_233: (yes = 1, no = 2)
-real_name <- quest_clean[, .(v_233)]
+real_name <- quest_clean_UK[, .(v_233)]
 real_name <- melt(real_name)
 real_name[value == -77, value := NA]
 real_name <- real_name[complete.cases(real_name)]
 real_name[, value := as.numeric(ifelse(value == "1", "1", 0))]
 round(real_name[, sum(value) / nrow(real_name)],2)
 
-# 52% of people who wouldn't send money to a seller without a name would change their opinion,
+# 49% of people who wouldn't send money to a seller without a name would change their opinion,
 # if they knew the real name
-
-
-
-
-
-
-
 
 
 
@@ -988,9 +959,9 @@ round(real_name[, sum(value) / nrow(real_name)],2)
 
 # v_100
 # Scale 1 (not comfortable at all) - 7 (very comfortable)
-details <- quest_clean[, .(v_100)]
+details <- quest_clean_UK[, .(v_100)]
 details[, .("Comfortability concering BT personal details as string of numbers and letters " = round(mean(v_100, na.rm = T),2))]
-# Rather uncomfortable
+# Neutral
 
 
 
@@ -999,7 +970,7 @@ details[, .("Comfortability concering BT personal details as string of numbers a
 
 # v_99
 # Scale 1 (fully disagree) - 7 (fully agree)
-concerns <- quest_clean[, .(v_99)]
+concerns <- quest_clean_UK[, .(v_99)]
 concerns[, .("Privacy concerns of BT for financial transactions" = round(mean(v_99, na.rm = T),2))]
 # Rather concerned 
 
@@ -1009,7 +980,7 @@ concerns[, .("Privacy concerns of BT for financial transactions" = round(mean(v_
 
 # v_101
 # Scale 1 (not comfortable at all) - 7 (very comfortable)
-losing.pin <- quest_clean[, .(v_101)]
+losing.pin <- quest_clean_UK[, .(v_101)]
 losing.pin[, .("Comfortability regarding losing blockchain PIN" = round(mean(v_101, na.rm = T),2))]
 # Not comfortable 
 
@@ -1022,7 +993,7 @@ losing.pin[, .("Comfortability regarding losing blockchain PIN" = round(mean(v_1
 
 # v_120, v_121, v_122, v_284
 # 1 = quoted, 0 = not quoted
-statements <- quest_clean[, .(v_120, v_121, v_122, v_284)]
+statements <- quest_clean_UK[, .(v_120, v_121, v_122, v_284)]
 colnames(statements) <- c("I know use cases for Blockchain Technology\nOTHER THAN cryptocurrencies (Bitcoin is a\ncryptocurrency)", 
                           "I have installed an app related to Blockchain\nTechnology on my phone or desktop computer\n(e.g. Metamask)", 
                           "I advise people on how to use Blockchain\nTechnology applications or have coded some\nmyself (e.g. a real Smart Contract)",
@@ -1062,7 +1033,7 @@ plot_statements
 
 #### Usage intention ####
 # v_132, v_133
-usage.int <- quest_clean[, .(v_132, v_133)]
+usage.int <- quest_clean_UK[, .(v_132, v_133)]
 colnames(usage.int) <- c("Given the chance, I would use Blockchain\nTechnology applications",
                          "Given the chance, it is very likely that\nI would use Blockchain Technology")
 
@@ -1117,7 +1088,7 @@ plot_usageint
 
 # Scores
 # Average out of all statements
-usage.int.mean <- quest_clean[, .(v_132, v_133)]
+usage.int.mean <- quest_clean_UK[, .(v_132, v_133)]
 usage.int.mean[usage.int.mean == 0] <- NA
 
 usage.int.mean[, Usage_Intention := round(rowMeans(usage.int.mean[, .(v_132, v_133)], na.rm = T), 2)]
@@ -1132,7 +1103,7 @@ usage.int.mean[, .("Usage Intention score overall" = round(mean(Usage_Intention,
 
 #### Trust BT Users ####
 # v_134, v_135, v_136
-trust_users <- quest_clean[, .(v_134, v_135, v_136)]
+trust_users <- quest_clean_UK[, .(v_134, v_135, v_136)]
 colnames(trust_users) <- c("I would trust people, that use \nBlockchain Technology",
                            "I would trust organizations that use\nBlockchain Technology",
                            "I would trust machines that are connected to a\nBlockchain Technology")
@@ -1189,7 +1160,7 @@ plot_trustUsers
 
 # Scores
 # Average out of all statements -> Own index 
-trust_user_score <- quest_clean[, .(v_134, v_135, v_136)]
+trust_user_score <- quest_clean_UK[, .(v_134, v_135, v_136)]
 trust_user_score[trust_user_score == 0] <- NA
 
 trust_user_score[, trust_user := round(rowMeans(trust_user_score[, .(v_134, v_135, v_136)], na.rm = T), 2)]
@@ -1197,13 +1168,13 @@ trust_user_score[, trust_user := round(rowMeans(trust_user_score[, .(v_134, v_13
 # Score overall
 trust_user_score[, .("Trust in users score overall" = round(mean(trust_user, na.rm = T),2))]
 
-# 3.61: rather low trust in other BT users
+# 4.1: Neutral (more trust than Germans)
 
 
 #### Trust BT (integrity, benevolence, ability) ####
 
 # v_247 - v_252, v_144 - v_146
-trust_iba <- quest_clean[, .(v_247, v_248, v_249, v_250, v_251, v_252,
+trust_iba <- quest_clean_UK[, .(v_247, v_248, v_249, v_250, v_251, v_252,
                              v_144, v_145, v_146)]
 colnames(trust_iba) <- c("Integrity: Blockchain Technology\nprovides reliable information",
                          "Integrity: Blockchain Technology\nis honest in dealing with my private data",
@@ -1266,7 +1237,7 @@ plot_trust_IBA
 
 # Scores
 # Average out of all statements 
-trust_iba_score <- quest_clean[, .(v_247, v_248, v_249, v_250, v_251, v_252,
+trust_iba_score <- quest_clean_UK[, .(v_247, v_248, v_249, v_250, v_251, v_252,
                                    v_144, v_145, v_146)]
 trust_iba_score[trust_iba_score == 0] <- NA
 trust_iba_score[, trust := round(rowMeans(trust_iba_score[, .(v_247, v_248, v_249, v_250, v_251, v_252,
@@ -1293,7 +1264,7 @@ trust_iba_score_table
 #### Perceived benefit for society ####
 
 # v_147, v_148
-sbenefit <- quest_clean[, .(v_148, v_147)]
+sbenefit <- quest_clean_UK[, .(v_148, v_147)]
 colnames(sbenefit) <- c("Using Blockchain Technology has\nmany disadvantages for society",
                         "Using Blockchain Technology has\nmany advantages for society")
 
@@ -1348,14 +1319,14 @@ plot_benefits_society
 
 # Scores
 # Reverse code v_148
-sbenefit_scores <- quest_clean[, .(v_148, v_147)]
+sbenefit_scores <- quest_clean_UK[, .(v_148, v_147)]
 sbenefit_scores[, Reverse_v_148 := 8 - v_148]
 
 # Calculate Average 
 sbenefit_scores[, Perc_Benefit := round(rowMeans(sbenefit_scores[, .(v_147, Reverse_v_148)], na.rm = T), 2)]
 
 sbenefit_scores[, .("Perceived benefit to society" = round(mean(Perc_Benefit, na.rm = T),2))]
-# not negative, rather neutral
+# rather positive
 
 
 
@@ -1363,7 +1334,7 @@ sbenefit_scores[, .("Perceived benefit to society" = round(mean(Perc_Benefit, na
 
 # Low score = not risky, high score risky 
 # v_149, v_150
-risk <- quest_clean[, .(v_150, v_149)]
+risk <- quest_clean_UK[, .(v_150, v_149)]
 colnames(risk) <- c("I would feel unsafe using\nBlockchain Technology",
                     "In general, it seems risky to\nuse Blockchain Technology")
 
@@ -1417,14 +1388,14 @@ plot_risk <- ggplot(risk_summary, aes(x = variable, y = dis, fill = likert)) +
 plot_risk
 
 # Scores
-risk_scores <- quest_clean[, .(v_149, v_150)]
+risk_scores <- quest_clean_UK[, .(v_149, v_150)]
 risk_scores[risk_scores == 0] <- NA
 
 # Calculate Average 
 risk_scores[, Perc_Risk := round(rowMeans(risk_scores[, .(v_149, v_150)], na.rm = T), 2)]
 
 risk_scores[, .("Perceived risk of BT" = round(mean(Perc_Risk, na.rm = T),2))]
-# rather risky
+# Neutral
 
 
 
@@ -1435,7 +1406,7 @@ risk_scores[, .("Perceived risk of BT" = round(mean(Perc_Risk, na.rm = T),2))]
 #### Feeling of disruptive potential ####
 
 # v_151, v_152, v_153, v_154
-dis_pot <- quest_clean[, .(v_154, v_153, v_152, v_151)]
+dis_pot <- quest_clean_UK[, .(v_154, v_153, v_152, v_151)]
 colnames(dis_pot) <- c("...has no disruptive potential at all",
                        "...to be as disruptive as the\nintroduction of the internet",
                        "...to disrupt everyday life", 
@@ -1494,7 +1465,7 @@ plot_disPotential
 
 # Scores
 # Average out of all statements 
-dis_pot_score <- quest_clean[, .(v_154, v_153, v_152, v_151)]
+dis_pot_score <- quest_clean_UK[, .(v_154, v_153, v_152, v_151)]
 dis_pot_score[dis_pot_score == 0] <- NA
 
 # Reverse code v_154
@@ -1505,27 +1476,27 @@ dis_pot_score[, Pot_Dis := round(rowMeans(dis_pot_score[, .(v_151, v_152, v_153,
 # Score overall
 dis_pot_score[, .("Potential of disruption score overall" = round(mean(Pot_Dis, na.rm = T),2))]
 
+# Stronger feeling of disruptive potential than Germans
 
 
-
-################################## Application scores in 03_Applications_Descriptive ###################################
+################################## Application scores in UK_Quest_Applications_Descriptive ###################################
 
 ################################## Post-Survey BT questions ###################################
 
 #### Post-survey knowledge of BT ####
 #  v_333
-quest_clean[, .("Post-Knowledge of Blockchain Technology (1-10)" = round(mean(v_333, na.rm = T),2))]
+quest_clean_UK[, .("Post-Knowledge of Blockchain Technology (1-10)" = round(mean(v_333, na.rm = T),2))]
 
 # Beginning of Questionnaire: v_286 (1-10 scale)
-quest_clean[, .("Pre-Knowledge of Blockchain Technology (1-10)" = round(mean(v_286, na.rm = T),2))]
+quest_clean_UK[, .("Pre-Knowledge of Blockchain Technology (1-10)" = round(mean(v_286, na.rm = T),2))]
 
 
 #### More opportunities or risks from BT ####
 
 #  v_288
 # scale 1 (=more risks) - 10 (more opportunities)
-quest_clean[, .("More risks (1) or more opportunities (10) from BT" = round(mean(v_288, na.rm = T),2))]
-# neutral
+quest_clean_UK[, .("More risks (1) or more opportunities (10) from BT" = round(mean(v_288, na.rm = T),2))]
+# more opportunities
 
 
 
@@ -1538,12 +1509,12 @@ quest_clean[, .("More risks (1) or more opportunities (10) from BT" = round(mean
 
 
 #### German federal ministry BT campaign####
-
-# v_196 (1 = Yes, 2 = No)
-camp <- quest_clean[, .(v_196)]
-camp[v_196 == 1, .N] # 40 know about it
-round(camp[ v_196 == 1, .("Knowledge about German ministry BT campaign" = .N / nrow(camp))],2) 
-# 5% know about it
+# Was not asked
+# # v_196 (1 = Yes, 2 = No)
+# camp <- quest_clean_UK[, .(v_196)]
+# camp[v_196 == 1, .N] # 40 know about it
+# round(camp[ v_196 == 1, .("Knowledge about German ministry BT campaign" = .N / nrow(camp))],2) 
+# # 5% know about it
 
 
 
