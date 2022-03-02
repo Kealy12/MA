@@ -102,7 +102,7 @@ tri_comp_means <- melt(tri_comp_means, variable.name = "TR Components", value.na
 tri_comp_means$Mean <- format(tri_comp_means$Mean, digits = 3)
 tri_comp_means
 
-# Writing to Excel and Printing Table
+########################################## # Writing to Excel and Printing Table ########################################## 
 print(xtable(tri_comp_means, type = "latex"), file = "./../02_Output/TRI_Components_Means.tex",include.rownames = F, only.contents = T, include.colnames = T, hline.after = c(nrow(tri_comp_means)))
 sheets <- list("tri_comp_means" = tri_comp_means)
 write_xlsx(sheets, "./../02_Output/TRI_Components_Means.xlsx")
