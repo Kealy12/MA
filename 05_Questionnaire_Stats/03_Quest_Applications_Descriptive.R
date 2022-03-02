@@ -135,8 +135,8 @@ plot_apps <- ggplot(apps_summary, aes(x = reorder(Applications, Score_Int), y = 
 
 plot_apps
 
-##### Significant difference between Applications - T-Tests #####
-# t-test
+##### Significant difference between Applications - Welch t-Tests #####
+# Welch T-Test because we cannot assume equal variance
 apps_t_test <- quest_clean[, .(v_265, v_266, v_267, v_268, v_269, v_270)]
 # Renaming
 colnames(apps_t_test) <- c("Tokenization", "Fractional", "Identity",
@@ -169,11 +169,12 @@ micro_fractional <- apps_t_test[variable %in% c("Micropayments", "Fractional")]
 t.test(value ~ variable, data = micro_fractional, alternative = "two.sided" , var.equal=F)
 # p-value > 0.05 -> NO Significant difference
 
-# SSI vs. Fractional Ownership
-ssi_fractional <- apps_t_test[variable %in% c("Identity", "Fractional")]
-t.test(value ~ variable, data = ssi_fractional, alternative = "two.sided" ,var.equal=F)
+# Tests between groups_
+beyond_group <- apps_t_test[variable %in% c("Anonymous", "Micropayments")]
+t.test(value ~ variable, data = beyond_group, alternative = "two.sided" ,var.equal=F)
 # p-value < 0.05 -> Significant difference
 
+# Conclusion:
 # -> 3 Groups, where there is no significant difference: SSI & token, Anony & Smart Cs, Microp & Frac. Own
 # -> Significant Differences between these groups
 

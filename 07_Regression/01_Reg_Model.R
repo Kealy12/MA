@@ -371,36 +371,36 @@ gender$Gender <- as.factor(gender$Gender)
 poss_crypto$Possession_of_cryptocurrency <- as.factor(poss_crypto$Possession_of_cryptocurrency)
 
 predictors_all_NonModerated <- c("Optimism", "Innovativeness", "Discomfort", "Insecurity", "Social_Influence", "Disposition_to_privacy", "Trust", "Perceived_risk",
-                        "Perceived_benefit_for_society", "Potential_of_disruption", "Usage_Intention")
+                        "Perceived_benefit_for_society")
 
 predictors_all_age <- c("Optimism*Age", "Innovativeness*Age", "Discomfort*Age", "Insecurity*Age", "Social_Influence*Age", "Disposition_to_privacy*Age", "Trust*Age", "Perceived_risk*Age",
-                        "Perceived_benefit_for_society*Age", "Potential_of_disruption*Age", "Usage_Intention*Age")
+                        "Perceived_benefit_for_society*Age")
 
 predictors_all_gender <- c("Optimism*Gender", "Innovativeness*Gender", "Discomfort*Gender", "Insecurity*Gender", "Social_Influence*Gender", "Disposition_to_privacy*Gender", "Trust*Gender", "Perceived_risk*Gender",
-                        "Perceived_benefit_for_society*Gender", "Potential_of_disruption*Gender", "Usage_Intention*Gender")
+                        "Perceived_benefit_for_society*Gender")
 
 predictors_all_experience <- c("Optimism*Experience", "Innovativeness*Experience", "Discomfort*Experience", "Insecurity*Experience", "Social_Influence*Experience", "Disposition_to_privacy*Experience", "Trust*Experience", "Perceived_risk*Experience",
-                        "Perceived_benefit_for_society*Experience", "Potential_of_disruption*Experience", "Usage_Intention*Experience")
+                        "Perceived_benefit_for_society*Experience")
 
 predictors_all_possCrypto <- c("Optimism*Possession_of_cryptocurrency", "Innovativeness*Possession_of_cryptocurrency", "Discomfort*Possession_of_cryptocurrency", "Insecurity*Possession_of_cryptocurrency", "Social_Influence*Possession_of_cryptocurrency", "Disposition_to_privacy*Possession_of_cryptocurrency", "Trust*Possession_of_cryptocurrency", "Perceived_risk*Possession_of_cryptocurrency",
-                        "Perceived_benefit_for_society*Possession_of_cryptocurrency", "Potential_of_disruption*Possession_of_cryptocurrency", "Usage_Intention*Possession_of_cryptocurrency")
+                        "Perceived_benefit_for_society*Possession_of_cryptocurrency")
 
 predictors_all_national <- 0
 
 predictors_without_Usage_NonModerated <- c("Optimism", "Innovativeness", "Discomfort", "Insecurity", "Social_Influence", "Disposition_to_privacy", "Trust", "Perceived_risk",
-                                 "Perceived_benefit_for_society", "Potential_of_disruption", "Application_Usefulness")
+                                 "Perceived_benefit_for_society", "Application_Usefulness")
 
 predictors_without_Usage_age <- c("Optimism*Age", "Innovativeness*Age", "Discomfort*Age", "Insecurity*Age", "Social_Influence*Age", "Disposition_to_privacy*Age", "Trust*Age", "Perceived_risk*Age",
-                        "Perceived_benefit_for_society*Age", "Potential_of_disruption*Age", "Application_Usefulness*Age")
+                        "Perceived_benefit_for_society*Age", "Application_Usefulness*Age")
 
 predictors_without_Usage_gender <- c("Optimism*Gender", "Innovativeness*Gender", "Discomfort*Gender", "Insecurity*Gender", "Social_Influence*Gender", "Disposition_to_privacy*Gender", "Trust*Gender", "Perceived_risk*Gender",
-                           "Perceived_benefit_for_society*Gender", "Potential_of_disruption*Gender", "Application_Usefulness*Gender")
+                           "Perceived_benefit_for_society*Gender", "Application_Usefulness*Gender")
 
 predictors_without_Usage_experience <- c("Optimism*Experience", "Innovativeness*Experience", "Discomfort*Experience", "Insecurity*Experience", "Social_Influence*Experience", "Disposition_to_privacy*Experience", "Trust*Experience", "Perceived_risk*Experience",
-                               "Perceived_benefit_for_society*Experience", "Potential_of_disruption*Experience", "Application_Usefulness*Experience")
+                               "Perceived_benefit_for_society*Experience", "Application_Usefulness*Experience")
 
 predictors_without_Usage_possCrypto <- c("Optimism*Possession_of_cryptocurrency", "Innovativeness*Possession_of_cryptocurrency", "Discomfort*Possession_of_cryptocurrency", "Insecurity*Possession_of_cryptocurrency", "Social_Influence*Possession_of_cryptocurrency", "Disposition_to_privacy*Possession_of_cryptocurrency", "Trust*Possession_of_cryptocurrency", "Perceived_risk*Possession_of_cryptocurrency",
-                               "Perceived_benefit_for_society*Possession_of_cryptocurrency", "Potential_of_disruption*Possession_of_cryptocurrency", "Application_Usefulness*Possession_of_cryptocurrency")
+                               "Perceived_benefit_for_society*Possession_of_cryptocurrency", "Application_Usefulness*Possession_of_cryptocurrency")
 
 predictors_without_Usage_national <- 0
 
