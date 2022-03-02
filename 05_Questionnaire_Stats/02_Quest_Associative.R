@@ -203,7 +203,7 @@ know_gender
 mean_know_gender <- know_gender[, .("Mean knowledge" = round(mean(`Pre-Knowledge of Blockchain Technology (1-10)`, na.rm = T),2)), by = Gender]
 mean_know_gender
 
-#### Mediation: Knowledge -> Perceived risk -> Usage intention ####
+#### Mediation: Experience -> Perceived risk -> Usage intention ####
 # Experience
 contact<- quest_clean[, c("v_10", "v_11")]
 colnames(contact) <- c("Contact_in_professional_life", "Contact_in_personal_life")
@@ -246,6 +246,7 @@ summary(lm(Perceived_risk ~ Experience, data = mediation)) # significant
 # X + M → Y
 summary(lm(Usage_Intention ~ Experience + Perceived_risk, data = mediation)) # significant: b(experience) = 0.4211
 # Mediation successfully supported, as absolute b-coef is reduced 
+
 
 
 
