@@ -227,8 +227,9 @@ mean(quest_clean$v_285)
 
 # Age distribution 
 quest_raw[, "v_285"]
-ggplot(quest_raw[, "v_285"], aes(v_285)) + 
+a <- ggplot(quest_raw[, "v_285"], aes(v_285)) + 
   geom_histogram() + theme_apa()
+a
 
 
 # Age - Heard of Blockchain Technology

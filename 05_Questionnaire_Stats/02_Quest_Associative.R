@@ -246,6 +246,7 @@ summary(lm(Perceived_risk ~ Experience, data = mediation)) # significant
 # X + M → Y
 summary(lm(Usage_Intention ~ Experience + Perceived_risk, data = mediation)) # significant: b(experience) = 0.4211
 # Mediation successfully supported, as absolute b-coef is reduced 
+# Partial Mediation 
 
 
 

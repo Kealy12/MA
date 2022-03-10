@@ -24,6 +24,9 @@ setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 quest_raw <- fread("./01_Input/raw_data_field_UK_2022_02_24.csv")
 load("./01_Input/00_clean_data_field_UK.RData")
 
+quest_clean[, p_0001]
+quest_clean_UK[, p_0001]
+
 
 # Loading Data 
 load("./01_Input/tri_all.RData")

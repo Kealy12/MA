@@ -223,8 +223,10 @@ mean(quest_clean_UK$v_285)
 
 # Age distribution 
 quest_raw[, "v_285"]
-ggplot(quest_raw[, "v_285"], aes(v_285)) + 
+b <- ggplot(quest_raw[, "v_285"], aes(v_285)) + 
   geom_histogram() + theme_apa()
+
+b
 
 
 # Age - Heard of Blockchain Technology
@@ -1095,7 +1097,9 @@ usage.int.mean[, Usage_Intention := round(rowMeans(usage.int.mean[, .(v_132, v_1
 
 # Score overall
 usage.int.mean[, .("Usage Intention score overall" = round(mean(Usage_Intention, na.rm = T),2))]
-# 3.22: Rather not use BT applications 
+# 3.49: Rather not use BT applications 
+
+# t-test on significance
 
 
 
@@ -1479,6 +1483,7 @@ dis_pot_score[, .("Potential of disruption score overall" = round(mean(Pot_Dis, 
 # Stronger feeling of disruptive potential than Germans
 
 
+
 ################################## Application scores in UK_Quest_Applications_Descriptive ###################################
 
 ################################## Post-Survey BT questions ###################################
@@ -1515,6 +1520,8 @@ quest_clean_UK[, .("More risks (1) or more opportunities (10) from BT" = round(m
 # camp[v_196 == 1, .N] # 40 know about it
 # round(camp[ v_196 == 1, .("Knowledge about German ministry BT campaign" = .N / nrow(camp))],2) 
 # # 5% know about it
+
+
 
 
 
