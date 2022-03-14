@@ -28,8 +28,11 @@ load("./../01_Input/01_RData/00_clean_data_field.RData")
 # Loading Theme
 source("./../04_Data_Prep/99_APA_Theme.R")
 
-############################################# Usage Intention  ###############################################################
+# Can use statistical testing only for maximum number of rows as in GER dataset, as length(GER data) < length(UK data)
+quest_clean_UK <- subset(quest_clean_UK[1:nrow(quest_clean)])
 
+
+############################################# Usage Intention  ###############################################################
 #### GER ####
 # v_132, v_133: Likert (1-7)
 # can be no 0s
@@ -56,7 +59,6 @@ quest_clean
 usage_test <- cbind(usage_int_GER, usage_int_UK)
 usage_test <- melt(usage_test)
 t.test(value ~ variable, data = usage_test, alternative = "two.sided" , var.equal=F)
-
 # p-value < 0.05 -> Significant difference 
 
 
