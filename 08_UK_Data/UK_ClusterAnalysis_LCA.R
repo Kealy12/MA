@@ -20,7 +20,7 @@ library(poLCA)
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 
 # Loading Data 
-quest_raw_UK <- fread("./01_Input/raw_data_field_UK_2022_02_24.csv")
+quest_raw_UK <- fread("./01_Input/raw_data_field_UK_final.csv")
 load("./01_Input/00_clean_data_field_UK.RData")
 load("./01_Input/tri_all.RData")
 
@@ -40,7 +40,7 @@ f1 <- as.formula(cbind(OPT2, OPT4, INN1, INN2, INN4, DIS2, DIS3, INS1, INS2, INS
 # LCA can only be computed on rows with no NA, so these rows need to be filtered out
 tri_comp_all_noNA_UK<- tri_comp_all_UK[complete.cases(tri_comp_all_UK)]
 
-# N of LCA = 830 due to invalid answers
+# N of LCA = 880 due to invalid answers
 # (Parasuraman and Colby (2015): N of survey to LCA also reduced from 878 to 782)
 nrow(tri_comp_all_noNA_UK)
 
@@ -57,8 +57,8 @@ lca_6class_UK <- poLCA(f1, data = tri_comp_all_noNA_UK, nclass = 6, na.rm = T, n
 lca_3class_UK <- poLCA(f1, data = tri_comp_all_noNA_UK, nclass = 3, na.rm = T, nrep = 15)
 
 # Predicted Classes -> Do for each analysis
-pred_class <- as.data.table(lca_3class_UK$predclass)
-colnames(pred_class) <- c("Predicted Class (3Cs)")
+pred_class <- as.data.table(lca_6class_UK$predclass)
+colnames(pred_class) <- c("Predicted Class (6Cs)")
 unique(pred_class)
 
 # Binding Results together
@@ -147,10 +147,10 @@ write_xlsx(sheets, "./02_Output/lca_model_summary.xlsx")
 # Preparing Table
 colnames(tri_segments_4C_summary_UK)[1] <- "Cluster"
 tri_segments_4C_summary_UK$Cluster <- as.character(tri_segments_4C_summary_UK$Cluster)
-tri_segments_4C_summary_UK[ Cluster == "3", Cluster := "Explorers"]
-tri_segments_4C_summary_UK[ Cluster == "4", Cluster := "Hesitators"]
+tri_segments_4C_summary_UK[ Cluster == "4", Cluster := "Explorers"]
+tri_segments_4C_summary_UK[ Cluster == "1", Cluster := "Hesitators"]
 tri_segments_4C_summary_UK[ Cluster == "2", Cluster := "Avoiders"]
-tri_segments_4C_summary_UK[ Cluster == "1", Cluster := "Pioneers"]
+tri_segments_4C_summary_UK[ Cluster == "3", Cluster := "Pioneers"]
 
 tri_segments_4C_summary_UK
 

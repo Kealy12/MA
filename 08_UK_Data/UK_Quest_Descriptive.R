@@ -22,8 +22,9 @@ library(ggrepel)
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 
 # Loading Data 
-quest_raw <- fread("./01_Input/raw_data_field_UK_2022_02_24.csv")
+quest_raw <- fread("./01_Input/raw_data_field_UK_final.csv")
 load("./01_Input/00_clean_data_field_UK.RData")
+load("./01_Input/quest_tri_extended_UK_UK.RData")
 
 # Loading Theme
 source("./../04_Data_Prep/99_APA_Theme.R")
@@ -250,14 +251,12 @@ round(diff[, sum(value) / nrow(diff)],2)
 # only 37 % know the difference
 
 # Who knows the difference? 
-# Categorizing them by Cluster TBD
-quest_tri_extended[, v_282 := as.numeric(ifelse(v_282 == "1", "1", "0"))]
-diff_clus <- quest_tri_extended[, round(sum(v_282) / nrow(quest_tri_extended),2), by = Cluster]
+quest_tri_extended_UK[, v_282 := as.numeric(ifelse(v_282 == "1", "1", "0"))]
+diff_clus <- quest_tri_extended_UK[, round(sum(v_282) / nrow(quest_tri_extended_UK),2), by = Cluster]
 diff_clus
 
 # v_169 -> Male = 1, Female = 2
-quest_tri_extended[, .("Know difference between Bitcoin and BT (%)" = round(sum(v_282) / nrow(quest_tri_extended),2)), by = v_169]
-
+quest_tri_extended_UK[, .("Know difference between Bitcoin and BT (%)" = round(sum(v_282) / nrow(quest_tri_extended_UK),2)), by = v_169]
 
 #### Contact with Blockchain technology ####
 
@@ -951,7 +950,7 @@ real_name <- real_name[complete.cases(real_name)]
 real_name[, value := as.numeric(ifelse(value == "1", "1", 0))]
 round(real_name[, sum(value) / nrow(real_name)],2)
 
-# 49% of people who wouldn't send money to a seller without a name would change their opinion,
+# 50% of people who wouldn't send money to a seller without a name would change their opinion,
 # if they knew the real name
 
 
@@ -1497,17 +1496,10 @@ quest_clean_UK[, .("Pre-Knowledge of Blockchain Technology (1-10)" = round(mean(
 
 
 #### More opportunities or risks from BT ####
-
 #  v_288
 # scale 1 (=more risks) - 10 (more opportunities)
 quest_clean_UK[, .("More risks (1) or more opportunities (10) from BT" = round(mean(v_288, na.rm = T),2))]
 # more opportunities
-
-
-
-
-
-
 
 
 
@@ -1520,12 +1512,6 @@ quest_clean_UK[, .("More risks (1) or more opportunities (10) from BT" = round(m
 # camp[v_196 == 1, .N] # 40 know about it
 # round(camp[ v_196 == 1, .("Knowledge about German ministry BT campaign" = .N / nrow(camp))],2) 
 # # 5% know about it
-
-
-
-
-
-
 
 
 

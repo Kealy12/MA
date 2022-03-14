@@ -32,6 +32,8 @@ quest_tri_extended_UK
 
 # Filter out respondents who had invalid answers on TRI questions, LCA only worked on non-NA answers
 quest_tri_extended_UK <- quest_tri_extended_UK[complete.cases(quest_tri_extended_UK)]
+dim(quest_tri_extended_UK)
+dim(tri_comp_all_noNA_UK)
 
 # Map clusters to remaining data
 quest_tri_extended_UK <- cbind(quest_tri_extended_UK, tri_comp_all_noNA_UK[, "Predicted Class (4Cs)"])
@@ -39,10 +41,10 @@ setnames(quest_tri_extended_UK, "Predicted Class (4Cs)", "Cluster")
 
 # Setting names
 quest_tri_extended_UK$Cluster <- as.character(quest_tri_extended_UK$Cluster)
-quest_tri_extended_UK[ Cluster == "3", Cluster := "Explorers"]
-quest_tri_extended_UK[ Cluster == "4", Cluster := "Hesitators"]
+quest_tri_extended_UK[ Cluster == "4", Cluster := "Explorers"]
+quest_tri_extended_UK[ Cluster == "1", Cluster := "Hesitators"]
 quest_tri_extended_UK[ Cluster == "2", Cluster := "Avoiders"]
-quest_tri_extended_UK[ Cluster == "1", Cluster := "Pioneers"]
+quest_tri_extended_UK[ Cluster == "3", Cluster := "Pioneers"]
 
 # Setting Cluster as Factor and Levels corresponding Overall TRI
 quest_tri_extended_UK$Cluster <- as.factor(quest_tri_extended_UK$Cluster)
@@ -168,6 +170,9 @@ quest_tri_extended_UK[, .N, by =v_331]
 
 
 ########################################## Saving and Cleaning ##########################################################
+
+# Saving
+save(quest_tri_extended_UK, file = "./01_Input/quest_tri_extended_UK.RData")
 
 # Clean Environment
 rm(list = ls())

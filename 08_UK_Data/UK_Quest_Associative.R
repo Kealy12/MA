@@ -22,7 +22,7 @@ library(ggrepel)
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 
 # Loading Data 
-quest_raw <- fread("./01_Input/raw_data_field_UK_2022_02_24.csv")
+quest_raw <- fread("./01_Input/raw_data_field_UK_final.csv")
 load("./01_Input/00_clean_data_field_UK.RData")
 
 # load("./../01_Input/01_RData/tri_all_noNA_clusters.RData")
@@ -35,7 +35,6 @@ source("./../04_Data_Prep/99_APA_Theme.R")
 ################################## Associations ############################################
 
 #### Gender vs. Possession of Crypto / NFT ####
-
 # v_169 -> Male = 1, Female = 2
 quest_clean_UK$v_169 <- as.character(quest_clean_UK$v_169)
 quest_clean_UK[v_169 == 1, v_169 := "Male"]
@@ -53,9 +52,13 @@ ggplot(quest_clean_UK, aes(v_169, fill = v_54 == 1 )) +
   labs(y = "%", x = "", title = "Possession of Crypto") +
   guides(fill = guide_legend(reverse=TRUE))
 
-geom_text(aes(label = scales::percent(dis,accuracy = 1, trim = FALSE)), 
-          position = position_stack(vjust = 0.5), size = 2.5, family = "Times New Roman",
-          check_overlap = T)
+# Duplication problem:
+which(duplicated(colnames(quest_clean_UK))) # column 159 & 160 duplicated? No
+quest_clean_UK[, c(159, 160)]
+
+# geom_text(aes(label = scales::percent(dis,accuracy = 1, trim = FALSE)), 
+#          position = position_stack(vjust = 0.5), size = 2.5, family = "Times New Roman",
+#          check_overlap = T)
 
 # Gender - Possession of NFT
 # v_331 (1 = Yes, 2 = No, -77 = missing value (conditional question, if person heard of NFT))
@@ -241,11 +244,11 @@ usage_int <- quest_clean_UK[, .(Usage_Intention)]
 # MEDIATION: X → Y, X → M, and X + M → Y
 mediation <- cbind(experience,perceived_risk,usage_int)
 # X (Experience) → Y (Usage Intention)
-summary(lm(Usage_Intention ~ Experience, data = mediation)) # significant: b(experience)= 0.62570
+summary(lm(Usage_Intention ~ Experience, data = mediation)) # significant: b(experience)= 0.62641
 # X (Experience) → M (Perceived_risk)
 summary(lm(Perceived_risk ~ Experience, data = mediation)) # significant
 # X + M → Y
-summary(lm(Usage_Intention ~ Experience + Perceived_risk, data = mediation)) # significant: b(experience) = 0.37802
+summary(lm(Usage_Intention ~ Experience + Perceived_risk, data = mediation)) # significant: b(experience) = 0.38797
 # Mediation successfully supported, as absolute b-coef is reduced 
 
 

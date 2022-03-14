@@ -23,6 +23,7 @@ setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 quest_raw <- fread("./01_Input/raw_data_field_UK_2022_02_24.csv")
 load("./01_Input/00_clean_data_field_UK.RData")
 
+nrow(quest_clean_UK)
 ########################################## Extracting TRI 2.0 Components ##########################################################
 
 # Extracting relevant questions for TRI subcomponents
@@ -34,10 +35,10 @@ tri_comp_all_UK
 # 0s are invalid responses that need to be filtered out
 tri_comp_all_UK[tri_comp_all_UK == 0] <- NA
 
-# within N=847, 25 respondents have at least 1 invalid answer (Total of 28 NAs, so multiple NAs in 1 column)
-sum(is.na(tri_comp_all_UK[, 1:10])) # Total of 28 NAs
+# within N=901, 19 respondents have at least 1 invalid answer (Total of 18 NAs, so multiple NAs in 1 column)
+sum(is.na(tri_comp_all_UK[, 1:10])) # Total of 19 NAs
 rownames(tri_comp_all_UK)[!complete.cases(tri_comp_all_UK)] # Indices of rows with NAs
-tri_comp_all_UK[rowSums(is.na(tri_comp_all_UK)) > 0] # Overview of 25 rows with NA
+tri_comp_all_UK[rowSums(is.na(tri_comp_all_UK)) > 0] # Overview of 18 rows with NA
 
 ########################################## Reverse Coding of Discomfort ##########################################################
 # Reverse Coding of DIS2 necessary: Uncomfortable = 7, Comfortable = 1

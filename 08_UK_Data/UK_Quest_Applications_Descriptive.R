@@ -19,14 +19,9 @@ library(MASS)
 # Set working directory
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 
-
 # Loading Data 
-quest_raw <- fread("./01_Input/raw_data_field_UK_2022_02_24.csv")
+quest_raw <- fread("./01_Input/raw_data_field_UK_final.csv")
 load("./01_Input/00_clean_data_field_UK.RData")
-
-quest_clean[, p_0001]
-quest_clean_UK[, p_0001]
-
 
 # Loading Data 
 load("./01_Input/tri_all.RData")
@@ -48,10 +43,10 @@ setnames(quest_tri_extended_UK, "Predicted Class (4Cs)", "Cluster")
 
 # Setting names
 quest_tri_extended_UK$Cluster <- as.character(quest_tri_extended_UK$Cluster)
-quest_tri_extended_UK[ Cluster == "3", Cluster := "Explorers"]
-quest_tri_extended_UK[ Cluster == "4", Cluster := "Hesitators"]
+quest_tri_extended_UK[ Cluster == "4", Cluster := "Explorers"]
+quest_tri_extended_UK[ Cluster == "1", Cluster := "Hesitators"]
 quest_tri_extended_UK[ Cluster == "2", Cluster := "Avoiders"]
-quest_tri_extended_UK[ Cluster == "1", Cluster := "Pioneers"]
+quest_tri_extended_UK[ Cluster == "3", Cluster := "Pioneers"]
 
 # Setting Cluster as Factor and Levels corresponding Overall TRI
 quest_tri_extended_UK$Cluster <- as.factor(quest_tri_extended_UK$Cluster)
@@ -188,7 +183,7 @@ t.test(value ~ variable, data = beyond_group, alternative = "two.sided" ,var.equ
 
 dim(quest_clean_UK)
 
-########################################################### Scores by Cluster ###############################################################
+########################################################### NOT in Paper anymore: Scores by Cluster ###############################################################
 
 #### Scores per Cluster ####
 # Cluster Means on Applications
@@ -316,7 +311,8 @@ ggplot(quest_tri_extended_UK, aes(x = Predicted_Class_4C, v_270)) + geom_boxplot
 
 
 
-################################################################ Logistic Regression ###############################################################
+
+################################################################ Testing: Logistic Regression ###############################################################
 
 
 # Ordinal Logistic Regression: TBD
@@ -345,7 +341,7 @@ cbind(coeffs_4C, "p value" = round(p,3))
 ################################################################ Saving and Cleaning ###############################################################
 
 # Saving updated questionnaire with clusters
-save(quest_tri_extended_UK, file = "./../01_Input/01_RData/01_quest_cluster_extended.RData")
+save(quest_tri_extended_UK, file = "./01_Input/01_quest_cluster_extended_UK.RData")
 
 # Clean Environment
 rm(list = ls())

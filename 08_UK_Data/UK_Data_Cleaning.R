@@ -12,7 +12,7 @@ library(writexl)
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 
 # Loading Questionnaire
-quest_raw_UK <- fread("./01_Input/raw_data_field_UK_2022_02_24.csv")
+quest_raw_UK <- fread("./01_Input/raw_data_field_UK_final.csv")
 
 head(quest_raw_UK)
 
@@ -20,6 +20,9 @@ head(quest_raw_UK)
 
 # unnecessary Columns: Quality always -77, lastpage always 6028435. external_lfdn always 0, tester always 0, duration irrelevant
 quest_clean_UK <- quest_raw_UK[, c("quality", "lastpage", "external_lfdn", "tester", "duration") := NULL]
+
+# Clean Rows where Data is missing: 3
+quest_clean_UK <- quest_clean_UK[complete.cases(quest_clean_UK)]
 
 # uniqueness checks
 quest_clean_UK[, unique(browser)]
