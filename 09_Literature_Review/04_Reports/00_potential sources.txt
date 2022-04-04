@@ -1,1 +1,12 @@
-McKinsey, BCG, Bain, Deloitte, EY, PwC, Visa, Mastercard, Banks, Gartner, Microsoft, IBM
+McK: done
+Deloitte: done
+BCG: done
+Bain: none
+EY: none
+PwC: done
+Visa: done
+Mastercard: none
+Gartner: done
+Microsoft: none
+IBM: none
+
