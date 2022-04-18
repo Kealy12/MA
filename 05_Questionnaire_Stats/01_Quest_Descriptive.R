@@ -59,7 +59,9 @@ heard_summary
 
 heard[value == "No", N := 0]
 
-plot_heard <- ggplot(heard, aes(reorder(variable, N), fill = factor(value))) + geom_bar(position = "fill") +
+tiff("test.tiff", units="in", width=5, height=5, res=300)
+
+ggplot(heard, aes(reorder(variable, N), fill = factor(value))) + geom_bar(position = "fill") +
   coord_flip() + scale_fill_brewer( palette = "Paired") +
   scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25)) + 
   theme_apa(remove.x.gridlines = F) +
@@ -71,7 +73,8 @@ plot_heard <- ggplot(heard, aes(reorder(variable, N), fill = factor(value))) + g
             check_overlap = T)
 
 plot_heard
-
+# insert ggplot code
+dev.off()
 
 ####  Conditional: Sector you heard about blockchain technology ####
 

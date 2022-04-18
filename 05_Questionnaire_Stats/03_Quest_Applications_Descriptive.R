@@ -306,30 +306,31 @@ ggplot(quest_tri_extended, aes(x = Predicted_Class_4C, v_270)) + geom_boxplot() 
 
 
 
+
 ################################################################ Logistic Regression ###############################################################
 
 
 # Ordinal Logistic Regression: TBD
 # Dependent variable (Y) = Likert Scale -> Ordinal
 # Independent vairable (X) = Categorical 
-quest_tri_extended$v_265 <- as.factor(quest_tri_extended$v_265)
-
-# 5 Classes OLR
-olr_5C <- polr(v_265 ~ Predicted_Class_5C, data = quest_tri_extended, Hess = T)
-summary(olr_5C)
-olr_5C$coefficients
-coeffs_5C <- coef(summary(olr_5C))
-p <- pnorm(abs(coeffs_5C[, "t value"]), lower.tail = FALSE) * 2
-cbind(coeffs_5C, "p value" = round(p,3))
-
-olr_4C <- polr(v_265 ~ Predicted_Class_4C, data = quest_tri_extended, Hess = T)
-summary(olr_4C)
-olr_4C$coefficients
-coeffs_4C <- coef(summary(olr_4C))
-p <- pnorm(abs(coeffs_4C[, "t value"]), lower.tail = FALSE) * 2
-cbind(coeffs_4C, "p value" = round(p,3))
-
-
+# quest_tri_extended$v_265 <- as.factor(quest_tri_extended$v_265)
+# 
+# # 5 Classes OLR
+# olr_5C <- polr(v_265 ~ Predicted_Class_5C, data = quest_tri_extended, Hess = T)
+# summary(olr_5C)
+# olr_5C$coefficients
+# coeffs_5C <- coef(summary(olr_5C))
+# p <- pnorm(abs(coeffs_5C[, "t value"]), lower.tail = FALSE) * 2
+# cbind(coeffs_5C, "p value" = round(p,3))
+# 
+# olr_4C <- polr(v_265 ~ Predicted_Class_4C, data = quest_tri_extended, Hess = T)
+# summary(olr_4C)
+# olr_4C$coefficients
+# coeffs_4C <- coef(summary(olr_4C))
+# p <- pnorm(abs(coeffs_4C[, "t value"]), lower.tail = FALSE) * 2
+# cbind(coeffs_4C, "p value" = round(p,3))
+# 
+# 
 
 
 ################################################################ Saving and Cleaning ###############################################################

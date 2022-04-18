@@ -41,6 +41,8 @@ quest_clean[v_169 == 1, v_169 := "Male"]
 quest_clean[v_169 == 2, v_169 := "Female"]
 quest_clean$v_169 <- as.factor(quest_clean$v_169)
 
+quest_clean[v_169 == "Male", .N]
+
 # Gender - Possession of Crypto
 # v_54 (1 = Yes, 2 = No)
 ggplot(quest_clean, aes(v_169, fill = v_54 == 1 )) + 
