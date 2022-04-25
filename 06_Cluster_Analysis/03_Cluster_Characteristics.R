@@ -113,7 +113,73 @@ quest_tri_extended[, .(Mean = mean(v_333, na.rm = T)), by = Cluster]
 
 cluster_bc_dt <- quest_tri_extended[, .("Knowledge of Blockchain Technology (1-10)" = round(mean(v_286, na.rm = T),2)), by = Cluster][order(Cluster)]
 cluster_bc_dt
- 
+
+####  Ability to Explain Blockchain ####
+# v_50 (1-10 scale)
+explain <- quest_tri_extended[, .("Ability to Explain Blockchain Technology (1-10)" = round(mean(v_50, na.rm = T),2)), by = Cluster]
+
+cluster_bc_dt <- merge(cluster_bc_dt, explain, by = "Cluster", all.x = T)
+cluster_bc_dt
+
+####  Ability to Explain the Internet ####
+# v_49 (1-10 scale)
+internet <- quest_tri_extended[, .("Ability to Explain the Internet (1-10)" = round(mean(v_49, na.rm = T),2)), by = Cluster]
+
+cluster_bc_dt <- merge(cluster_bc_dt, internet, by = "Cluster", all.x = T)
+cluster_bc_dt
+
+#### Possession of any cryptocurrency ####
+# v_54 (1 = Yes, 2 = No)
+
+crypto_dt <- quest_tri_extended[ v_54 == 1, .("Possession of Cryptocurrency (N)" = .N), by = Cluster ]
+n_c <- quest_tri_extended[, .(N = .N), by = "Cluster"]
+crypto_dt <- merge(crypto_dt, n_c, by = "Cluster")
+crypto_dt[, "Possession of Cryptocurrency (%)" := round(`Possession of Cryptocurrency (N)` / `N`,2)][, `Possession of Cryptocurrency (N)` := NULL]
+crypto_dt[, N := NULL]
+
+cluster_bc_dt <- merge(cluster_bc_dt, crypto_dt, by = "Cluster", all.x = T)
+cluster_bc_dt
+
+#### Possession of a NFT ####
+# v_331 (1 = Yes, 2 = No, -77 = missing value (conditional question, if person heard of NFT))
+
+nft_dt <- quest_tri_extended[ v_331 == 1, .("Possession of NFT (N)" = .N), by = Cluster ]
+n_c <- quest_tri_extended[, .(N = .N), by = "Cluster"]
+nft_dt <- merge(nft_dt, n_c, by = "Cluster")
+nft_dt[, "Possession of NFT (%)" := round(`Possession of NFT (N)` / `N`,2)][, `Possession of NFT (N)` := NULL]
+nft_dt[, N := NULL]
+
+cluster_bc_dt <- merge(cluster_bc_dt, nft_dt, by = "Cluster", all.x = T)
+cluster_bc_dt
+
+#### Know the difference between BT and Bitcoin within Clusters ####
+diff_dt <- quest_tri_extended[ v_282 == 1, .("Know difference between Bitcoin and BT (N)" = .N), by = Cluster ]
+n_c <- quest_tri_extended[, .(N = .N), by = "Cluster"]
+diff_dt <- merge(diff_dt, n_c, by = "Cluster")
+diff_dt[, "Knowledge of difference between Bitcoin and BT (%)" := round(`Know difference between Bitcoin and BT (N)` / `N`,2)][, `Know difference between Bitcoin and BT (N)` := NULL]
+diff_dt[, N := NULL]
+
+cluster_bc_dt <- merge(cluster_bc_dt, diff_dt, by = "Cluster", all.x = T)
+cluster_bc_dt
+
+quest_tri_extended[, .N, by =v_331]
+
+
+
+
+
+
+
+
+########################################## Merging all characteristics together ##########################################################
+cluster_all <- merge(cluster_demo_dt, cluster_bc_dt, by = "Cluster", all.x = T)
+
+print(xtable(cluster_all, type = "latex"), file = "./../02_Output/cluster_characteristcs.tex",include.rownames = F, only.contents = T, include.colnames = T, hline.after = c(nrow(cluster_all)))
+sheets <- list("cluster_all" = cluster_all)
+write_xlsx(sheets, "./../02_Output/cluster_characteristcs.xlsx")
+
+
+
 ########################################## Saving and Cleaning ##########################################################
 
 # Clean Environment
