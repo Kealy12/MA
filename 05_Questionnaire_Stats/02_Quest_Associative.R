@@ -166,34 +166,6 @@ f_test$p.value
 # Usage intention pre-survey not independent from usage intention post-survey
 # --> the difference in ratios did not arrive by pure chance
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #### Knowledge vs. Gender ####
 
 # Beginning of Questionnaire: v_286 (1-10 scale)

@@ -349,7 +349,7 @@ cfa_mod_fit_table
 reliability(cfa_mod_fit)
 
 # Multicollinearity: Irrelevant for moderators (McClelland 2017)
-# Run AFTER regression was performed
+# Run AFTER regression was performed: VIF
 car::vif(lm_usageIntention_nonMod)
 
 
@@ -485,7 +485,6 @@ outcome_usefulness <- c("Perceived_Usefulness")
 # 0. Non-moderated
 lm_usefulness_nonMod <- perform_linear_regression(outcome_usefulness, predictors_all_NonModerated, data = lm_data_usefulness )
 apa.reg.table(lm_usefulness_nonMod)
-car::vif(lm_usefulness_nonMod)
 
 # NO MODERATION EFFECT ON USEFULNESS FOR PAPER
 
