@@ -1,6 +1,6 @@
 #######################################################################################################################################
 
-# General Questionnaire Stats 
+# General Questionnaire Stats - GER
 
 ############################################# Set Up ###############################################################
 
@@ -17,6 +17,7 @@ library(poLCA)
 library(RColorBrewer)
 library(extrafont)
 library(ggrepel)
+library(officer)
 
 # Set working directory
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
@@ -31,15 +32,16 @@ load("./../01_Input/01_RData/tri_all.RData")
 
 # Loading Theme
 source("./../04_Data_Prep/99_APA_Theme.R")
+my_colors <- RColorBrewer::brewer.pal(3, "BrBG")[c(1,3)]
 
 
 ################################ Descriptive Blockchain Stats ##########################
 
-#### N ####
+#### INCLUDED N ####
 quest_clean[, .N]
 
 
-#### Have you heard of the following terms ####
+#### INCLUDED Have you heard of the following terms ####
 # v_321 - v_325
 # 1 = yes, 2 = no
 heard <- quest_clean[, .(v_321, v_322, v_323, v_324, v_325)]
@@ -59,24 +61,21 @@ heard_summary
 
 heard[value == "No", N := 0]
 
-tiff("test.tiff", units="in", width=5, height=5, res=300)
-
-ggplot(heard, aes(reorder(variable, N), fill = factor(value))) + geom_bar(position = "fill") +
-  coord_flip() + scale_fill_brewer( palette = "Paired") +
+ggplot(heard, aes(reorder(variable, N), fill = factor(value))) + geom_bar(position = "fill", width = .5) +
+  coord_flip() + scale_fill_brewer(palette = "Paired") +
   scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25)) + 
   theme_apa(remove.x.gridlines = F) +
-  theme(text=element_text(family="Times New Roman", size=12)) + 
-  labs(y = "%", x = "", title = "Distribution of respondents knowing the following terms") +
+  theme(text=element_text(family="Times New Roman", size=10)) + 
+  labs(y = "%", x = "") +
   guides(fill = guide_legend(reverse=TRUE)) +
+  theme(legend.text=element_text(size=10)) +
   geom_text(data = heard_summary, aes(label = scales::percent(dis,accuracy = 1, trim = FALSE), y = dis), 
-            position = position_stack(vjust = 0.5), size = 2.5, family = "Times New Roman",
-            check_overlap = T)
+            position = position_stack(vjust = 0.5), size = 2, family = "Times New Roman",
+            check_overlap = T) +
+  theme(aspect.ratio = 1/2, legend.position = "bottom")
 
-plot_heard
-# insert ggplot code
-dev.off()
 
-####  Conditional: Sector you heard about blockchain technology ####
+####  INCLUDED Conditional: Sector you heard about blockchain technology ####
 
 # Conditional Question
 # v_31 - v_35, v_292, v_293
@@ -107,7 +106,7 @@ ggplot(sector, aes(x= value, fill = reorder(variable, -N))) + geom_bar(position 
   scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25))
 
 
-####  Conditional: Knowingly used blockchain applications ####
+####  INCLUDED Conditional: Knowingly used blockchain applications ####
 # v_55
 # 1 = Yes, 2 = No
 
@@ -125,7 +124,7 @@ used_share <- used_share[complete.cases(used_share)]
 used_share[, value := as.numeric(ifelse(value == "1", "1", 0))]
 round(used_share[, sum(value) / nrow(used_share)],2)
 
-####  Conditional: Use Crypto as means of payment ####
+####  INCLUDED Conditional: Use Crypto as means of payment ####
 
 # v_56
 # 1 = Yes, 2 = No
@@ -149,7 +148,7 @@ round(use_crypto_share[, sum(value) / nrow(use_crypto_share)],2)
 
 
 
-####  Conditional: Why exclude possibility to use crypto  ####
+####  INCLUDED Conditional: Why exclude possibility to use crypto  ####
 
 # v_306, v_307, v_313
 exclude <- quest_clean[, .(v_306, v_307, v_313)]
@@ -179,7 +178,7 @@ plot_exclude <- ggplot(exclude, aes(x= value, fill = reorder(variable, -N))) + g
 plot_exclude
 
 
-#### Can you explain these to a friend ####
+#### NOT Can you explain these to a friend ####
 # v_326 - v_330
 # 1 = yes, 2 = no
 explain <- quest_clean[, .(v_326, v_327, v_328, v_329, v_330)]
@@ -219,7 +218,7 @@ plot_explain
 
 
 
-#### Age ####
+#### NOT Age ####
 
 # v_285 -> Need to recode data: +14 on score to show age (nobody < 15 and > 85)
 quest_clean[, v_285 := v_285 + 14]
@@ -245,7 +244,7 @@ a
 # coef(gl)
 
 
-#### Difference between Bitcoin and Blockchain #### 
+#### INCLUDED Difference between Bitcoin and Blockchain #### 
 
 # v_282
 # 1 = Yes, 2 = No
@@ -265,7 +264,8 @@ diff_clus
 quest_tri_extended[, .("Know difference between Bitcoin and BT (%)" = round(sum(v_282) / nrow(quest_tri_extended),2)), by = v_169]
 
 
-#### Contact with Blockchain technology ####
+
+#### INLCUDED Contact with Blockchain technology ####
 
 # v_10: in professional life
 # v_11: in personal life
@@ -320,7 +320,7 @@ contact[, mean(value), by = variable]
 
 
 
-#### Knowledge of Blockchain technology ####
+#### INCLUDED Knowledge of Blockchain technology ####
 
 # Beginning of Questionnaire: v_286 (1-10 scale)
 quest_clean[, .("Pre-Knowledge of Blockchain Technology (1-10)" = round(mean(v_286, na.rm = T),2))]
@@ -329,7 +329,7 @@ quest_clean[, .("Pre-Knowledge of Blockchain Technology (1-10)" = round(mean(v_2
 quest_clean[, .("Post-Knowledge of Blockchain Technology (1-10)" = round(mean(v_333, na.rm = T),2))]
 
 
-#### Friend's knowledge of blockchain technology ####
+#### NOT Friend's knowledge of blockchain technology ####
 
 # v_287
 # Scale 1 (they never heard of it) - 10 (they are experts)
@@ -337,17 +337,17 @@ friends_know <- quest_clean[, .(v_287)]
 friends_know[, .("Friend's knowledge of blockchain technology (1-10)" = round(mean(v_287, na.rm = T),2))]
 # they have low knowledge about blockchain, similar to mine
 
-#### Social influence on blockchain usage ####
+#### INCLUDED Social influence on blockchain usage ####
 
 # v_296
-# Scale 1 (they never heard of it) - 10 (they are experts)
+# Scale 1 (They would discourage me to use it) - 10 (They would encourage me to use it)
 social <- quest_clean[, .(v_296)]
 social[, .("Social influence on my blockchain usage (1-10)" = round(mean(v_296, na.rm = T),2))]
 # They would rather discourage me
 
 
 
-#### Tech Usage ####
+#### INCLUDED Tech Usage ####
 
 # v_19 - v_30
 # 1 = Yes, 2 = No, 3 = Don't know enough 
@@ -383,27 +383,31 @@ tech_usage[value == "2", N:= 0]
 tech_usage[value == "3", N:= 0]
 tech_usage
 
-tech_usage_summary <- unique(tech_usage)
-tech_usage_summary
+tech_usage_summary_GER <- unique(tech_usage)
+tech_usage_summary_GER
 
 # Plot
-plot_usageIntention <- 
-  ggplot(tech_usage_summary, aes(x = reorder(variable, N), y = dis, fill = likert)) +
+plot_usage_ger <-
+  ggplot(tech_usage_summary_GER, aes(x = reorder(variable, N), y = dis, fill = likert)) +
   geom_bar(position = "stack", stat = "identity", width = 0.6) +
   geom_text(aes(label = scales::percent(dis,accuracy = 1, trim = FALSE)), 
-                position = position_stack(vjust = 0.5), size = 2.1, family = "Times New Roman") +
+                position = position_stack(vjust = 0.5), size = 3.5, family = "Times New Roman") +
   coord_flip() +
   scale_fill_brewer(palette = "BrBG") +
   guides(fill = guide_legend(reverse=TRUE)) +
-  labs( title = "Usage intention of technologies", y = "%", x = "") +
+  labs(title = "Germany", y = "%", x = "") +
   scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25)) + 
   theme_apa(remove.x.gridlines = F) +
-  theme(text=element_text(family="Times New Roman", size=12))
+  theme(text=element_text(family="Times New Roman", size=20)) +
+  theme(aspect.ratio = 2/1, legend.position = "bottom") +
+  theme(legend.text=element_text(size=12))
 
-plot_usageIntention
+plot_usage_ger
+ggsave("plot_usage_ger.png", plot_usage_ger)
 
 
-#### Ability to explain the internet and blockchain ####
+
+#### NOT Ability to explain the internet and blockchain ####
 
 ## Mean: Explain the Internet
 # v_49 (1-10 scale)
@@ -469,7 +473,8 @@ plot_abilityExplain <- ggplot(ability_summary, aes(x = variable, y = dis,
 plot_abilityExplain
 
 
-#### Possession of Crypto / NFT ####
+
+#### INCLUDED Possession of Crypto / NFT ####
 # Crypto
 # v_54 (1 = Yes, 2 = No)
 crypto <- quest_clean[, "v_54"]
@@ -483,7 +488,7 @@ round(nft[ v_331 == 1, .("Possession of NFT (%)" = .N / nrow(crypto))],2)
 
 
 
-####  Conditional: When first became crypto owner ####
+####  NOT Conditional: When first became crypto owner ####
 
 # v_297
 when <- quest_clean[, "v_297"]
@@ -515,7 +520,7 @@ ggplot(when, aes(Year, dis)) +
 
 
 
-####  Conditional: Difficulty buying crypto ####
+####  INCLUDED Conditional: Difficulty buying crypto ####
 # v_298 (Scale: 1 (Very easy) - 7 (Very hard))
 
 diff <- quest_clean[, .(v_298)]
@@ -524,7 +529,7 @@ diff[, mean(v_298, na.rm = T)] # relatively easy
 
 
 
-####  Conditional: How manage crypto ####
+####  INCLUDED Conditional: How manage crypto ####
 
 manage_crypto <- quest_clean[, .(v_316, v_317, v_318, v_319)]
 colnames(manage_crypto) <- c("On Coinbase, Binance or other exchange", 
@@ -559,7 +564,7 @@ ggplot(manage_crypto, aes(x= value, fill = reorder(variable, -N))) + geom_bar(po
 
 ################################## Trust, Personal Innovativeness & TRI   ###################################
 
-#### Trust overall ####
+#### INCLUDED Trust overall ####
 
 # Disposition to trust other people
 # v_314
@@ -596,7 +601,7 @@ plot_trust <- ggplot(trust, aes(x= variable, fill = reorder(String, -N))) + geom
 plot_trust
 # Vertrauensgrundeinstellung eher negativ
 
-#### Disposition to privacy ####
+#### NOT Disposition to privacy ####
 
 # v_104, v_105, v_106 (reverse coded)
 privacy <- quest_clean[, .(v_106, v_104, v_105)]
@@ -667,7 +672,7 @@ privacy_scores[, .("Privacy score overall" = round(mean(Privacy, na.rm = T),2))]
 
 
 
-#### Cynism ####
+#### NOT Cynism ####
 # v_107
 # "I am not bothered by data collection, because my\npersonal information is publicly available anyway", 
 cynism <- quest_clean[, .(v_107)]
@@ -722,7 +727,7 @@ plot_cynism <- plot_privacy <- ggplot(cynism_summary, aes(x = variable, y = dis,
 plot_cynism 
 
 
-#### Personal innovativeness ####
+#### NOT Personal innovativeness ####
 # cf. Agarwal & Prasad, 1998 
 # v_205, v_206
 
@@ -789,20 +794,20 @@ pers_inn_score[, .("Personal innovativeness overall" = round(mean(PIIT, na.rm = 
 
 
 
-#### TRI ####
+#### INCLUDED TRI ####
 
 tri <- quest_clean[, .(v_108, v_109, v_207, v_208, v_209, 
                        v_228, v_229, v_230, v_231, v_232)]
-colnames(tri) <- c("Optimism:\nNew technology gives me more freedom of\nmobility",
-                   "Optimism:\nNew technology makes me more productive",
-                   "Innovativeness:\nOther people come to me for advice on new\ntechnologies",
-                   "Innovativeness:\nIn general, I am among the first in my circle of\nfriends to acquire new technology when it\nappears",
-                   "Innovativeness:\nI keep up with the latest technological\ndevelopments in my areas of interest",
-                   "Discomfort:\nI can usually figure out new high-tech products\nand services without help from others",
-                   "Discomfort:\nSometimes, I think that technology systems are\nnot designed for use by ordinary people",
-                   "Insecurity:\nPeople are too dependent on technology to do\nthings for them",
-                   "Insecurity:\nToo much technology distracts people to a point\nthat is harmful",
-                   "Insecurity:\nI don’t feel comfortable doing business if the\nother party is only available online")
+colnames(tri) <- c("Optimism: New technology gives\nme more freedom of mobility",
+                   "Optimism: New technology makes\nme more productive",
+                   "Innovativeness: Other people come to\nme for advice on new technologies",
+                   "Innovativeness: In general, I am among\nthe first in my circle of friends to\nacquire new technology when it appears",
+                   "Innovativeness: I keep up with the latest\ntechnological developments in\nmy areas of interest",
+                   "Discomfort: I can usually figure out\nnew high-tech products and\nservices without help from others",
+                   "Discomfort: Sometimes, I think that\ntechnology systems are not\ndesigned for use by ordinary people",
+                   "Insecurity: People are too dependent on\ntechnology to do things for them",
+                   "Insecurity: Too much technology distracts\npeople to a point that is harmful",
+                   "Insecurity: I don’t feel comfortable doing\nbusiness if the other party\nis only available online")
 
 tri <- tri[, c(10,9,8,7,6,5,4,3,2,1)]
 
@@ -837,46 +842,32 @@ tri[value == 7 , dis := .N / N, by = variable]
 
 tri_summary <- unique(tri)
 
-ggplot(tri_summary, aes(x = variable, y = dis, fill = likert)) +
+plot_TRI_GER <- ggplot(tri_summary, aes(x = variable, y = dis, fill = likert)) +
   geom_bar(position = "stack", stat = "identity", width = 0.6) +
   geom_text(aes(label = scales::percent(dis,accuracy = 1, trim = FALSE)), 
-            position = position_stack(vjust = 0.5), size = 2.5, family = "Times New Roman",
+            position = position_stack(vjust = 0.5), size = 4.5, family = "Times New Roman",
             check_overlap = T) +
   coord_flip() +
   scale_fill_brewer(palette = "BrBG") +
   guides(fill = guide_legend(reverse=TRUE)) +
-  labs( title = "Distribution of answers on TRI statements", y = "%", x = "") +
+  labs( title = "Germany", y = "%", x = "") +
   theme_apa(remove.x.gridlines = F) + 
   scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25)) + 
-  theme(text=element_text(family="Times New Roman", size=12))
+  theme(text=element_text(family="Times New Roman", size=28)) +
+  theme( legend.position = "none") +
+  theme(legend.text=element_text(size=15))
 
-tri_comp_all
+plot_TRI_GER
+ggsave("plot_TRI_GER.png", plot_TRI_GER)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# Scores
 
 
 
 
 ################################## BT Deep-Dive ###################################
 
-#### Bank account statement on street ####
+#### INCLUDED Bank account statement on street ####
 # v_126: (yes = 1, no = 2)
 
 bank <- quest_clean[, .(v_126)]
@@ -887,7 +878,7 @@ round(bank[, sum(value) / nrow(bank)],2)
 
 
 
-#### BT to buy items ####
+#### INCLUDED BT to buy items ####
 # v_85, v_86, v_87, v_88
 
 # 1 = yes, 2 = no
@@ -914,7 +905,7 @@ buy_summary
 buy[value == "No", N := 0]
 
 plot_buy <- ggplot(buy, aes(reorder(variable, N), fill = factor(value))) + geom_bar(position = "fill") +
-  coord_flip() + scale_fill_brewer( palette = "Paired") +
+  coord_flip() + scale_fill_brewer( palette = "BrBG") +
   scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25)) + 
   theme_apa(remove.x.gridlines = F) +
   theme(text=element_text(family="Times New Roman", size=12)) + 
@@ -938,7 +929,7 @@ plot_buy
 
 
 
-#### Verified seller without name ####
+#### INCLUDED Verified seller without name ####
 
 # v_234: (yes = 1, no = 2)
 seller <- quest_clean[, .(v_234)]
@@ -966,7 +957,7 @@ round(seller[, sum(value) / nrow(seller)],2)
 
 
 
-####  Conditional: If you knew the real name ####
+####  NOT Conditional: If you knew the real name ####
 # v_233: (yes = 1, no = 2)
 real_name <- quest_clean[, .(v_233)]
 real_name <- melt(real_name)
@@ -988,48 +979,48 @@ round(real_name[, sum(value) / nrow(real_name)],2)
 
 
 
-#### Personal details - String of numbers & letters ####
+#### INCLUDED Personal details - String of numbers & letters ####
 
 # v_100
 # Scale 1 (not comfortable at all) - 7 (very comfortable)
 details <- quest_clean[, .(v_100)]
 details[, .("Comfortability concering BT personal details as string of numbers and letters " = round(mean(v_100, na.rm = T),2))]
-# Rather uncomfortable
+# Rather uncomfortable: 3.55
 
 
 
 
-#### Privacy concerns - BT Financial transactions ####
+#### INCLUDED Privacy concerns - BT Financial transactions ####
 
 # v_99
 # Scale 1 (fully disagree) - 7 (fully agree)
 concerns <- quest_clean[, .(v_99)]
 concerns[, .("Privacy concerns of BT for financial transactions" = round(mean(v_99, na.rm = T),2))]
-# Rather concerned 
+# Rather concerned 4.52
 
 
 
-#### Losing Blockchain PIN ####
+#### NOT Losing Blockchain PIN ####
 
 # v_101
 # Scale 1 (not comfortable at all) - 7 (very comfortable)
 losing.pin <- quest_clean[, .(v_101)]
 losing.pin[, .("Comfortability regarding losing blockchain PIN" = round(mean(v_101, na.rm = T),2))]
-# Not comfortable 
+# Not comfortable: 1.91
 
 
 
 
 
 
-#### BT self-selected use cases ####
+#### INCLUDED BT self-selected use cases ####
 
 # v_120, v_121, v_122, v_284
 # 1 = quoted, 0 = not quoted
 statements <- quest_clean[, .(v_120, v_121, v_122, v_284)]
-colnames(statements) <- c("I know use cases for Blockchain Technology\nOTHER THAN cryptocurrencies (Bitcoin is a\ncryptocurrency)", 
-                      "I have installed an app related to Blockchain\nTechnology on my phone or desktop computer\n(e.g. Metamask)", 
-                      "I advise people on how to use Blockchain\nTechnology applications or have coded some\nmyself (e.g. a real Smart Contract)",
+colnames(statements) <- c("I know use cases for Blockchain\nTechnology other than crypto-\ncurrencies (Bitcoin is a cryptocurrency)", 
+                      "I have installed an app related to\nBlockchain Technology on my phone or\ndesktop computer (e.g. Metamask)", 
+                      "I advise people on how to use Blockchain\nTechnology applications or have coded\nsome myself (e.g. a real Smart Contract)",
                       "None of the statements apply to me")
 statements <- melt(statements)
 statements$value <- as.character(statements$value)
@@ -1045,26 +1036,44 @@ statements_summary[, dis := N / N_total, by =variable]
 statements_summary
 
 
-plot_statements <- ggplot(statements, aes(reorder(variable, N), fill = factor(value))) + geom_bar(position = "fill") +
-  coord_flip() + scale_fill_brewer( palette = "Paired") +
+plot_statements_GER <- ggplot(statements, aes(reorder(variable, N), fill = factor(value))) + geom_bar(position = "fill", width = 0.6) +
+  coord_flip() +
   scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25)) + 
   theme_apa(remove.x.gridlines = F) +
-  theme(text=element_text(family="Times New Roman", size=12)) + 
-  labs(y = "%", x = "", title = "Distribution of respondents on BT use cases") +
+  theme(text=element_text(family="Times New Roman", size=25)) + 
+  labs(y = "%", x = "", title = "Germany") +
   guides(fill = guide_legend(reverse=TRUE)) +
   geom_text(data = statements_summary, aes(label = scales::percent(dis,accuracy = 1, trim = FALSE), y = dis), 
-            position = position_stack(vjust = 0.5), size = 2.5, family = "Times New Roman",
-            check_overlap = T)
+            position = position_stack(vjust = 0.5), size = 5, family = "Times New Roman",
+            check_overlap = T) +
+  scale_fill_manual(values = my_colors) +
+  theme( legend.position = "bottom") +
+  theme(legend.text=element_text(size=16))
 
-plot_statements
+
+plot_statements_GER
+ggsave("plot_statements_GER.png", plot_statements_GER)
 
 
 
-
+# usage_ger <-
+#   ggplot(tech_usage_summary_GER, aes(x = reorder(variable, N), y = dis, fill = likert)) +
+#   geom_bar(position = "stack", stat = "identity", width = 0.6) +
+#   geom_text(aes(label = scales::percent(dis,accuracy = 1, trim = FALSE)), 
+#             position = position_stack(vjust = 0.5), size = 3.5, family = "Times New Roman") +
+#   coord_flip() +
+#   scale_fill_brewer(palette = "Paired") +
+#   guides(fill = guide_legend(reverse=TRUE)) +
+#   labs(title = "Germany", y = "%", x = "") +
+#   scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25)) + 
+#   theme_apa(remove.x.gridlines = F) +
+#   theme(text=element_text(family="Times New Roman", size=20)) +
+#   theme(aspect.ratio = 2/1, legend.position = "bottom") +
+#   theme(legend.text=element_text(size=12))
 
 ################################## BT Constructs ###################################
 
-#### Usage intention ####
+#### NOT Usage intention ####
 # v_132, v_133
 usage.int <- quest_clean[, .(v_132, v_133)]
 colnames(usage.int) <- c("Given the chance, I would use Blockchain\nTechnology applications",
@@ -1134,13 +1143,12 @@ usage.int.mean[, .("Usage Intention score overall" = round(mean(Usage_Intention,
 
 
 
-#### Trust BT Users ####
+#### INCLUDED Trust BT Users ####
 # v_134, v_135, v_136
 trust_users <- quest_clean[, .(v_134, v_135, v_136)]
-colnames(trust_users) <- c("I would trust people, that use \nBlockchain Technology",
-                       "I would trust organizations that use\nBlockchain Technology",
-                       "I would trust machines that are connected to a\nBlockchain Technology")
-
+colnames(trust_users) <- c("I would trust\npeople that use\nBlockchain Technology",
+                       "I would trust\norganizations that use\nBlockchain Technology",
+                       "I would trust machines\nthat are connected to a\nBlockchain Technology")
 trust_users <- melt(trust_users)
 
 # can be no 0s
@@ -1175,18 +1183,23 @@ trust_users[value == 7 , dis := .N / N, by = variable]
 
 trust_users_summary <- unique(trust_users)
 
-plot_trustUsers <- ggplot(trust_users_summary, aes(x = variable, y = dis, fill = likert)) +
+plot_trustUsers_GER <- ggplot(trust_users_summary, aes(x = variable, y = dis, fill = likert)) +
   geom_bar(position = "stack", stat = "identity", width = 0.6) +
   geom_text(aes(label = scales::percent(dis,accuracy = 1, trim = FALSE)), 
-            position = position_stack(vjust = 0.5), size = 2.5, family = "Times New Roman",
+            position = position_stack(vjust = 0.5), size = 5, family = "Times New Roman",
             check_overlap = T) +
   coord_flip() +
   scale_fill_brewer(palette = "BrBG") +
   guides(fill = guide_legend(reverse=TRUE)) +
-  labs( title = "Distribution of answers related to trust in\nblockchain users", y = "%", x = "") +
+  labs( title = "Germany", y = "%", x = "") +
   theme_apa(remove.x.gridlines = F) + 
   scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25)) + 
-  theme(text=element_text(family="Times New Roman", size=12))
+  theme(text=element_text(family="Times New Roman", size=26)) +
+  theme( legend.position = "none") +
+  theme(legend.text=element_text(size=12))
+
+plot_trustUsers_GER
+ggsave("plot_trustUsers_GER.png", plot_trustUsers_GER)
 
 plot_trustUsers
 # Low trust independent of machine or person 
@@ -1204,13 +1217,13 @@ trust_user_score[, .("Trust in users score overall" = round(mean(trust_user, na.
 # 3.61: rather low trust in other BT users
 
 
-#### Trust BT (integrity, benevolence, ability) ####
+#### INCLUDED Trust BT (integrity, benevolence, ability) ####
 
 # v_247 - v_252, v_144 - v_146
 trust_iba <- quest_clean[, .(v_247, v_248, v_249, v_250, v_251, v_252,
                               v_144, v_145, v_146)]
 colnames(trust_iba) <- c("Integrity: Blockchain Technology\nprovides reliable information",
-                          "Integrity: Blockchain Technology\nis honest in dealing with my private data",
+                          "Integrity: Blockchain Technology is\nhonest in dealing with my private data",
                           "Integrity: Blockchain Technology\nadheres to rules and principles", 
                           "Benevolence: Blockchain Technology\nacts in the interests of its users",
                           "Benevolence: In general Blockchain\nTechnology is not malicious",
@@ -1253,20 +1266,23 @@ trust_iba[value == 7 , dis := .N / N, by = variable]
 trust_iba_summary <- unique(trust_iba)
 
 # Plot
-plot_trust_IBA <- 
+plot_trust_IBA_GER <- 
   ggplot(trust_iba_summary, aes(x = variable, y = dis, fill = likert)) +
   geom_bar(position = "stack", stat = "identity", width = 0.6) +
   geom_text(aes(label = scales::percent(dis,accuracy = 1, trim = FALSE)), 
-            position = position_stack(vjust = 0.5), size = 2.1, family = "Times New Roman") +
+            position = position_stack(vjust = 0.5), size = 4, family = "Times New Roman") +
   coord_flip() +
   scale_fill_brewer(palette = "BrBG") +
   guides(fill = guide_legend(reverse=TRUE)) +
-  labs( title = "Trust in blockchain's integrity, benevolence and ability", y = "%", x = "") +
+  labs( title = "Germany", y = "%", x = "") +
   scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25)) + 
   theme_apa(remove.x.gridlines = F) +
-  theme(text=element_text(family="Times New Roman", size=12))
+  theme(text=element_text(family="Times New Roman", size=22)) +
+  theme( legend.position = "none") +
+  theme(legend.text=element_text(size=15))
 
-plot_trust_IBA
+plot_trust_IBA_GER
+ggsave("plot_trust_IBA_GER.png", plot_trust_IBA_GER)
 
 # Scores
 # Average out of all statements 
@@ -1294,7 +1310,7 @@ trust_iba_score_table$Mean <- format(trust_iba_score_table$Mean, digits = 3)
 trust_iba_score_table
 # Overall = 4.29: Rather neutral to rather trustworthy score
 
-#### Perceived benefit for society ####
+#### NOT Perceived benefit for society ####
 
 # v_147, v_148
 sbenefit <- quest_clean[, .(v_148, v_147)]
@@ -1363,7 +1379,7 @@ sbenefit_scores[, .("Perceived benefit to society" = round(mean(Perc_Benefit, na
 
 
 
-#### Perceived Risk ####
+#### NOT Perceived Risk ####
 
 # Low score = not risky, high score risky 
 # v_149, v_150
@@ -1436,7 +1452,7 @@ risk_scores[, .("Perceived risk of BT" = round(mean(Perc_Risk, na.rm = T),2))]
 
 
 
-#### Feeling of disruptive potential ####
+#### NOT Feeling of disruptive potential ####
 
 # v_151, v_152, v_153, v_154
 dis_pot <- quest_clean[, .(v_154, v_153, v_152, v_151)]
@@ -1512,11 +1528,12 @@ dis_pot_score[, .("Potential of disruption score overall" = round(mean(Pot_Dis, 
 
 
 
+
 ################################## Application scores in 03_Applications_Descriptive ###################################
 
 ################################## Post-Survey BT questions ###################################
 
-#### Post-survey knowledge of BT ####
+#### NOT Post-survey knowledge of BT ####
 #  v_333
 quest_clean[, .("Post-Knowledge of Blockchain Technology (1-10)" = round(mean(v_333, na.rm = T),2))]
 
@@ -1524,7 +1541,7 @@ quest_clean[, .("Post-Knowledge of Blockchain Technology (1-10)" = round(mean(v_
 quest_clean[, .("Pre-Knowledge of Blockchain Technology (1-10)" = round(mean(v_286, na.rm = T),2))]
 
 
-#### More opportunities or risks from BT ####
+#### NOT More opportunities or risks from BT ####
 
 #  v_288
 # scale 1 (=more risks) - 10 (more opportunities)
@@ -1541,7 +1558,7 @@ quest_clean[, .("More risks (1) or more opportunities (10) from BT" = round(mean
 
 
 
-#### German federal ministry BT campaign####
+#### NOT German federal ministry BT campaign####
 
 # v_196 (1 = Yes, 2 = No)
 camp <- quest_clean[, .(v_196)]

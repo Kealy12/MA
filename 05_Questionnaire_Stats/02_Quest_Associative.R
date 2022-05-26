@@ -33,8 +33,7 @@ source("./../04_Data_Prep/99_APA_Theme.R")
 
 ################################## Associations ############################################
 
-#### Gender vs. Possession of Crypto / NFT ####
-
+#### INCLUDED Gender vs. Possession of Crypto / NFT ####
 # v_169 -> Male = 1, Female = 2
 quest_clean$v_169 <- as.character(quest_clean$v_169)
 quest_clean[v_169 == 1, v_169 := "Male"]
@@ -42,6 +41,12 @@ quest_clean[v_169 == 2, v_169 := "Female"]
 quest_clean$v_169 <- as.factor(quest_clean$v_169)
 
 quest_clean[v_169 == "Male", .N]
+
+
+# % distribution
+gender_poss_crypto <- quest_clean[,c("v_169", "v_54")]
+gender_poss_crypto
+table(gender_poss_crypto)
 
 # Gender - Possession of Crypto
 # v_54 (1 = Yes, 2 = No)
@@ -53,8 +58,8 @@ ggplot(quest_clean, aes(v_169, fill = v_54 == 1 )) +
   theme(text=element_text(family="Times New Roman", size=12)) + 
   labs(y = "%", x = "", title = "Possession of Crypto") +
   guides(fill = guide_legend(reverse=TRUE))
-
-  geom_text(aes(label = scales::percent(dis,accuracy = 1, trim = FALSE)), 
+ 
+  geom_text(data = heard_summary, aes(label = scales::percent(dis,accuracy = 1, trim = FALSE), y = dis), 
             position = position_stack(vjust = 0.5), size = 2.5, family = "Times New Roman",
             check_overlap = T)
 
@@ -68,6 +73,11 @@ ggplot(quest_clean, aes(v_169, fill = v_331 == 1 )) +
   theme(text=element_text(family="Times New Roman", size=12)) + 
   labs(y = "%", x = "", title = "Possession of NFT") +
   guides(fill = guide_legend(reverse=TRUE))
+
+# % distribution
+gender_poss_nft <- quest_clean[,c("v_169", "v_331")]
+gender_poss_nft
+table(gender_poss_nft)
 
 
 #### Have you heard of Blockchain vs. Application Scores #####
@@ -166,7 +176,7 @@ f_test$p.value
 # Usage intention pre-survey not independent from usage intention post-survey
 # --> the difference in ratios did not arrive by pure chance
 
-#### Knowledge vs. Gender ####
+#### INCLUDED Knowledge vs. Gender ####
 
 # Beginning of Questionnaire: v_286 (1-10 scale)
 know <- quest_clean[, .("Pre-Knowledge of Blockchain Technology (1-10)" = v_286)]

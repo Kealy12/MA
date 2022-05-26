@@ -171,12 +171,13 @@ quest_tri_extended[, .N, by =v_331]
 
 
 
+
 ########################################## Merging all characteristics together ##########################################################
 cluster_all <- merge(cluster_demo_dt, cluster_bc_dt, by = "Cluster", all.x = T)
 
-print(xtable(cluster_all, type = "latex"), file = "./../02_Output/cluster_characteristcs.tex",include.rownames = F, only.contents = T, include.colnames = T, hline.after = c(nrow(cluster_all)))
+print(xtable(cluster_all, type = "latex"), file = "./../02_Output/cluster_characteristcs_GER.tex",include.rownames = F, only.contents = T, include.colnames = T, hline.after = c(nrow(cluster_all)))
 sheets <- list("cluster_all" = cluster_all)
-write_xlsx(sheets, "./../02_Output/cluster_characteristcs.xlsx")
+write_xlsx(sheets, "./../02_Output/cluster_characteristcs_GER.xlsx")
 
 
 

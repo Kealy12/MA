@@ -173,6 +173,14 @@ quest_tri_extended_UK[, .N, by =v_331]
 
 
 
+
+########################################## Merging all characteristics together ##########################################################
+cluster_all_UK <- merge(cluster_demo_dt, cluster_bc_dt, by = "Cluster", all.x = T)
+
+print(xtable(cluster_all_UK, type = "latex"), file = "./02_Output/cluster_characteristcs_UK.tex",include.rownames = F, only.contents = T, include.colnames = T, hline.after = c(nrow(cluster_all_UK)))
+sheets <- list("cluster_all_UK" = cluster_all_UK)
+write_xlsx(sheets, "./02_Output/cluster_characteristcs_UK.xlsx")
+
 ########################################## Saving and Cleaning ##########################################################
 
 # Saving

@@ -76,6 +76,9 @@ discomfort_fitted
 social <- quest_reg_mod[, .(v_296)]
 colnames(social) <- c("Social_Influence")
 
+# rescaling to level all scales to 1-7
+social[, (Social_Influence * (2/3) + (1/3))]
+
 
 #### Disposition to privacy ####
 # Likert 1 (low privacy concern) - 7 (high privacy concern)): v_104, v_105, v_106
@@ -559,6 +562,14 @@ write.csv(tidy(lm_anony_nonMod), "usefulness_atr.csv")
 
 
 ############################################# Cleaning ###############################################################
+edu <- quest_clean[, c("v_186")]
+table(edu)
+
+# EMPLOYMENT
+# v_188
+empl <- quest_clean[, c("v_188")]
+table(empl)
+
 # Clean Environment
 rm(list = ls())
 

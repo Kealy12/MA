@@ -34,16 +34,25 @@ source("./../04_Data_Prep/99_APA_Theme.R")
 
 ################################## Associations ############################################
 
-#### Gender vs. Possession of Crypto / NFT ####
+#### INCLUDED Gender vs. Possession of Crypto / NFT ####
 # v_169 -> Male = 1, Female = 2
 quest_clean_UK$v_169 <- as.character(quest_clean_UK$v_169)
 quest_clean_UK[v_169 == 1, v_169 := "Male"]
 quest_clean_UK[v_169 == 2, v_169 := "Female"]
 quest_clean_UK$v_169 <- as.factor(quest_clean_UK$v_169)
 
+quest_clean_UK[v_169 == "Female", .N]
+
+
+# % distribution
+gender_poss_crypto_UK <- quest_clean_UK[,c("v_169", "v_54")]
+gender_poss_crypto_UK
+table(gender_poss_crypto_UK)
+gender_poss_crypto_UK[v_54 == 1, .N]
+
 # Gender - Possession of Crypto
 # v_54 (1 = Yes, 2 = No)
-ggplot(quest_clean_UK, aes(v_169, fill = v_54 == 1 )) + 
+ggplot(gender_poss_crypto_UK, aes(v_169, fill = v_54 == 1 )) + 
   geom_bar(position = "fill") + scale_fill_brewer( palette = "Paired") + 
   coord_flip() +
   scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25)) + 
@@ -196,7 +205,7 @@ f_test$p.value
 
 
 
-#### Knowledge vs. Gender ####
+#### INCLUDED Knowledge vs. Gender ####
 
 # Beginning of Questionnaire: v_286 (1-10 scale)
 know <- quest_clean_UK[, .("Pre-Knowledge of Blockchain Technology (1-10)" = v_286)]
@@ -250,6 +259,7 @@ summary(lm(Perceived_risk ~ Experience, data = mediation)) # significant
 # X + M → Y
 summary(lm(Usage_Intention ~ Experience + Perceived_risk, data = mediation)) # significant: b(experience) = 0.38797
 # Mediation successfully supported, as absolute b-coef is reduced 
+
 
 
 
