@@ -386,7 +386,7 @@ plot_usageIntention <-
   ggplot(tech_usage_summary, aes(x = variable, y = dis, fill = likert)) +
   geom_bar(position = "stack", stat = "identity", width = 0.6) +
   geom_text(aes(label = scales::percent(dis,accuracy = 1, trim = FALSE)), 
-            position = position_stack(vjust = 0.5), size = 3.5, family = "Times New Roman",
+            position = position_stack(vjust = 0.5), size = 3, family = "Times New Roman",
             check_overlap = T) +
   coord_flip() +
   scale_fill_brewer(palette = "BrBG") +
@@ -394,9 +394,10 @@ plot_usageIntention <-
   labs(title = "UK", y = "%", x = "") +
   scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25)) + 
   theme_apa(remove.x.gridlines = F) +
-  theme(text=element_text(family="Times New Roman", size=20))  +
-  theme(aspect.ratio = 2/1, legend.position = "bottom") +
-  theme(legend.text=element_text(size=12))
+  theme(text=element_text(family="Times New Roman", size=17))  +
+  theme(aspect.ratio = 2/1, legend.position = "none") +
+  theme(legend.text=element_text(size=12)) + 
+  theme(plot.title = element_text(size=10))
 
 plot_usageIntention
 ggsave("plot_usage_uk.png", plot_usageIntention)
@@ -838,7 +839,7 @@ tri_summary <- unique(tri)
 plot_TRI_UK <- ggplot(tri_summary, aes(x = variable, y = dis, fill = likert)) +
   geom_bar(position = "stack", stat = "identity", width = 0.6) +
   geom_text(aes(label = scales::percent(dis,accuracy = 1, trim = FALSE)), 
-            position = position_stack(vjust = 0.5), size = 4.5, family = "Times New Roman",
+            position = position_stack(vjust = 0.5), size = 3.5, family = "Times New Roman",
             check_overlap = T) +
   coord_flip() +
   scale_fill_brewer(palette = "BrBG") +
@@ -846,12 +847,14 @@ plot_TRI_UK <- ggplot(tri_summary, aes(x = variable, y = dis, fill = likert)) +
   labs( title = "UK", y = "%", x = "") +
   theme_apa(remove.x.gridlines = F) + 
   scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25)) + 
-  theme(text=element_text(family="Times New Roman", size=28)) +
+  theme(text=element_text(family="Times New Roman", size=18)) +
   theme(legend.position = "none") +
-  theme(legend.text=element_text(size=15))
+  theme(legend.text=element_text(size=15))+ 
+  theme(plot.title = element_text(size=12))
+
 
 plot_TRI_UK
-ggsave("plot_TRI_UK.png", plot_TRI_UK)
+ggsave("plot_TRI_UK2.png", plot_TRI_UK)
 
 ################################## BT Deep-Dive ###################################
 
@@ -983,7 +986,7 @@ losing.pin[, .("Comfortability regarding losing blockchain PIN" = round(mean(v_1
 statements <- quest_clean_UK[, .(v_120, v_121, v_122, v_284)]
 colnames(statements) <- c("I know use cases for Blockchain\nTechnology other than crypto-\ncurrencies (Bitcoin is a cryptocurrency)", 
                           "I have installed an app related to\nBlockchain Technology on my phone or\ndesktop computer (e.g. Metamask)", 
-                          "I advise people on how to use Blockchain\nTechnology applications or have coded\nsome myself (e.g. a real Smart Contract)",
+                          "I advise people on how to use Blockchain\nTechnology applications or have coded\nsome myself (e.g. a real smart contract)",
                           "None of the statements apply to me")
 statements <- melt(statements)
 statements$value <- as.character(statements$value)
@@ -1010,8 +1013,10 @@ plot_statements_UK <- ggplot(statements, aes(reorder(variable, N), fill = factor
             position = position_stack(vjust = 0.5), size = 5, family = "Times New Roman",
             check_overlap = T) +
   scale_fill_manual(values = my_colors) +
-  theme( legend.position = "bottom") +
-  theme(legend.text=element_text(size=16))
+  theme( legend.position = "none") +
+  theme(legend.text=element_text(size=16))+ 
+  theme(plot.title = element_text(size=16))
+
 
 plot_statements_UK
 
@@ -1145,10 +1150,12 @@ plot_trustUsers_UK <- ggplot(trust_users_summary, aes(x = variable, y = dis, fil
   scale_y_continuous(labels = scales::percent, minor_breaks = seq(1,25,25)) + 
   theme(text=element_text(family="Times New Roman", size=26)) +
   theme( legend.position = "none") +
-  theme(legend.text=element_text(size=12))
+  theme(legend.text=element_text(size=12))+ 
+  theme(plot.title = element_text(size=16))
+
 
 plot_trustUsers_UK
-ggsave("plot_trustUsers_UK.png", plot_trustUsers_UK)
+ggsave("plot_trustUsers_UK2.png", plot_trustUsers_UK)
 
 # Low trust independent of machine or person 
 
@@ -1228,7 +1235,8 @@ plot_trust_IBA_UK <-
   theme_apa(remove.x.gridlines = F) +
   theme(text=element_text(family="Times New Roman", size=22))+ 
   theme( legend.position = "bottom") +
-  theme(legend.text=element_text(size=15))
+  theme(legend.text=element_text(size=15))+ 
+  theme(plot.title = element_text(size=12))
 
 plot_trust_IBA_UK
 ggsave("plot_trust_IBA_UK.png", plot_trust_IBA_UK)
